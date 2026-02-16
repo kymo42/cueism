@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-function getStripe() {
-    return new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-        apiVersion: '2026-01-28.clover',
-    });
-}
 
 export async function POST(req: NextRequest) {
     try {
-        const stripe = getStripe();
+        const Stripe = (await import('stripe')).default;
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+            apiVersion: '2026-01-28.clover',
+        });
         const { items } = await req.json();
 
         if (!items || !Array.isArray(items) || items.length === 0) {

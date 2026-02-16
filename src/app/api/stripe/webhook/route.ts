@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 export async function POST(req: NextRequest) {
+    const Stripe = (await import('stripe')).default;
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
         apiVersion: '2026-01-28.clover',
     });
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
     // Handle the event
     switch (event.type) {
         case 'checkout.session.completed': {
-            const session = event.data.object as Stripe.Checkout.Session;
+            const session = event.data.object;
             console.log('✅ Payment successful!');
             console.log(`  Session ID: ${session.id}`);
             console.log(`  Customer email: ${session.customer_details?.email}`);
