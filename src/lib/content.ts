@@ -27,9 +27,26 @@ export interface PageContent {
  * Get all news articles sorted by date (newest first)
  */
 export function getAllNews(): NewsArticle[] {
-    const newsDir = path.join(contentDirectory, 'news');
+    const possiblePaths = [
+        path.join(process.cwd(), 'content', 'news'),
+        path.join(process.cwd(), '../content', 'news'), // specific to some build envs
+        path.join(__dirname, 'content', 'news'),
+        path.join(__dirname, '../../content', 'news'),
+    ];
 
-    if (!fs.existsSync(newsDir)) {
+    console.log('Searching for news content in:', possiblePaths);
+
+    let newsDir = '';
+    for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+            newsDir = p;
+            console.log('Found news directory at:', p);
+            break;
+        }
+    }
+
+    if (!newsDir) {
+        console.warn('News directory not found in any known location.');
         return [];
     }
 

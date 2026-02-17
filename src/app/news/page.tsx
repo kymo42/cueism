@@ -26,12 +26,24 @@ export default function NewsPage() {
             <div className="container" style={{ paddingBottom: 'var(--space-3xl)' }}>
                 {news.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: 'var(--space-3xl) 0', color: 'var(--color-text-muted)' }}>
-                        <p>No news articles yet. Check back soon!</p>
-                        <pre style={{ fontSize: '10px', marginTop: '20px', textAlign: 'left', overflow: 'auto' }}>
-                            Debug: {JSON.stringify({
+                        <p style={{ fontWeight: 'bold', color: 'red' }}>Content Loading Error (v3) - Check Debug Info Below</p>
+                        <pre style={{ fontSize: '10px', marginTop: '20px', textAlign: 'left', overflow: 'auto', background: '#f5f5f5', padding: '10px' }}>
+                            Debug Info ({new Date().toISOString()}):
+                            {JSON.stringify({
                                 cwd: process.cwd(),
-                                fs_exists: require('fs').existsSync(require('path').join(process.cwd(), 'content', 'news')),
-                                path: require('path').join(process.cwd(), 'content', 'news')
+                                dirname: __dirname,
+                                possiblePaths: [
+                                    require('path').join(process.cwd(), 'content', 'news'),
+                                    require('path').join(process.cwd(), '../content', 'news'),
+                                    require('path').join(__dirname, 'content', 'news'),
+                                    require('path').join(__dirname, '../../content', 'news'),
+                                ],
+                                fs_exists: [
+                                    require('fs').existsSync(require('path').join(process.cwd(), 'content', 'news')),
+                                    require('fs').existsSync(require('path').join(process.cwd(), '../content', 'news')),
+                                    require('fs').existsSync(require('path').join(__dirname, 'content', 'news')),
+                                    require('fs').existsSync(require('path').join(__dirname, '../../content', 'news')),
+                                ]
                             }, null, 2)}
                         </pre>
                     </div>
