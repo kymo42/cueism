@@ -27,6 +27,13 @@ export default function NewsPage() {
                 {news.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: 'var(--space-3xl) 0', color: 'var(--color-text-muted)' }}>
                         <p>No news articles yet. Check back soon!</p>
+                        <pre style={{ fontSize: '10px', marginTop: '20px', textAlign: 'left', overflow: 'auto' }}>
+                            Debug: {JSON.stringify({
+                                cwd: process.cwd(),
+                                fs_exists: require('fs').existsSync(require('path').join(process.cwd(), 'content', 'news')),
+                                path: require('path').join(process.cwd(), 'content', 'news')
+                            }, null, 2)}
+                        </pre>
                     </div>
                 ) : (
                     <>
