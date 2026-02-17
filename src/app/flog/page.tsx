@@ -92,7 +92,7 @@ export default function FlogPage() {
                         overflow: 'hidden',
                     }}>
                         <img
-                            src="/images/flog/6PVBZKUQOZAIVI26G3X2BSO7FY.webp"
+                            src="/images/flog/110009-752x1024.avif"
                             alt="Golfer on the course"
                             style={{
                                 width: '100%',
@@ -131,7 +131,7 @@ export default function FlogPage() {
                                 marginBottom: 'var(--space-md)',
                             }}>
                                 <img
-                                    src="/images/flog/_89865295_89865294.jpg"
+                                    src="/images/flog/fidel_watching.jpeg"
                                     alt="Accurate Distance Tracking"
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
@@ -367,7 +367,7 @@ export default function FlogPage() {
                                 margin: '0 auto var(--space-xs)',
                             }}>
                                 <img
-                                    src="/images/flog/fidel_watching.jpeg"
+                                    src="/images/flog/_89865295_89865294.jpg"
                                     alt="Fidel Castro"
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
