@@ -15,6 +15,7 @@ const PRODUCT_DATA: Record<string, {
     price: number; // cents — placeholder until Stripe prices are fetched
     priceDisplay: string;
     category: string;
+    images: string[];
     variants?: { id: string; name: string; price: number }[];
 }> = {
     chalkable: {
@@ -26,6 +27,12 @@ const PRODUCT_DATA: Record<string, {
             'Massive bottom opening for easy chalk removal',
             'Rigid format for durability and reliability',
             'Printed from recycled PET',
+        ],
+        images: [
+            '/images/chalkables/satar.JPG',
+            '/images/chalkables/IMG_20260213_131431913.jpg',
+            '/images/chalkables/IMG_20260213_131645796.jpg',
+            '/images/chalkables/IMG_20260213_131706392.jpg',
         ],
         price: 500,
         priceDisplay: 'From $5.00',
@@ -41,6 +48,12 @@ const PRODUCT_DATA: Record<string, {
             'Have your initials, numbers, or icons printed on it',
             'Environmentally conscious — printed from recycled PET',
             'Fits snugly into any pool bag',
+        ],
+        images: [
+            '/images/cheatstick/cs.jpg',
+            '/images/cheatstick/IMG_20241227_111822288_HDR.jpg',
+            '/images/cheatstick/IMG_20241227_111838965.jpg',
+            '/images/cheatstick/IMG_20241227_112009724_HDR.jpg',
         ],
         price: 1400,
         priceDisplay: '$14.00',
@@ -58,6 +71,13 @@ const PRODUCT_DATA: Record<string, {
             'Choose an individual icon from Google Material Icons',
             'Treat yourself!',
         ],
+        images: [
+            '/images/racksafe9/9.jpg',
+            '/images/racksafe9/999.jpg',
+            '/images/racksafe9/9999.jpg',
+            '/images/racksafe9/99999.jpg',
+            '/images/racksafe9/999999.jpg',
+        ],
         price: 2000,
         priceDisplay: '$20.00',
         category: 'Accessories',
@@ -73,6 +93,12 @@ const PRODUCT_DATA: Record<string, {
             'Made from recycled materials',
             'Made in Australia',
         ],
+        images: [
+            '/images/racksafe8/888.jpg',
+            '/images/racksafe8/8888.jpg',
+            '/images/racksafe8/88888.jpg',
+            '/images/racksafe8/888888.jpg',
+        ],
         price: 2000,
         priceDisplay: '$20.00',
         category: 'Racks',
@@ -84,6 +110,7 @@ export default function ProductDetailPage() {
     const slug = params.slug as string;
     const product = PRODUCT_DATA[slug];
 
+    const [selectedImage, setSelectedImage] = useState(0);
     const [selectedVariant, setSelectedVariant] = useState(
         product?.variants?.[0]?.id || ''
     );
@@ -140,24 +167,62 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="product-detail">
-                {/* Image */}
+                {/* Image Gallery */}
                 <div className="product-detail__gallery">
                     <div
                         className="product-detail__main-image"
                         style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexDirection: 'column',
-                            gap: 'var(--space-sm)',
-                            color: 'var(--color-text-muted)',
-                            fontFamily: 'var(--font-heading)',
-                            background: 'linear-gradient(135deg, #F5F5F4, #E7E5E4)',
+                            overflow: 'hidden',
+                            background: '#F5F5F4',
                         }}
                     >
-                        <span style={{ fontSize: 'var(--text-4xl)' }}>{product.name}</span>
-                        <span style={{ fontSize: 'var(--text-sm)', fontFamily: 'var(--font-body)' }}>cueism</span>
+                        <img
+                            src={product.images[selectedImage]}
+                            alt={`${product.name} — image ${selectedImage + 1}`}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                            }}
+                        />
                     </div>
+                    {product.images.length > 1 && (
+                        <div style={{
+                            display: 'flex',
+                            gap: 'var(--space-sm)',
+                            marginTop: 'var(--space-sm)',
+                            flexWrap: 'wrap',
+                        }}>
+                            {product.images.map((img, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setSelectedImage(i)}
+                                    style={{
+                                        width: 72,
+                                        height: 72,
+                                        borderRadius: 'var(--radius-sm)',
+                                        overflow: 'hidden',
+                                        border: selectedImage === i
+                                            ? '2px solid var(--color-primary)'
+                                            : '2px solid transparent',
+                                        cursor: 'pointer',
+                                        padding: 0,
+                                        background: '#F5F5F4',
+                                    }}
+                                >
+                                    <img
+                                        src={img}
+                                        alt={`${product.name} thumbnail ${i + 1}`}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Info */}

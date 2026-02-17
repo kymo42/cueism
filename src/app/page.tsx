@@ -4,10 +4,10 @@ import NewsletterForm from '@/components/NewsletterForm';
 
 // Real Stripe products for featured section
 const FEATURED_PRODUCTS = [
-  { slug: 'chalkable', name: 'Chalkable', price: 'From $5.00', badge: 'Popular' },
-  { slug: 'cheatstick', name: 'cheatStick', price: '$14.00', badge: undefined },
-  { slug: 'racksafe9', name: 'Racksafe9', price: '$20.00', badge: undefined },
-  { slug: 'racksafe8', name: 'RackSafe8', price: '$20.00', badge: undefined },
+  { slug: 'chalkable', name: 'Chalkable', price: 'From $5.00', image: '/images/chalkables/satar.JPG', badge: 'Popular' },
+  { slug: 'cheatstick', name: 'cheatStick', price: '$14.00', image: '/images/cheatstick/cs.jpg', badge: undefined },
+  { slug: 'racksafe9', name: 'Racksafe9', price: '$20.00', image: '/images/racksafe9/9.jpg', badge: undefined },
+  { slug: 'racksafe8', name: 'RackSafe8', price: '$20.00', image: '/images/racksafe8/888.jpg', badge: undefined },
 ];
 
 export default function HomePage() {
@@ -56,16 +56,19 @@ export default function HomePage() {
                     <div
                       className="card__image"
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--color-text-muted)',
-                        fontSize: 'var(--text-xl)',
-                        fontFamily: 'var(--font-heading)',
-                        background: 'linear-gradient(135deg, #F5F5F4, #E7E5E4)',
+                        overflow: 'hidden',
+                        background: '#F5F5F4',
                       }}
                     >
-                      {product.name}
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
                     </div>
                     {product.badge && <span className="card__badge">{product.badge}</span>}
                   </div>

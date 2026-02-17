@@ -12,6 +12,7 @@ const PRODUCTS = [
         slug: 'chalkable',
         name: 'Chalkable',
         price: 'From $5.00',
+        image: '/images/chalkables/satar.JPG',
         description: 'A robust, reliable chalk holder that ensures chalk sees through its full life span. Handles varied chalk sizes with easy removal.',
         badge: 'Popular',
     },
@@ -19,18 +20,21 @@ const PRODUCTS = [
         slug: 'cheatstick',
         name: 'cheatStick',
         price: '$14.00',
+        image: '/images/cheatstick/cs.jpg',
         description: 'Execute hard-to-reach shots easily from any angle, including off the cushion. Fits various cues.',
     },
     {
         slug: 'racksafe9',
         name: 'Racksafe9',
         price: '$20.00',
+        image: '/images/racksafe9/9.jpg',
         description: 'Innovative protective case for your Turtle or Magic Rack. Designed for serious rotation pool players.',
     },
     {
         slug: 'racksafe8',
         name: 'RackSafe8',
         price: '$20.00',
+        image: '/images/racksafe8/888.jpg',
         description: 'Precision rack template for 8-ball. Perfect racks every single time.',
     },
 ];
@@ -59,20 +63,19 @@ export default function ShopPage() {
                                     <div
                                         className="card__image"
                                         style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            flexDirection: 'column',
-                                            gap: 'var(--space-sm)',
-                                            color: 'var(--color-text-muted)',
-                                            fontFamily: 'var(--font-heading)',
-                                            background: 'linear-gradient(135deg, #F5F5F4, #E7E5E4)',
+                                            overflow: 'hidden',
+                                            background: '#F5F5F4',
                                         }}
                                     >
-                                        <span style={{ fontSize: 'var(--text-2xl)' }}>{product.name}</span>
-                                        <span style={{ fontSize: 'var(--text-xs)', fontFamily: 'var(--font-body)' }}>
-                                            cueism
-                                        </span>
+                                        <img
+                                            src={product.image}
+                                            alt={product.name}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                            }}
+                                        />
                                     </div>
                                     {product.badge && <span className="card__badge">{product.badge}</span>}
                                 </div>

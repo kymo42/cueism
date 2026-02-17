@@ -119,7 +119,7 @@ export default function FlogPage() {
                         Discover how FLOG simplifies distance tracking, boosts your accuracy, and improves every shot on the course.
                     </p>
                     <a
-                        href="/files/FLOG-User-Manual.pdf"
+                        href="/docs/FLOG-User-Manual.pdf"
                         className="btn btn--primary btn--lg"
                     >
                         Download User Manual (PDF)
