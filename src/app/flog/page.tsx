@@ -384,7 +384,9 @@ export default function FlogPage() {
             {/* CTA — PDF Download */}
             <section style={{
                 padding: 'var(--space-3xl) 0',
-                background: '#111',
+                backgroundImage: 'linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url(/images/flog/6PVBZKUQOZAIVI26G3X2BSO7FY.webp)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
                 color: 'var(--color-white)',
             }}>
                 <div className="container" style={{ maxWidth: '600px' }}>
