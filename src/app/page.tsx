@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { getAllNews } from '@/lib/content';
 import NewsletterForm from '@/components/NewsletterForm';
 
+export const dynamic = 'force-static';
+
 // Real Stripe products for featured section
 const FEATURED_PRODUCTS = [
   { slug: 'chalkable', name: 'Chalkable', price: 'From $5.00', image: '/images/chalkables/satar.JPG', badge: 'Popular' },
