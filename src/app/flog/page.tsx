@@ -384,7 +384,7 @@ export default function FlogPage() {
             {/* CTA — PDF Download */}
             <section style={{
                 padding: 'var(--space-3xl) 0',
-                backgroundImage: 'linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url(/images/flog/6PVBZKUQOZAIVI26G3X2BSO7FY.webp)',
+                backgroundImage: 'linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url(/images/flog/che-castro-putt.jpg)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 color: 'var(--color-white)',
