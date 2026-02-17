@@ -16,7 +16,11 @@ export default function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="hero">
+      <section className="hero" style={{
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.82), rgba(255,255,255,0.82)), url(/images/site/spokncapn.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}>
         <div className="hero__eyebrow">3D Printed in Australia</div>
         <h1 className="hero__title">
           Billiard Gear for the Discerning Player
