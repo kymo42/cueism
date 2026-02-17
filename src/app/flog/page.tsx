@@ -92,7 +92,7 @@ export default function FlogPage() {
                         overflow: 'hidden',
                     }}>
                         <img
-                            src="/images/flog/110009-752x1024.avif"
+                            src="/images/flog/fidel_watching.jpeg"
                             alt="Golfer on the course"
                             style={{
                                 width: '100%',
@@ -131,7 +131,7 @@ export default function FlogPage() {
                                 marginBottom: 'var(--space-md)',
                             }}>
                                 <img
-                                    src="/images/flog/fidel_watching.jpeg"
+                                    src="/images/flog/110009-752x1024.avif"
                                     alt="Accurate Distance Tracking"
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
