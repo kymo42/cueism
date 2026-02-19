@@ -52,7 +52,7 @@
   --space-3xl: 64px;
   --space-4xl: 96px;
 
-  --header-height: 90px;
+  --header-height: 120px;
   --bg-overlay: linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.82));
   --bg-image-hero: url(/images/site/spokncapn.jpg);
 
@@ -212,7 +212,7 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-md) var(--space-lg);
+  padding: var(--space-xl) var(--space-lg);
   max-width: var(--max-width);
   margin: 0 auto;
 }
