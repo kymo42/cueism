@@ -1283,7 +1283,7 @@ a:hover {
   gap: var(--space-3xl);
   max-width: var(--wide-width);
   margin: 0 auto;
-  padding: 0 var(--space-lg) var(--space-3xl);
+  padding: var(--space-4xl) var(--space-lg) var(--space-3xl);
 }
 
 /* ===========================

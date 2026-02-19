@@ -51,9 +51,8 @@ export default function ShopPage() {
                     never mass-produced. Made in Australia from recycled materials.
                 </p>
             </div>
-            <div style={{ textAlign: 'center', fontSize: '2rem', color: 'red', padding: '20px', fontWeight: 'bold' }}>UPDATED</div>
 
-            <div className="container" style={{ paddingBottom: 'var(--space-3xl)' }}>
+            <div className="container" style={{ paddingTop: 'var(--space-4xl)', paddingBottom: 'var(--space-3xl)' }}>
                 <div className="product-grid">
                     {PRODUCTS.map((product) => (
                         <Link

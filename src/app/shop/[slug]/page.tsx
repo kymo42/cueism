@@ -36,7 +36,6 @@ export default async function ProductPage({ params }: PageProps) {
             <div className="page-header">
                 <h1>Shop</h1>
             </div>
-            <div style={{ textAlign: 'center', fontSize: '2rem', color: 'red', padding: '20px', fontWeight: 'bold' }}>UPDATED</div>
             <ProductDetail product={product} slug={slug} />
         </>
     );
