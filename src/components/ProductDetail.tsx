@@ -76,7 +76,7 @@ export default function ProductDetail({ product, slug }: ProductDetailProps) {
     };
 
     return (
-        <div className="container" style={{ paddingTop: 'var(--space-2xl)', paddingBottom: 'var(--space-3xl)' }}>
+        <div className="container" style={{ paddingTop: 'var(--space-4xl)', paddingBottom: 'var(--space-3xl)' }}>
             {/* Breadcrumb */}
             <div style={{ marginBottom: 'var(--space-xl)', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
                 <Link href="/" style={{ color: 'var(--color-text-muted)' }}>Home</Link>
