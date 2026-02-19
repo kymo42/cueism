@@ -35,6 +35,7 @@ export default function ContactPage() {
                 <h1>Contact</h1>
                 <p>Got a question, custom order request, or just want to chat about billiards? Get in touch.</p>
             </div>
+            <div style={{ textAlign: 'center', fontSize: '2rem', color: 'red', padding: '20px', fontWeight: 'bold' }}>UPDATED</div>
 
             <div className="contact-grid">
                 <div>
