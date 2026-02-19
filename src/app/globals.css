@@ -1202,12 +1202,17 @@ a:hover {
 
 .page-header {
   text-align: center;
-  padding: calc(var(--space-3xl) + var(--header-height)) var(--space-lg) var(--space-xl);
+  padding: calc(var(--space-4xl) + var(--header-height)) var(--space-lg) var(--space-4xl);
   background-image: var(--bg-overlay), var(--bg-image-hero);
   background-size: cover;
-  background-position: center;
+  background-position: center top;
   position: relative;
   width: 100%;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .page-header h1 {

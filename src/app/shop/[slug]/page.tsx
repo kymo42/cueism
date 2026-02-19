@@ -31,5 +31,12 @@ export default async function ProductPage({ params }: PageProps) {
         );
     }
 
-    return <ProductDetail product={product} slug={slug} />;
+    return (
+        <>
+            <div className="page-header">
+                <h1>Shop</h1>
+            </div>
+            <ProductDetail product={product} slug={slug} />
+        </>
+    );
 }
