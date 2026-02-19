@@ -1206,6 +1206,8 @@ a:hover {
   background-image: var(--bg-overlay), var(--bg-image-hero);
   background-size: cover;
   background-position: center;
+  position: relative;
+  width: 100%;
 }
 
 .page-header h1 {
