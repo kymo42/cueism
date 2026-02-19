@@ -10,8 +10,10 @@ export default function FlogPage() {
         <>
             {/* Hero — split layout */}
             <section style={{
-                padding: 'var(--space-3xl) 0',
-                background: 'var(--color-bg)',
+                padding: 'calc(var(--space-3xl) + var(--header-height)) 0 var(--space-3xl)',
+                backgroundImage: 'var(--bg-overlay), var(--bg-image-hero)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
             }}>
                 <div className="container" style={{
                     display: 'grid',
