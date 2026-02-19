@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { getAllNews } from '@/lib/content';
-import NewsletterForm from '@/components/NewsletterForm';
 
 export const dynamic = 'force-static';
 
@@ -175,8 +174,6 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Newsletter */}
-      <NewsletterForm />
     </>
   );
 }
