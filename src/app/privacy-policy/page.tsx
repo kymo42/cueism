@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-static';
+
 export const metadata: Metadata = {
     title: 'Privacy Policy',
     description: 'cueism Privacy Policy — how we collect, use, and protect your personal information.',

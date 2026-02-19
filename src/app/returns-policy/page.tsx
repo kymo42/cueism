@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-static';
+
 export const metadata: Metadata = {
     title: 'Returns Policy',
     description: 'cueism Returns & Refunds Policy — learn about our return process for 3D-printed products.',

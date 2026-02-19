@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+export const dynamic = 'force-static';
+
 export const metadata: Metadata = {
     title: 'About',
     description: 'Crafting custom 3D-printed billiard gear for every player. Made by humans in Australia with the smallest carbon footprint possible.',
