@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
                 <h1>Privacy Policy</h1>
             </div>
 
-            <div className="prose">
+            <div className="prose" style={{ paddingTop: 'var(--space-4xl)' }}>
                 <p><strong>Last updated:</strong> January 2025</p>
 
                 <h2>1. Information We Collect</h2>

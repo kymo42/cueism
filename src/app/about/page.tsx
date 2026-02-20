@@ -15,7 +15,7 @@ export default function AboutPage() {
                 <h1>About</h1>
             </div>
 
-            <div className="prose">
+            <div className="prose" style={{ paddingTop: 'var(--space-4xl)' }}>
                 <h2 style={{ marginTop: 0 }}>Crafting Custom 3D-Printed Billiard Gear for Every Player of any species</h2>
 
                 <p>

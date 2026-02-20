@@ -34,7 +34,7 @@ export default async function NewsArticlePage({ params }: Props) {
     return (
         <>
             <div className="page-header">
-                <div style={{ marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
+                <div className="container" style={{ paddingTop: 'var(--space-4xl)', paddingBottom: 'var(--space-3xl)', marginBottom: 'var(--space-md)', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
                     <Link href="/" style={{ color: 'var(--color-text-muted)' }}>Home</Link>
                     {' / '}
                     <Link href="/news" style={{ color: 'var(--color-text-muted)' }}>News</Link>

@@ -23,7 +23,7 @@ export default function NewsPage() {
                 </p>
             </div>
 
-            <div className="container" style={{ paddingBottom: 'var(--space-3xl)' }}>
+            <div className="container" style={{ paddingTop: 'var(--space-4xl)', paddingBottom: 'var(--space-3xl)' }}>
                 {news.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: 'var(--space-3xl) 0', color: 'var(--color-text-muted)' }}>
                         No news articles yet. Check back soon!

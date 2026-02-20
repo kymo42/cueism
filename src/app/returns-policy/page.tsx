@@ -14,7 +14,7 @@ export default function ReturnsPolicyPage() {
                 <h1>Returns Policy</h1>
             </div>
 
-            <div className="prose">
+            <div className="prose" style={{ paddingTop: 'var(--space-4xl)' }}>
                 <p><strong>Last updated:</strong> January 2025</p>
 
                 <h2>1. 3D-Printed Products</h2>

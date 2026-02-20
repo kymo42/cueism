@@ -10,7 +10,7 @@ export default function FlogPage() {
         <>
             {/* Hero — split layout */}
             <section style={{
-                padding: 'calc(var(--space-3xl) + var(--header-height)) 0 var(--space-3xl)',
+                padding: 'calc(var(--space-4xl) + var(--header-height)) 0 var(--space-4xl)',
                 backgroundImage: 'var(--bg-overlay), var(--bg-image-hero)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
