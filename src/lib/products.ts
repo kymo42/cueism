@@ -86,8 +86,8 @@ export const PRODUCT_DATA: Record<string, ProductInfo> = {
         stock: '42 in stock',
         colors: [
             { id: 'black', name: 'Black', hex: '#1A1A1A' },
-            { id: 'red', name: 'Red', hex: '#C0392B' },
-            { id: 'blue', name: 'Blue', hex: '#2980B9' },
+            { id: 'white', name: 'White', hex: '#F5F5F5' },
+            { id: 'orange', name: 'Orange', hex: '#FF6600' },
         ],
     },
     racksafe9: {
@@ -117,9 +117,7 @@ export const PRODUCT_DATA: Record<string, ProductInfo> = {
         colors: [
             { id: 'black', name: 'Black', hex: '#1A1A1A' },
             { id: 'white', name: 'White', hex: '#F5F5F5' },
-            { id: 'red', name: 'Red', hex: '#C0392B' },
-            { id: 'blue', name: 'Blue', hex: '#2980B9' },
-            { id: 'green', name: 'Green', hex: '#27AE60' },
+            { id: 'orange', name: 'Orange', hex: '#FF6600' },
         ],
         addOns: [
             { id: 'rfid', name: 'Add RFID chip', price: 500 },
@@ -152,9 +150,7 @@ export const PRODUCT_DATA: Record<string, ProductInfo> = {
         colors: [
             { id: 'black', name: 'Black', hex: '#1A1A1A' },
             { id: 'white', name: 'White', hex: '#F5F5F5' },
-            { id: 'red', name: 'Red', hex: '#C0392B' },
-            { id: 'blue', name: 'Blue', hex: '#2980B9' },
-            { id: 'green', name: 'Green', hex: '#27AE60' },
+            { id: 'orange', name: 'Orange', hex: '#FF6600' },
         ],
     },
 };
