@@ -1,46 +1,54 @@
-# Astro Starter Kit: Basics
+# EmDash Starter Template (Cloudflare)
 
-```sh
-npm create astro@latest -- --template basics
+A general-purpose starting point for building sites with [EmDash](https://github.com/emdash-cms/emdash) on Cloudflare Workers. Includes posts, pages, categories, and tags with minimal styling -- designed as a base you can build on rather than a finished theme.
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/emdash-cms/templates/tree/main/starter-cloudflare)
+
+## What's Included
+
+- Posts with category and tag archives
+- Static pages via slug routing
+- Seed data with demo content
+- D1 database and R2 storage pre-configured
+- Dark/light mode support
+
+## Pages
+
+| Page | Route |
+|---|---|
+| Homepage | `/` |
+| All posts | `/posts` |
+| Single post | `/posts/:slug` |
+| Category archive | `/category/:slug` |
+| Tag archive | `/tag/:slug` |
+| Static pages | `/:slug` |
+| 404 | fallback |
+
+## Infrastructure
+
+- **Runtime:** Cloudflare Workers
+- **Database:** D1
+- **Storage:** R2
+- **Framework:** Astro with `@astrojs/cloudflare`
+
+## Local Development
+
+```bash
+pnpm install
+pnpm bootstrap
+pnpm dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Deploying
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+```bash
+pnpm deploy
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+Or click the deploy button above to set up the project in your Cloudflare account.
 
-## 🧞 Commands
+## See Also
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- [Node.js variant](../starter) -- same template using SQLite and local file storage
+- [All templates](../)
+- [EmDash documentation](https://github.com/emdash-cms/emdash/tree/main/docs)
