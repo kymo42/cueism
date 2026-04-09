@@ -1,13 +1,11 @@
 ---
 import { getMenu } from "emdash";
 import {
-	WidgetArea,
 	EmDashHead,
 	EmDashBodyStart,
 	EmDashBodyEnd,
 } from "emdash/ui";
 import { createPublicPageContext } from "emdash/page";
-import LiveSearch from "emdash/ui/search";
 import CartFlyout from "../components/CartFlyout";
 import CartToggle from "../components/CartToggle";
 import "../styles/global.css";
@@ -17,7 +15,6 @@ interface Props {
 	description?: string | null;
 	image?: string | null;
 	canonical?: string | null;
-	/** Pass content reference for plugin page contributions on content pages */
 	content?: { collection: string; id: string; slug?: string | null };
 }
 
@@ -52,14 +49,14 @@ const pageCtx = createPublicPageContext({
 
 		<header>
 			<nav>
-				<a href="/">{title}</a>
-				{
-					menu?.items.map((item) => (
+				<a href="/" class="logo">Cueism</a>
+				<div class="nav-links">
+					{menu?.items.map((item) => (
 						<a href={item.url} target={item.target}>
 							{item.label}
 						</a>
-					))
-				}
+					))}
+				</div>
 				<CartToggle client:idle />
 			</nav>
 		</header>
@@ -69,7 +66,7 @@ const pageCtx = createPublicPageContext({
 		</main>
 
 		<footer>
-			<WidgetArea name="sidebar" />
+			<p>&copy; {new Date().getFullYear()} Cueism. All rights reserved.</p>
 		</footer>
 
 		<CartFlyout client:idle />

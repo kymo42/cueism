@@ -9,13 +9,15 @@ interface AddToCartButtonProps {
 export default function AddToCartButton({ product, disabled }: AddToCartButtonProps) {
 	return (
 		<button 
-			className="btn-primary" 
+			className="btn btn-primary"
 			style={{ 
 				width: '100%', 
-				padding: '1rem', 
-				fontSize: '1rem',
+				padding: '0.875rem 1.5rem',
+				fontSize: '0.9375rem',
+				fontWeight: 500,
 				opacity: disabled ? 0.5 : 1,
-				cursor: disabled ? 'not-allowed' : 'pointer'
+				cursor: disabled ? 'not-allowed' : 'pointer',
+				borderRadius: 'var(--radius-sm)',
 			}}
 			disabled={disabled}
 			onClick={() => addCartItem(product)}

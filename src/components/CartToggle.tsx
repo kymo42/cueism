@@ -13,30 +13,36 @@ export default function CartToggle() {
 			style={{
 				background: 'transparent',
 				border: 'none',
-				color: 'var(--color-text-primary)',
+				color: 'var(--color-text-secondary)',
 				fontFamily: 'var(--font-primary)',
-				textTransform: 'uppercase',
-				letterSpacing: '0.05em',
 				cursor: 'pointer',
 				display: 'flex',
 				alignItems: 'center',
 				gap: '0.5rem',
-				padding: '0.5rem'
+				padding: '0.5rem',
+				borderRadius: 'var(--radius-sm)',
+				transition: 'var(--transition-fast)',
 			}}
+			aria-label="Shopping cart"
 		>
-			<span style={{ fontSize: '1.2rem'}}>🛒</span>
+			<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+				<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+				<line x1="3" y1="6" x2="21" y2="6"/>
+				<path d="M16 10a4 4 0 0 1-8 0"/>
+			</svg>
 			{totalItems > 0 && (
 				<span style={{
-					backgroundColor: 'var(--color-accent-gold)',
-					color: 'var(--color-bg-base)',
-					borderRadius: '50%',
-					width: '20px',
+					backgroundColor: 'var(--color-accent)',
+					color: '#ffffff',
+					borderRadius: 'var(--radius-full)',
+					minWidth: '20px',
 					height: '20px',
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
 					fontSize: '0.75rem',
-					fontWeight: 'bold'
+					fontWeight: 600,
+					padding: '0 6px',
 				}}>
 					{totalItems}
 				</span>
