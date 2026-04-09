@@ -138,6 +138,7 @@
 			"label": "Primary Navigation",
 			"items": [
 				{ "type": "custom", "label": "Home", "url": "/" },
+				{ "type": "custom", "label": "Shop", "url": "/shop" },
 				{ "type": "custom", "label": "Posts", "url": "/posts" },
 				{ "type": "custom", "label": "About", "url": "/about" }
 			]
