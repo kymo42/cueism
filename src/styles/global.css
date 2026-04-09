@@ -186,6 +186,11 @@ section {
 	margin: 0 auto var(--spacing-md);
 }
 
+/* Shop Grid */
+.shop-grid {
+	padding-top: var(--spacing-md);
+}
+
 /* Cards */
 .card {
 	background: var(--color-bg-base);
