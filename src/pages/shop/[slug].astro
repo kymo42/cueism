@@ -2,21 +2,13 @@
 import { getEmDashCollection, Content } from "emdash";
 import { Image } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
-
-// Get products from the 'products' collection
-const { entries: products } = await getEmDashCollection("products").catch(() => ({ entries: [] }));
-
-export async function getStaticPaths() {
-	const { entries: products } = await getEmDashCollection("products").catch(() => ({ entries: [] }));
-	return products.map((product) => ({
-		params: { slug: product.slug || product.id },
-		props: { product },
-	}));
-}
-
 import AddToCartButton from "../../components/AddToCartButton";
 
-const { product } = Astro.props;
+const { slug } = Astro.params;
+
+// Fetch collection and find the matched product natively via SSR
+const { entries: products } = await getEmDashCollection("products").catch(() => ({ entries: [] }));
+const product = products.find((p: any) => p.slug === slug || p.id === slug);
 
 if (!product) {
 	return Astro.redirect("/404");

@@ -1,18 +1,12 @@
-import Stripe from 'stripe';
 import type { APIRoute } from 'astro';
 import { getEmDashCollection } from 'emdash';
 
-const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-	apiVersion: '2025-02-24.acacia',
-});
-
-// Flat rate shipping setup (AusPost Base)
-// 10.00 AUD base + 2.00 AUD per extra item as an example of "thought to multiple products"
 const BASE_SHIPPING_CENTS = 1000; 
 const PER_EXTRA_ITEM_CENTS = 200;
 
 export const POST: APIRoute = async ({ request, url }) => {
 	try {
+		const stripeKey = import.meta.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
 		const body = await request.json();
 		const items = body.items as { id: string; quantity: number }[];
 
@@ -21,67 +15,63 @@ export const POST: APIRoute = async ({ request, url }) => {
 		}
 
 		// Query EmDash to validate prices securely
-		const { entries: databaseProducts } = await getEmDashCollection('products');
+		const { entries: databaseProducts } = await getEmDashCollection('products').catch(() => ({ entries: [] }));
 		
-		const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+		const data = new URLSearchParams();
+		data.append('payment_method_types[0]', 'card');
+		data.append('mode', 'payment');
+		data.append('success_url', `${url.origin}/shop?success=true`);
+		data.append('cancel_url', `${url.origin}/shop?canceled=true`);
+		data.append('shipping_address_collection[allowed_countries][0]', 'AU');
+		data.append('shipping_address_collection[allowed_countries][1]', 'US');
+		data.append('shipping_address_collection[allowed_countries][2]', 'GB');
+		data.append('shipping_address_collection[allowed_countries][3]', 'NZ');
+
 		let totalItems = 0;
 
-		for (const item of items) {
-			const dbProduct = databaseProducts.find(p => p.id === item.id);
+		items.forEach((item, index) => {
+			const dbProduct: any = databaseProducts.find((p: any) => p.id === item.id);
 			if (!dbProduct) throw new Error(`Product ${item.id} not found.`);
 			if (!dbProduct.data.price) throw new Error(`Product ${item.id} has no price.`);
 
-			line_items.push({
-				price_data: {
-					currency: 'aud',
-					unit_amount: dbProduct.data.price,
-					product_data: {
-						name: dbProduct.data.title,
-						description: dbProduct.data.excerpt || '',
-						// Optional: link images if hosted public
-					},
-				},
-				quantity: item.quantity,
-			});
+			data.append(`line_items[${index}][price_data][currency]`, 'aud');
+			data.append(`line_items[${index}][price_data][unit_amount]`, dbProduct.data.price.toString());
+			data.append(`line_items[${index}][price_data][product_data][name]`, dbProduct.data.title);
+			data.append(`line_items[${index}][quantity]`, item.quantity.toString());
+			
 			totalItems += item.quantity;
-		}
+		});
 
 		// Calculate flat rate
 		const shippingCost = BASE_SHIPPING_CENTS + (Math.max(0, totalItems - 1) * PER_EXTRA_ITEM_CENTS);
+		
+		data.append('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
+		data.append('shipping_options[0][shipping_rate_data][fixed_amount][amount]', shippingCost.toString());
+		data.append('shipping_options[0][shipping_rate_data][fixed_amount][currency]', 'aud');
+		data.append('shipping_options[0][shipping_rate_data][display_name]', 'AusPost Standard Delivery');
 
-		const session = await stripe.checkout.sessions.create({
-			payment_method_types: ['card'],
-			line_items,
-			mode: 'payment',
-			success_url: `${url.origin}/shop?success=true`,
-			cancel_url: `${url.origin}/shop?canceled=true`,
-			shipping_address_collection: {
-				allowed_countries: ['AU', 'US', 'GB', 'NZ'], // Adjust based on targeted sales regions
+		const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${stripeKey}`,
+				'Content-Type': 'application/x-www-form-urlencoded',
 			},
-			shipping_options: [
-				{
-					shipping_rate_data: {
-						type: 'fixed_amount',
-						fixed_amount: {
-							amount: shippingCost,
-							currency: 'aud',
-						},
-						display_name: 'AusPost Standard Delivery',
-						delivery_estimate: {
-							minimum: { unit: 'business_day', value: 3 },
-							maximum: { unit: 'business_day', value: 7 },
-						},
-					},
-				},
-			],
+			body: data.toString(),
 		});
 
-		return new Response(JSON.stringify({ url: session.url }), {
+		const sessionData = await stripeRes.json();
+
+		if (!stripeRes.ok) {
+			console.error('Stripe native fetch error:', sessionData);
+			return new Response(JSON.stringify({ error: sessionData.error?.message || 'Stripe error' }), { status: 500 });
+		}
+
+		return new Response(JSON.stringify({ url: sessionData.url }), {
 			status: 200,
 			headers: { 'Content-Type': 'application/json' },
 		});
 	} catch (error: any) {
-		console.error('Stripe Checkout Error:', error);
+		console.error('Checkout Error:', error);
 		return new Response(JSON.stringify({ error: error.message }), { status: 500 });
 	}
 };
