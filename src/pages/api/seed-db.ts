@@ -11,7 +11,7 @@ export const GET: APIRoute = async () => {
         
         // Apply it directly to the active EmDash database via the emdash/seed API
         const db = await getDb();
-        const result = await applySeed(db, seedData);
+        const result = await applySeed(db, seedData as any);
 
         return new Response(JSON.stringify({ success: true, result }), {
             headers: { 'Content-Type': 'application/json' }
