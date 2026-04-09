@@ -9,38 +9,56 @@ const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
 Astro.cache.set(cacheHint);
 ---
 
-<Base title="My Site">
-	<h1>Recent Posts</h1>
+<Base title="Cueism | Luxury 3D Printed Accessories">
+	<section class="hero" style="text-align: center; margin-bottom: var(--spacing-xl); padding-top: var(--spacing-lg);">
+		<h1 style="font-size: 3.5rem; color: var(--color-accent-gold); margin-bottom: var(--spacing-sm);">
+			Crafted For Perfection
+		</h1>
+		<p style="font-size: 1.25rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto var(--spacing-md);">
+			Premium, Australian-made components designed to elevate your game. Liquid glass. Solid performance.
+		</p>
+		<a href="/_emdash/admin" class="btn-primary">Discover the Collection</a>
+	</section>
 
-	{
-		posts.length === 0 ? (
-			<p>
-				No posts yet.{" "}
-				<a href="/_emdash/admin/content/posts/new">Create one</a>.
-			</p>
-		) : (
-			<ul>
-				{posts.map((post) => (
-					<li>
-						<a href={`/posts/${post.id}`}>
-							{post.data.featured_image && (
-								<Image image={post.data.featured_image} />
+	<section class="featured-posts">
+		<h2 style="font-size: 2rem; border-bottom: 1px solid var(--color-border); padding-bottom: var(--spacing-sm); margin-bottom: var(--spacing-md);">
+			Latest Journal
+		</h2>
+
+		{
+			posts.length === 0 ? (
+				<div class="glass-card" style="text-align: center; padding: var(--spacing-lg);">
+					<p style="margin-bottom: var(--spacing-sm);">No stories published yet.</p>
+					<a href="/_emdash/admin/content/posts/new" class="btn-primary">Write the first entry</a>
+				</div>
+			) : (
+				<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--spacing-md);">
+					{posts.map((post) => (
+						<article class="glass-card" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+							<a href={`/posts/${post.id}`} style="display: block;">
+								{post.data.featured_image && (
+									<div style="width: 100%; aspect-ratio: 16/9; overflow: hidden; border-radius: 4px; margin-bottom: var(--spacing-sm);">
+										<Image image={post.data.featured_image} style="width: 100%; height: 100%; object-fit: cover;" />
+									</div>
+								)}
+								<h3 style="font-size: 1.5rem; margin-bottom: 0.25rem;">{post.data.title}</h3>
+							</a>
+							
+							{post.data.excerpt && <p style="color: var(--color-text-secondary); font-size: 0.95rem;">{post.data.excerpt}</p>}
+							
+							{post.data.publishedAt && (
+								<time datetime={post.data.publishedAt.toISOString()} style="color: var(--color-accent-gold); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: auto; padding-top: var(--spacing-sm);">
+									{post.data.publishedAt.toLocaleDateString("en-US", {
+										year: "numeric",
+										month: "long",
+										day: "numeric",
+									})}
+								</time>
 							)}
-							<h2>{post.data.title}</h2>
-						</a>
-						{post.data.excerpt && <p>{post.data.excerpt}</p>}
-						{post.data.publishedAt && (
-							<time datetime={post.data.publishedAt.toISOString()}>
-								{post.data.publishedAt.toLocaleDateString("en-US", {
-									year: "numeric",
-									month: "long",
-									day: "numeric",
-								})}
-							</time>
-						)}
-					</li>
-				))}
-			</ul>
-		)
-	}
+						</article>
+					))}
+				</div>
+			)
+		}
+	</section>
 </Base>
