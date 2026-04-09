@@ -1,0 +1,58 @@
+---
+import { getEmDashCollection } from "emdash";
+import { Image } from "emdash/ui";
+import Base from "../../layouts/Base.astro";
+
+// Get products from the 'products' collection (which the user needs to create in the admin panel)
+const { entries: products = [], cacheHint } = await getEmDashCollection("products", {
+	orderBy: { published_at: "desc" },
+}).catch(() => ({ entries: [], cacheHint: null })); // Fallback if collection doesn't exist yet
+
+if (cacheHint) {
+	Astro.cache.set(cacheHint);
+}
+---
+
+<Base title="Shop | Cueism">
+	<section class="hero" style="text-align: center; margin-bottom: var(--spacing-xl); padding-top: var(--spacing-lg);">
+		<h1 style="font-size: 3.5rem; color: var(--color-accent-gold); margin-bottom: var(--spacing-sm);">
+			The Collection
+		</h1>
+		<p style="font-size: 1.25rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto var(--spacing-md);">
+			Discover our precision-crafted instruments and accessories.
+		</p>
+	</section>
+
+	<section class="products-grid">
+		{
+			products.length === 0 ? (
+				<div class="glass-card" style="text-align: center; padding: var(--spacing-lg);">
+					<p style="margin-bottom: var(--spacing-sm);">No products available yet.</p>
+					<a href="/_emdash/admin" class="btn-primary">Add products in Admin</a>
+				</div>
+			) : (
+				<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--spacing-md);">
+					{products.map((product) => (
+						<article class="glass-card" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+							<a href={`/shop/${product.slug || product.id}`} style="display: block;">
+								{product.data.featured_image && (
+									<div style="width: 100%; aspect-ratio: 1/1; overflow: hidden; border-radius: 4px; margin-bottom: var(--spacing-sm);">
+										<Image image={product.data.featured_image} style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" />
+									</div>
+								)}
+								<h3 style="font-size: 1.5rem; margin-bottom: 0.25rem;">{product.data.title}</h3>
+							</a>
+							
+							<div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: var(--spacing-sm); border-top: 1px solid var(--color-border);">
+								<span style="font-family: var(--font-primary); font-size: 1.1rem; color: var(--color-text-primary);">
+									${(product.data.price / 100).toFixed(2)}
+								</span>
+								<a href={`/shop/${product.slug || product.id}`} class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.75rem;">View Details</a>
+							</div>
+						</article>
+					))}
+				</div>
+			)
+		}
+	</section>
+</Base>

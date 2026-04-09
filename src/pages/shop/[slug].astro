@@ -1,0 +1,101 @@
+---
+import { getEmDashCollection, Content } from "emdash";
+import { Image } from "emdash/ui";
+import Base from "../../layouts/Base.astro";
+
+// Get products from the 'products' collection
+const { entries: products } = await getEmDashCollection("products").catch(() => ({ entries: [] }));
+
+export async function getStaticPaths() {
+	const { entries: products } = await getEmDashCollection("products").catch(() => ({ entries: [] }));
+	return products.map((product) => ({
+		params: { slug: product.slug || product.id },
+		props: { product },
+	}));
+}
+
+import AddToCartButton from "../../components/AddToCartButton";
+
+const { product } = Astro.props;
+
+if (!product) {
+	return Astro.redirect("/404");
+}
+
+const price = product.data.price ? (product.data.price / 100).toFixed(2) : "0.00";
+const isOutOfStock = product.data.inventory_count !== undefined && product.data.inventory_count <= 0;
+
+// Derive an image URL if possible
+let imageSrc = undefined;
+if (product.data.featured_image) {
+	if (typeof product.data.featured_image === 'string') imageSrc = product.data.featured_image;
+	else if (product.data.featured_image.src) imageSrc = product.data.featured_image.src;
+}
+---
+
+<Base 
+	title={`${product.data.title} | Cueism`} 
+	description={product.data.excerpt || product.data.description}
+	content={{ collection: "products", id: product.id, slug: product.slug }}
+>
+	<div style="padding: var(--spacing-md) 0; margin-bottom: var(--spacing-md);">
+		<a href="/shop" style="color: var(--color-text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">← Back to Collection</a>
+	</div>
+
+	<article class="product-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-xl); align-items: start;">
+		<div class="product-gallery glass-card" style="padding: 0; overflow: hidden;">
+			{product.data.featured_image ? (
+				<Image image={product.data.featured_image} style="width: 100%; height: auto; display: block;" />
+			) : (
+				<div style="width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02);">
+					<span style="color: var(--color-text-secondary);">No image</span>
+				</div>
+			)}
+		</div>
+
+		<div class="product-details" style="position: sticky; top: 100px;">
+			<h1 style="font-size: 2.5rem; margin-bottom: var(--spacing-xs); color: var(--color-accent-gold);">
+				{product.data.title}
+			</h1>
+			
+			<div style="font-size: 1.5rem; color: var(--color-text-primary); margin-bottom: var(--spacing-md); font-family: var(--font-primary);">
+				${price}
+			</div>
+
+			<div class="product-description" style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg); line-height: 1.8;">
+				{product.data.description || product.data.excerpt || "A masterpiece designed for precision."}
+				{product.data.content && <Content content={product.data.content} />}
+			</div>
+
+			<div class="product-actions" style="border-top: 1px solid var(--color-border); padding-top: var(--spacing-md);">
+				<AddToCartButton 
+					client:load 
+					disabled={isOutOfStock}
+					product={{
+						id: product.id,
+						slug: product.slug || product.id,
+						title: product.data.title,
+						price: product.data.price || 0,
+						image: imageSrc
+					}} 
+				/>
+			</div>
+			
+			<div style="margin-top: var(--spacing-sm); font-size: 0.8rem; color: var(--color-text-secondary); text-align: center; text-transform: uppercase; letter-spacing: 0.05em;">
+				Includes standard flat-rate shipping options.
+			</div>
+		</div>
+	</article>
+
+	<style>
+		@media (max-width: 768px) {
+			.product-layout {
+				grid-template-columns: 1fr !important;
+				gap: var(--spacing-md) !important;
+			}
+			.product-details {
+				position: static !important;
+			}
+		}
+	</style>
+</Base>
