@@ -1,5 +1,5 @@
 ---
-import { getEmDashCollection, Content } from "emdash";
+import { getEmDashCollection } from "emdash";
 import { Image } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 import AddToCartButton from "../../components/AddToCartButton";
@@ -56,7 +56,6 @@ if (product.data.featured_image) {
 
 			<div class="product-description" style="color: var(--color-text-secondary); margin-bottom: var(--spacing-lg); line-height: 1.8;">
 				{product.data.description || product.data.excerpt || "A masterpiece designed for precision."}
-				{product.data.content && <Content content={product.data.content} />}
 			</div>
 
 			<div class="product-actions" style="border-top: 1px solid var(--color-border); padding-top: var(--spacing-md);">
