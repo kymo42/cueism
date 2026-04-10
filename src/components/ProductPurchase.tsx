@@ -18,19 +18,14 @@ type ProductPurchaseProps = {
 
 type PersonalizationType = 'none' | 'text' | 'nfc';
 
-const NFC_ICONS = [
-	{ id: 'person', name: 'Person' },
-	{ id: 'home', name: 'Home' },
-	{ id: 'email', name: 'Email' },
-	{ id: 'phone', name: 'Phone' },
-	{ id: 'link', name: 'Link' },
-	{ id: 'Qr_code', name: 'QR Code' },
-	{ id: 'wifi', name: 'WiFi' },
-	{ id: 'share', name: 'Share' },
-	{ id: 'vpn_key', name: 'Key' },
-	{ id: 'badge', name: 'ID Badge' },
-	{ id: 'contact_emergency', name: 'Medical' },
-	{ id: 'pets', name: 'Pet' },
+const PERSONALIZATION_SURCHARGE = 5;
+
+const GOOGLE_MATERIAL_ICONS = [
+	'person', 'home', 'email', 'phone', 'link', 'qr_code', 'wifi', 'share', 'vpn_key', 'badge', 'contact_emergency', 'pets',
+	'car_repair', 'directions_bike', 'sports_esports', 'favorite', 'star', 'security', 'key', 'shield', 'lock', 'fingerprint',
+	'medical_services', 'emergency', 'school', 'work', 'business', 'storefront', 'restaurant', 'local_cafe', 'music_note',
+	'photo_camera', 'videocam', 'palette', 'draw', 'flight', 'train', 'directions_car', 'map', 'place', 'public', 'language',
+	'smartphone', 'laptop', 'computer', 'headphones', 'watch', 'charging_station', 'bolt', 'eco', 'park', 'forest',
 ];
 
 export default function ProductPurchase({
@@ -48,36 +43,47 @@ export default function ProductPurchase({
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const [selectedVariantId, setSelectedVariantId] = useState(hasVariants ? variants[0]?.id || '' : '');
-	
+
 	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>('none');
 	const [textOption, setTextOption] = useState('');
 	const [nfcIcon, setNfcIcon] = useState('person');
 	const [nfcName, setNfcName] = useState('');
+	const [iconSearch, setIconSearch] = useState('');
 
 	const selectedVariant = useMemo(
 		() => variants.find((variant) => variant.id === selectedVariantId),
 		[variants, selectedVariantId],
 	);
 
-	const unitPrice = selectedVariant?.price ?? basePrice;
+	const personalizationSelected = personalizationType === 'text' || personalizationType === 'nfc';
+	const personalizationValid =
+		personalizationType === 'none' ||
+		(personalizationType === 'text' && textOption.trim().length > 0) ||
+		(personalizationType === 'nfc' && nfcName.trim().length > 0);
+
+	const baseUnitPrice = selectedVariant?.price ?? basePrice;
+	const unitPrice = baseUnitPrice + (personalizationSelected ? PERSONALIZATION_SURCHARGE : 0);
 	const unitStock = selectedVariant?.stock ?? baseStock;
 	const unitWeightGrams = selectedVariant?.weightGrams ?? baseWeightGrams;
 	const variantLabel = selectedVariant?.label;
-	const disabled = trackStock && unitStock <= 0;
+	const disabled = (trackStock && unitStock <= 0) || !personalizationValid;
 
 	const hasPersonalization = hasTextOption || hasNfcOption;
 
+	const filteredIcons = GOOGLE_MATERIAL_ICONS.filter((icon) =>
+		icon.replace(/_/g, ' ').toLowerCase().includes(iconSearch.toLowerCase().trim()),
+	).slice(0, 60);
+
 	const handleAdd = () => {
 		let personalization: string | undefined;
-		
+
 		if (personalizationType === 'text' && textOption.trim()) {
-			personalization = `Text: ${textOption.trim()}`;
+			personalization = `Text (+$${PERSONALIZATION_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
 		} else if (personalizationType === 'nfc' && nfcName.trim()) {
-			const iconName = NFC_ICONS.find(i => i.id === nfcIcon)?.name || nfcIcon;
-			personalization = `NFC: ${iconName} - ${nfcName.trim()}`;
+			personalization = `NFC (+$${PERSONALIZATION_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
 		}
 
-		const lineId = `${productId}::${selectedVariant?.id || 'base'}`;
+		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}`;
 		addCartItem({
 			id: lineId,
 			productId,
@@ -122,8 +128,8 @@ export default function ProductPurchase({
 
 			{hasPersonalization && (
 				<div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', display: 'grid', gap: '0.75rem' }}>
-					<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization</span>
-					
+					<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization (+$5.00)</span>
+
 					<div style={{ display: 'flex', gap: '0.5rem' }}>
 						<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
 							<input
@@ -134,7 +140,7 @@ export default function ProductPurchase({
 							/>
 							<span style={{ fontSize: '0.875rem' }}>None</span>
 						</label>
-						
+
 						{hasTextOption && (
 							<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
 								<input
@@ -146,7 +152,7 @@ export default function ProductPurchase({
 								<span style={{ fontSize: '0.875rem' }}>Text</span>
 							</label>
 						)}
-						
+
 						{hasNfcOption && (
 							<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
 								<input
@@ -187,33 +193,57 @@ export default function ProductPurchase({
 						<div style={{ display: 'grid', gap: '0.75rem' }}>
 							<div>
 								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>
+									Search Google Material icons:
+								</label>
+								<input
+									type="text"
+									value={iconSearch}
+									onChange={(e) => setIconSearch(e.target.value)}
+									placeholder="Search icons (e.g. person, lock, car, medical)"
+									style={{
+										width: '100%',
+										padding: '0.625rem 0.875rem',
+										border: '1px solid var(--color-border)',
+										borderRadius: 'var(--radius-sm)',
+										fontFamily: 'var(--font-primary)',
+										fontSize: '0.875rem',
+									}}
+								/>
+							</div>
+
+							<div>
+								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>
 									Select icon:
 								</label>
-								<div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
-									{NFC_ICONS.map((icon) => (
+								<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))', gap: '0.375rem', maxHeight: '180px', overflowY: 'auto', paddingRight: '0.25rem' }}>
+									{filteredIcons.map((icon) => (
 										<button
-											key={icon.id}
+											key={icon}
 											type="button"
-											onClick={() => setNfcIcon(icon.id)}
+											onClick={() => setNfcIcon(icon)}
 											style={{
-												width: '40px',
-												height: '40px',
+												width: '44px',
+												height: '44px',
 												display: 'flex',
 												alignItems: 'center',
 												justifyContent: 'center',
-												border: nfcIcon === icon.id ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
+												border: nfcIcon === icon ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
 												borderRadius: 'var(--radius-sm)',
-												background: nfcIcon === icon.id ? 'var(--color-bg-surface)' : 'var(--color-bg-base)',
+												background: nfcIcon === icon ? 'var(--color-bg-surface)' : 'var(--color-bg-base)',
 												cursor: 'pointer',
-												fontSize: '1.25rem',
 											}}
-											title={icon.name}
+											title={icon.replace(/_/g, ' ')}
 										>
-											{getIconEmoji(icon.id)}
+											<span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{icon}</span>
 										</button>
 									))}
 								</div>
+								<div style={{ marginTop: '0.375rem', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>
+									Selected: <code>{nfcIcon}</code> - More icons at{' '}
+									<a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer">Google Icons</a>
+								</div>
 							</div>
+
 							<div>
 								<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem', display: 'block' }}>
 									Enter name/details for NFC:
@@ -238,6 +268,11 @@ export default function ProductPurchase({
 				</div>
 			)}
 
+			<div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+				Total: <strong style={{ color: 'var(--color-text-primary)' }}>${unitPrice.toFixed(2)}</strong>
+				{personalizationSelected && <span> (includes +$5.00 personalization)</span>}
+			</div>
+
 			<button
 				className="btn btn-primary"
 				style={{
@@ -256,22 +291,4 @@ export default function ProductPurchase({
 			</button>
 		</div>
 	);
-}
-
-function getIconEmoji(iconId: string): string {
-	const icons: Record<string, string> = {
-		person: '👤',
-		home: '🏠',
-		email: '✉️',
-		phone: '📞',
-		link: '🔗',
-		Qr_code: '⬜',
-		wifi: '📶',
-		share: '📤',
-		vpn_key: '🔑',
-		badge: '📛',
-		contact_emergency: '🏥',
-		pets: '🐾',
-	};
-	return icons[iconId] || '●';
 }
