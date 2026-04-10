@@ -47,8 +47,8 @@ export const POST: APIRoute = async ({ request, url }) => {
 			}
 
 			const variant = getVariantById(dbProduct.data, item.variantId);
-			const unitAmount = variant?.price ?? getBasePrice(dbProduct.data);
-			if (!Number.isFinite(unitAmount) || unitAmount <= 0) {
+			const unitPriceDollars = variant?.price ?? getBasePrice(dbProduct.data);
+			if (!Number.isFinite(unitPriceDollars) || unitPriceDollars <= 0) {
 				throw new Error(`Product ${productId} has invalid price.`);
 			}
 
@@ -60,8 +60,9 @@ export const POST: APIRoute = async ({ request, url }) => {
 				}
 			}
 
+			const unitAmountCents = Math.round(unitPriceDollars * 100);
 			data.append(`line_items[${index}][price_data][currency]`, 'aud');
-			data.append(`line_items[${index}][price_data][unit_amount]`, unitAmount.toString());
+			data.append(`line_items[${index}][price_data][unit_amount]`, unitAmountCents.toString());
 			data.append(
 				`line_items[${index}][price_data][product_data][name]`,
 				variant ? `${dbProduct.data.title} - ${variant.label}` : dbProduct.data.title,

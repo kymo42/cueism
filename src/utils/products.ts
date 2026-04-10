@@ -3,7 +3,7 @@ export type ProductVariant = {
 	label: string;
 	optionGroup?: string;
 	optionValue?: string;
-	price: number;
+	price: number; // dollars
 	stock: number;
 	weightGrams: number;
 	sku?: string;

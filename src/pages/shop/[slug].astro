@@ -29,13 +29,13 @@ const baseStock = getBaseStock(product.data);
 const baseWeightGrams = getBaseWeightGrams(product.data);
 const trackStock = getTrackStock(product.data);
 
-const hasTextOption = product.data.has_text_option === true;
-const hasNfcOption = product.data.has_nfc_option === true;
+const hasTextOption = true;
+const hasNfcOption = true;
 
 const priceLabel =
 	priceRange.min === priceRange.max
-		? `$${(priceRange.min / 100).toFixed(2)}`
-		: `$${(priceRange.min / 100).toFixed(2)} - $${(priceRange.max / 100).toFixed(2)}`;
+		? `$${priceRange.min.toFixed(2)}`
+		: `$${priceRange.min.toFixed(2)} - $${priceRange.max.toFixed(2)}`;
 ---
 
 <Base 

@@ -1,5 +1,5 @@
 ---
-import { getEmDashCollection, getEmDashEntry } from "emdash";
+import { getEmDashCollection } from "emdash";
 import { WidgetArea } from "emdash/ui";
 import Base from "../layouts/Base.astro";
 import PostCardImage from "../components/PostCardImage";
@@ -7,24 +7,9 @@ import { getPostDate, getPostImageSrc, getPostIntro } from "../utils/post-format
 
 const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
 	orderBy: { published_at: "desc" },
-	include: ["content", "excerpt", "featured_image"], // Explicitly include content fields
 });
 Astro.cache.set(cacheHint);
 
-// Debug: Log March post content
-posts.forEach(post => {
-	if (post.id?.includes("march") || post.slug?.includes("march")) {
-		console.log("March post collection data:", {
-			id: post.id,
-			slug: post.slug,
-			contentType: typeof post.data?.content,
-			contentLength: Array.isArray(post.data?.content) ? post.data.content.length : (typeof post.data?.content === "string" ? post.data.content.length : 0),
-			contentPreview: Array.isArray(post.data?.content) ? JSON.stringify(post.data.content.slice(0, 1)) : (typeof post.data?.content === "string" ? post.data.content.substring(0, 200) : "no content")
-		});
-	}
-});
-
-// Use posts directly - getEmDashCollection should return full data
 const normalizedPosts = posts;
 ---
 
@@ -52,11 +37,6 @@ const normalizedPosts = posts;
 						const imageSrc = getPostImageSrc(post);
 						const publishedAt = getPostDate(post);
 						const title = typeof post.data.title === "string" ? post.data.title : "Post";
-
-						// Debug: Log image extraction for March post
-						if (post.id?.includes("march") || post.slug?.includes("march")) {
-							console.log("March post image extraction:", { imageSrc, title, hasIntro: !!intro });
-						}
 
 						return (
 							<article class="card">

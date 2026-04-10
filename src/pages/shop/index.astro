@@ -28,8 +28,8 @@ if (cacheHint) {
 						const range = getPriceRange(product.data);
 						const priceLabel =
 							range.min === range.max
-								? `$${(range.min / 100).toFixed(2)}`
-								: `$${(range.min / 100).toFixed(2)} - $${(range.max / 100).toFixed(2)}`;
+								? `$${range.min.toFixed(2)}`
+								: `$${range.min.toFixed(2)} - $${range.max.toFixed(2)}`;
 
 						return (
 							<article class="product-card">

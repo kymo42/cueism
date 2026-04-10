@@ -113,7 +113,7 @@ export default function ProductPurchase({
 					>
 						{variants.map((variant) => (
 							<option key={variant.id} value={variant.id}>
-								{variant.label} - ${(variant.price / 100).toFixed(2)}
+								{variant.label} - ${variant.price.toFixed(2)}
 							</option>
 						))}
 					</select>

@@ -97,7 +97,7 @@ export default function CartFlyout() {
 											</p>
 										)}
 										<p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-primary)' }}>
-											${(item.price / 100).toFixed(2)}
+											${item.price.toFixed(2)}
 										</p>
 										
 										<div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
@@ -166,7 +166,7 @@ export default function CartFlyout() {
 				<footer style={{ borderTop: '1px solid var(--color-border-light)', padding: 'var(--spacing-md)' }}>
 					<div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-sm)', fontSize: '1.125rem' }}>
 						<span style={{ fontWeight: 500 }}>Subtotal</span>
-						<span style={{ fontWeight: 500 }}>${(subtotal / 100).toFixed(2)}</span>
+						<span style={{ fontWeight: 500 }}>${subtotal.toFixed(2)}</span>
 					</div>
 					<p style={{ fontSize: '0.8125rem', color: 'var(--color-text-tertiary)', marginBottom: 'var(--spacing-md)', textAlign: 'center' }}>
 						Shipping calculated at checkout
