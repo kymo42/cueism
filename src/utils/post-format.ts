@@ -77,16 +77,37 @@ export function getPostImageValue(post: PostLike): any {
 export function getPostImageSrc(post: PostLike): string | undefined {
 	const data = post?.data || {};
 	const image = getPostImageValue(post);
+	if (typeof image === "string") return normalizeImageUrl(image);
+	if (typeof image?.src === "string") return normalizeImageUrl(image.src);
+	if (typeof image?.url === "string") return normalizeImageUrl(image.url);
 
-	const deepImage = findImageUrlDeep(image);
-	if (deepImage) return deepImage;
-
+	// Check Portable Text blocks for images
 	if (Array.isArray(data.content)) {
 		for (const block of data.content) {
 			const candidate = block?.image ?? block?.asset ?? block?.media;
 			const candidateUrl = findImageUrlDeep(candidate);
 			if (candidateUrl) return candidateUrl;
 		}
+	}
+
+	// Check HTML content for img tags
+	if (typeof data.content === "string") {
+		const match = data.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+		if (match?.[1]) return normalizeImageUrl(match[1]);
+	}
+
+	// Check Portable Text blocks for HTML content
+	if (Array.isArray(data.content)) {
+		for (const block of data.content) {
+			if (block._type === "html" && typeof block.html === "string") {
+				const match = block.html.match(/<img[^>]+src=["']([^"']+)["']/i);
+				if (match?.[1]) return normalizeImageUrl(match[1]);
+			}
+		}
+	}
+
+	return undefined;
+}
 	}
 
 	if (typeof data.content === "string") {
