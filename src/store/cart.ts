@@ -12,6 +12,7 @@ export type CartItem = {
 	variantLabel?: string;
 	sku?: string;
 	weightGrams?: number;
+	personalization?: string;
 };
 
 export const cartItems = map<Record<string, CartItem>>({});

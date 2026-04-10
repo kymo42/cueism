@@ -132,6 +132,16 @@
 					"slug": "content",
 					"label": "Full Description",
 					"type": "portableText"
+				},
+				{
+					"slug": "has_text_option",
+					"label": "Enable Text Personalization",
+					"type": "boolean"
+				},
+				{
+					"slug": "has_nfc_option",
+					"label": "Enable NFC Personalization",
+					"type": "boolean"
 				}
 			]
 		},

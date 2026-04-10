@@ -29,6 +29,9 @@ const baseStock = getBaseStock(product.data);
 const baseWeightGrams = getBaseWeightGrams(product.data);
 const trackStock = getTrackStock(product.data);
 
+const hasTextOption = product.data.has_text_option === true;
+const hasNfcOption = product.data.has_nfc_option === true;
+
 const priceLabel =
 	priceRange.min === priceRange.max
 		? `$${(priceRange.min / 100).toFixed(2)}`
@@ -76,6 +79,8 @@ const priceLabel =
 				baseWeightGrams={baseWeightGrams}
 				trackStock={trackStock}
 				variants={variants}
+				hasTextOption={hasTextOption}
+				hasNfcOption={hasNfcOption}
 			/>
 
 			{product.data.content && (
