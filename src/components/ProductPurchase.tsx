@@ -18,7 +18,8 @@ type ProductPurchaseProps = {
 
 type PersonalizationType = 'none' | 'text' | 'nfc';
 
-const PERSONALIZATION_SURCHARGE = 5;
+const TEXT_SURCHARGE = 5;
+const NFC_SURCHARGE = 7;
 
 const GOOGLE_MATERIAL_ICONS = [
 	'person', 'person_2', 'groups', 'group', 'badge', 'contact_emergency', 'home', 'apartment', 'cottage', 'domain', 'email',
@@ -94,17 +95,21 @@ export default function ProductPurchase({
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const [selectedVariantId, setSelectedVariantId] = useState(hasVariants ? variants[0]?.id || '' : '');
-	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>('none');
+	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>('text');
 	const [textOption, setTextOption] = useState('');
 	const [nfcIcon, setNfcIcon] = useState('person');
 	const [nfcName, setNfcName] = useState('');
 	const [iconSearch, setIconSearch] = useState('');
 
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
-	const personalizationSelected = personalizationType === 'text' || personalizationType === 'nfc';
-	const personalizationValid = personalizationType === 'none' || (personalizationType === 'text' && textOption.trim().length > 0) || (personalizationType === 'nfc' && nfcName.trim().length > 0);
-	const baseUnitPrice = selectedVariant?.price ?? basePrice;
-	const unitPrice = baseUnitPrice + (personalizationSelected ? PERSONALIZATION_SURCHARGE : 0);
+const personalizationSurcharge = personalizationType === 'nfc' ? NFC_SURCHARGE : personalizationType === 'text' ? TEXT_SURCHARGE : 0;
+const personalizationSelected = personalizationSurcharge > 0;
+const personalizationValid =
+	personalizationType === 'none' ||
+	(personalizationType === 'text' && textOption.trim().length > 0) ||
+	(personalizationType === 'nfc' && nfcName.trim().length > 0);
+const baseUnitPrice = selectedVariant?.price ?? basePrice;
+const unitPrice = baseUnitPrice + personalizationSurcharge;
 	const unitStock = selectedVariant?.stock ?? baseStock;
 	const unitWeightGrams = selectedVariant?.weightGrams ?? baseWeightGrams;
 	const variantLabel = selectedVariant?.label;
@@ -118,8 +123,8 @@ export default function ProductPurchase({
 
 	const handleAdd = () => {
 		let personalization: string | undefined;
-		if (personalizationType === 'text' && textOption.trim()) personalization = `Text (+$${PERSONALIZATION_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
-		else if (personalizationType === 'nfc' && nfcName.trim()) personalization = `NFC (+$${PERSONALIZATION_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
+		if (personalizationType === 'text' && textOption.trim()) personalization = `Text (+$${TEXT_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
+		else if (personalizationType === 'nfc' && nfcName.trim()) personalization = `NFC (+$${NFC_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
 
 		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}`;
 		addCartItem({ id: lineId, productId, slug, title, price: unitPrice, image, variantId: selectedVariant?.id, variantLabel, sku: selectedVariant?.sku, weightGrams: unitWeightGrams, personalization });
@@ -142,17 +147,17 @@ export default function ProductPurchase({
 
 			{hasPersonalization && (
 				<div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', display: 'grid', gap: '0.75rem' }}>
-					<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization (+$5.00)</span>
+					<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization (Cueism text +$5, NFC +$7)</span>
 					<div style={{ display: 'flex', gap: '0.5rem' }}>
-						<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>None</span></label>
+						<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>Cueism</span></label>
 						{hasTextOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'text'} onChange={() => setPersonalizationType('text')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'text' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'text' ? 600 : 400 }}>Text (+$5)</span></label>}
-						{hasNfcOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>NFC (+$5)</span></label>}
+						{hasNfcOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>NFC (+$7)</span></label>}
 					</div>
 
 					{personalizationType === 'text' && (
 						<div style={{ display: 'grid', gap: '0.5rem' }}>
 							<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>Enter text for top of product:</label>
-							<input type="text" value={textOption} onChange={(e) => setTextOption(e.target.value)} placeholder="Your name or text (max 30 chars)" maxLength={30} style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
+							<input type="text" value={textOption} onChange={(e) => setTextOption(e.target.value)} placeholder="Your text (max 6 chars)" maxLength={6} style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
 						</div>
 					)}
 
@@ -191,7 +196,7 @@ export default function ProductPurchase({
 
 			<div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
 				Total: <strong style={{ color: 'var(--color-text-primary)' }}>${unitPrice.toFixed(2)}</strong>
-				{personalizationSelected && <span> (includes +$5.00 personalization)</span>}
+				{personalizationSelected && <span> (includes +${personalizationSurcharge.toFixed(2)} personalization)</span>}
 			</div>
 
 			<button className="btn btn-primary" style={{ width: '100%', padding: '0.875rem 1.5rem', fontSize: '0.9375rem', fontWeight: 500, opacity: disabled ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'pointer', borderRadius: 'var(--radius-sm)' }} disabled={disabled} onClick={handleAdd}>
