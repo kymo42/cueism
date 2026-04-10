@@ -1,7 +1,8 @@
 ---
 import { getTerm, getEmDashCollection } from "emdash";
+import { Image } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
-import { getPostDate, getPostImageSrc, getPostIntro } from "../../utils/post-format";
+import { getPostDate, getPostImageSrc, getPostImageValue, getPostIntro } from "../../utils/post-format";
 
 const { slug } = Astro.params;
 const term = slug ? await getTerm("category", slug) : null;
@@ -27,17 +28,22 @@ const { entries: posts } = await getEmDashCollection("posts", {
 			<div class="grid grid-auto">
 				{posts.map((post) => {
 					const imageSrc = getPostImageSrc(post);
+					const imageValue = getPostImageValue(post);
 					const intro = getPostIntro(post);
 					const publishedAt = getPostDate(post);
 					const title = typeof post.data.title === "string" ? post.data.title : "Post";
 					return (
 						<article class="card">
 							<a href={`/posts/${post.id}`} style="display: block;">
-								{imageSrc && (
+								{imageValue ? (
 									<div class="card-image">
-										<img src={imageSrc} alt={title} loading="lazy" />
+										{typeof imageValue === "object" ? (
+											<Image image={imageValue} alt={title} />
+										) : (
+											imageSrc && <img src={imageSrc} alt={title} loading="lazy" />
+										)}
 									</div>
-								)}
+								) : null}
 								<div class="card-content">
 									<h3>{post.data.title}</h3>
 									{intro && <p>{intro}</p>}

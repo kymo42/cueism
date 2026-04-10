@@ -1,8 +1,8 @@
 ---
 import { getEmDashCollection } from "emdash";
-import { WidgetArea } from "emdash/ui";
+import { Image, WidgetArea } from "emdash/ui";
 import Base from "../layouts/Base.astro";
-import { getPostImageSrc, getPostIntro, getPostDate } from "../utils/post-format";
+import { getPostDate, getPostImageSrc, getPostImageValue, getPostIntro } from "../utils/post-format";
 
 const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
 	orderBy: { published_at: "desc" },
@@ -32,16 +32,21 @@ Astro.cache.set(cacheHint);
 					posts.slice(0, 3).map((post) => {
 						const intro = getPostIntro(post);
 						const imageSrc = getPostImageSrc(post);
+						const imageValue = getPostImageValue(post);
 						const publishedAt = getPostDate(post);
 						const title = typeof post.data.title === "string" ? post.data.title : "Post";
 						return (
 							<article class="card">
 								<a href={`/posts/${post.id}`} style="display: block;">
-									{imageSrc && (
+									{imageValue ? (
 										<div class="card-image">
-											<img src={imageSrc} alt={title} loading="lazy" />
+											{typeof imageValue === "object" ? (
+												<Image image={imageValue} alt={title} />
+											) : (
+												imageSrc && <img src={imageSrc} alt={title} loading="lazy" />
+											)}
 										</div>
-									)}
+									) : null}
 									<div class="card-content">
 										<h3>{post.data.title}</h3>
 										{intro && <p>{intro}</p>}

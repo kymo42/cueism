@@ -12,12 +12,25 @@ const normalizeImageUrl = (value?: string) => {
 	return value;
 };
 
+export function getPostImageValue(post: PostLike): any {
+	const data = post?.data || {};
+	return data.featured_image ?? data.featuredImage ?? data.image;
+}
+
 export function getPostImageSrc(post: PostLike): string | undefined {
 	const data = post?.data || {};
-	const image = data.featured_image ?? data.featuredImage ?? data.image;
+	const image = getPostImageValue(post);
 	if (typeof image === "string") return normalizeImageUrl(image);
 	if (typeof image?.src === "string") return normalizeImageUrl(image.src);
 	if (typeof image?.url === "string") return normalizeImageUrl(image.url);
+
+	if (Array.isArray(data.content)) {
+		for (const block of data.content) {
+			const candidate = block?.image ?? block?.asset ?? block?.media;
+			if (typeof candidate?.src === "string") return normalizeImageUrl(candidate.src);
+			if (typeof candidate?.url === "string") return normalizeImageUrl(candidate.url);
+		}
+	}
 
 	if (typeof data.content === "string") {
 		const match = data.content.match(/<img[^>]+src=["']([^"']+)["']/i);
