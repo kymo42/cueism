@@ -14,6 +14,7 @@ if (!term) {
 const { entries: posts } = await getEmDashCollection("posts", {
 	where: { tag: term.slug },
 	orderBy: { published_at: "desc" },
+	include: ["content", "excerpt", "featured_image"], // Explicitly include content fields
 });
 
 // Use posts directly - getEmDashCollection should return full data
