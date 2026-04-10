@@ -22,6 +22,19 @@ const normalizedPosts = await Promise.all(
 				break;
 			}
 		}
+
+		// Debug: Log image extraction for March post
+		if (post.id?.includes("march") || post.slug?.includes("march")) {
+			console.log("March post identifiers:", { id: post.id, slug: post.slug });
+			console.log("March post found:", !!fullPost);
+			if (fullPost) {
+				console.log("March post content preview:", typeof fullPost.data?.content);
+				if (Array.isArray(fullPost.data?.content)) {
+					console.log("March post blocks:", fullPost.data.content.slice(0, 2));
+				}
+			}
+		}
+
 		return fullPost || post;
 	}),
 );

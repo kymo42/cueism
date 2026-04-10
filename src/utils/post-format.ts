@@ -114,8 +114,10 @@ export function getPostImageSrc(post: PostLike): string | undefined {
 	// Check Portable Text blocks for HTML content
 	if (Array.isArray(data.content)) {
 		for (const block of data.content) {
-			if (block._type === "html" && typeof block.html === "string") {
-				const match = block.html.match(/<img[^>]+src=["']([^"']+)["']/i);
+			// Check various HTML block types
+			const htmlContent = block.html || block.content || block.value;
+			if (typeof htmlContent === "string") {
+				const match = htmlContent.match(/<img[^>]+src=["']([^"']+)["']/i);
 				if (match?.[1]) return normalizeImageUrl(match[1]);
 			}
 		}
