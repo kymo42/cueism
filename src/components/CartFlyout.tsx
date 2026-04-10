@@ -86,6 +86,11 @@ export default function CartFlyout() {
 										<h4 style={{ margin: '0 0 0.25rem', fontSize: '0.9375rem', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
 											{item.title}
 										</h4>
+										{item.variantLabel && (
+											<p style={{ margin: '0 0 0.25rem', fontSize: '0.8125rem', color: 'var(--color-text-tertiary)' }}>
+												{item.variantLabel}
+											</p>
+										)}
 										<p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-accent)' }}>
 											${(item.price / 100).toFixed(2)}
 										</p>

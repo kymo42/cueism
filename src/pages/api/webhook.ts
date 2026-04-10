@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import type { D1Database } from '@cloudflare/workers-types';
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
 	const stripeKey = import.meta.env.STRIPE_SECRET_KEY;
 	const webhookSecret = import.meta.env.STRIPE_WEBHOOK_SECRET;
 
@@ -15,19 +15,16 @@ export const POST: APIRoute = async ({ request }) => {
 	}
 
 	const body = await request.text();
-	const env = Astro.locals as { DB: D1Database } & Env;
+	const env = locals as { runtime?: { env?: { DB?: D1Database } } };
+	const db = env.runtime?.env?.DB;
+	if (!db) {
+		return new Response('Database binding not available', { status: 500 });
+	}
 
 	try {
-		const fetchStripeEvent = await fetch('https://api.stripe.com/v1/webhook_endpoints', {
-			method: 'GET',
-			headers: { Authorization: `Bearer ${stripeKey}` },
-		});
-
 		const payload = JSON.parse(body);
 		const eventType = payload.type;
 		const session = payload.data?.object;
-
-		console.log(`Received webhook: ${eventType}`);
 
 		switch (eventType) {
 			case 'checkout.session.completed': {
@@ -37,18 +34,14 @@ export const POST: APIRoute = async ({ request }) => {
 					const amountTotal = session.amount_total || 0;
 					const stripeSessionId = session.id || '';
 
-					await env.DB.prepare(`
-						INSERT INTO orders (stripe_session_id, customer_email, customer_name, amount_total, status, created_at)
-						VALUES (?, ?, ?, ?, 'paid', datetime('now'))
-					`).bind(stripeSessionId, customerEmail, customerName, amountTotal).run();
-
-					console.log(`Order saved: ${stripeSessionId}`);
+					await db
+						.prepare(`
+							INSERT INTO orders (stripe_session_id, customer_email, customer_name, amount_total, status, created_at)
+							VALUES (?, ?, ?, ?, 'paid', datetime('now'))
+						`)
+						.bind(stripeSessionId, customerEmail, customerName, amountTotal)
+						.run();
 				}
-				break;
-			}
-
-			case 'payment_intent.payment_failed': {
-				console.log(`Payment failed: ${session?.id}`);
 				break;
 			}
 		}
@@ -58,7 +51,6 @@ export const POST: APIRoute = async ({ request }) => {
 			headers: { 'Content-Type': 'application/json' },
 		});
 	} catch (err: any) {
-		console.error('Webhook error:', err);
 		return new Response(JSON.stringify({ error: err.message }), { status: 400 });
 	}
 };

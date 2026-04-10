@@ -2,11 +2,16 @@ import { atom, map } from 'nanostores';
 
 export type CartItem = {
 	id: string;
+	productId: string;
 	slug: string;
 	title: string;
 	price: number;
 	image?: string;
 	quantity: number;
+	variantId?: string;
+	variantLabel?: string;
+	sku?: string;
+	weightGrams?: number;
 };
 
 export const cartItems = map<Record<string, CartItem>>({});

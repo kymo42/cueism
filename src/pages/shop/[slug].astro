@@ -2,7 +2,15 @@
 import { getEmDashCollection } from "emdash";
 import { Image, PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
-import AddToCartButton from "../../components/AddToCartButton";
+import ProductPurchase from "../../components/ProductPurchase";
+import {
+	getBasePrice,
+	getBaseStock,
+	getBaseWeightGrams,
+	getPriceRange,
+	getProductVariants,
+	getTrackStock,
+} from "../../utils/products";
 
 const { slug } = Astro.params;
 
@@ -14,9 +22,17 @@ if (!product) {
 }
 
 const featuredImage = product.data.featured_image as { src?: string; alt?: string } | undefined;
+const variants = getProductVariants(product.data);
+const priceRange = getPriceRange(product.data);
+const basePrice = getBasePrice(product.data);
+const baseStock = getBaseStock(product.data);
+const baseWeightGrams = getBaseWeightGrams(product.data);
+const trackStock = getTrackStock(product.data);
 
-const price = product.data.price ? (product.data.price / 100).toFixed(2) : "0.00";
-const isOutOfStock = product.data.inventory_count !== undefined && product.data.inventory_count <= 0;
+const priceLabel =
+	priceRange.min === priceRange.max
+		? `$${(priceRange.min / 100).toFixed(2)}`
+		: `$${(priceRange.min / 100).toFixed(2)} - $${(priceRange.max / 100).toFixed(2)}`;
 ---
 
 <Base 
@@ -46,19 +62,20 @@ const isOutOfStock = product.data.inventory_count !== undefined && product.data.
 			</h1>
 			
 			<div style="font-size: 1.5rem; font-weight: 500; color: var(--color-text-primary); margin-bottom: var(--spacing-md);">
-				${price}
+				{priceLabel}
 			</div>
 
-			<AddToCartButton 
-				client:load 
-				disabled={isOutOfStock}
-				product={{
-					id: product.id,
-					slug: product.slug || product.id,
-					title: product.data.title,
-					price: product.data.price || 0,
-					image: featuredImage?.src
-				}} 
+			<ProductPurchase
+				client:load
+				productId={product.id}
+				slug={product.slug || product.id}
+				title={product.data.title}
+				image={featuredImage?.src}
+				basePrice={basePrice}
+				baseStock={baseStock}
+				baseWeightGrams={baseWeightGrams}
+				trackStock={trackStock}
+				variants={variants}
 			/>
 
 			{product.data.content && (

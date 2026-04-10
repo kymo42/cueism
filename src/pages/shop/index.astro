@@ -2,6 +2,7 @@
 import { getEmDashCollection } from "emdash";
 import { Image } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
+import { getPriceRange } from "../../utils/products";
 
 const { entries: products = [], cacheHint } = await getEmDashCollection("products", {
 	orderBy: { published_at: "desc" },
@@ -22,25 +23,29 @@ if (cacheHint) {
 						<a href="/_emdash/admin" class="btn btn-primary">Add products in Admin</a>
 					</div>
 				) : (
-					products.map((product) => (
-						<article class="product-card">
-							<a href={`/shop/${product.slug || product.id}`} style="display: block;">
-								{product.data.featured_image && (
-									<div class="product-card-image">
-										<Image image={product.data.featured_image} />
-									</div>
-								)}
-								<div class="product-card-content">
-									<h3>{product.data.title}</h3>
-									{product.data.price && (
-										<p class="product-card-price">
-											${(product.data.price / 100).toFixed(2)}
-										</p>
+					products.map((product) => {
+						const range = getPriceRange(product.data);
+						const priceLabel =
+							range.min === range.max
+								? `$${(range.min / 100).toFixed(2)}`
+								: `$${(range.min / 100).toFixed(2)} - $${(range.max / 100).toFixed(2)}`;
+
+						return (
+							<article class="product-card">
+								<a href={`/shop/${product.slug || product.id}`} style="display: block;">
+									{product.data.featured_image && (
+										<div class="product-card-image">
+											<Image image={product.data.featured_image} />
+										</div>
 									)}
-								</div>
-							</a>
-						</article>
-					))
+									<div class="product-card-content">
+										<h3>{product.data.title}</h3>
+										<p class="product-card-price">{priceLabel}</p>
+									</div>
+								</a>
+							</article>
+						);
+					})
 				)
 			}
 		</div>

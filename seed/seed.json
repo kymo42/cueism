@@ -57,15 +57,66 @@
 					"required": true
 				},
 				{
+					"slug": "sku",
+					"label": "SKU",
+					"type": "string"
+				},
+				{
 					"slug": "price",
-					"label": "Price (Cents)",
+					"label": "Base Price (Cents)",
 					"type": "number",
 					"required": true
 				},
 				{
-					"slug": "inventory_count",
-					"label": "Inventory",
+					"slug": "compare_at_price",
+					"label": "Compare At Price (Cents)",
 					"type": "number"
+				},
+				{
+					"slug": "track_stock",
+					"label": "Track Stock",
+					"type": "boolean"
+				},
+				{
+					"slug": "stock",
+					"label": "Base Stock",
+					"type": "integer"
+				},
+				{
+					"slug": "weight_grams",
+					"label": "Base Weight (Grams)",
+					"type": "integer"
+				},
+				{
+					"slug": "inventory_count",
+					"label": "Legacy Inventory",
+					"type": "number"
+				},
+				{
+					"slug": "status",
+					"label": "Status",
+					"type": "select",
+					"validation": {
+						"options": ["active", "draft", "discontinued"]
+					}
+				},
+				{
+					"slug": "variants",
+					"label": "Variants",
+					"type": "repeater",
+					"validation": {
+						"subFields": [
+							{ "slug": "id", "type": "string", "label": "Variant ID" },
+							{ "slug": "label", "type": "string", "label": "Label", "required": true },
+							{ "slug": "option_group", "type": "string", "label": "Option Group" },
+							{ "slug": "option_value", "type": "string", "label": "Option Value" },
+							{ "slug": "price", "type": "number", "label": "Price (Cents)", "required": true },
+							{ "slug": "stock", "type": "integer", "label": "Stock" },
+							{ "slug": "weight_grams", "type": "integer", "label": "Weight (Grams)" },
+							{ "slug": "sku", "type": "string", "label": "SKU" },
+							{ "slug": "enabled", "type": "boolean", "label": "Enabled" }
+						]
+					}
 				},
 				{
 					"slug": "featured_image",

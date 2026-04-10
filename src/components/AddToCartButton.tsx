@@ -8,10 +8,10 @@ interface AddToCartButtonProps {
 
 export default function AddToCartButton({ product, disabled }: AddToCartButtonProps) {
 	return (
-		<button 
+		<button
 			className="btn btn-primary"
-			style={{ 
-				width: '100%', 
+			style={{
+				width: '100%',
 				padding: '0.875rem 1.5rem',
 				fontSize: '0.9375rem',
 				fontWeight: 500,
