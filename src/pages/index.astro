@@ -7,6 +7,7 @@ import { getPostDate, getPostImageSrc, getPostIntro } from "../utils/post-format
 
 const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
 	orderBy: { published_at: "desc" },
+	fields: ["*"], // Include all fields
 });
 Astro.cache.set(cacheHint);
 

@@ -14,6 +14,7 @@ if (!term) {
 const { entries: posts } = await getEmDashCollection("posts", {
 	where: { category: term.slug },
 	orderBy: { published_at: "desc" },
+	fields: ["*"], // Include all fields
 });
 
 // Use posts directly - getEmDashCollection should return full data
