@@ -5,11 +5,20 @@ import { getBasePrice, getBaseStock, getTrackStock, getVariantById } from '../..
 const BASE_SHIPPING_CENTS = 1000;
 const PER_EXTRA_ITEM_CENTS = 200;
 
-export const POST: APIRoute = async ({ request, url }) => {
+export const POST: APIRoute = async ({ request, url, locals }) => {
 	try {
-		const stripeKey = import.meta.env.STRIPE_SECRET_KEY;
+		const runtimeEnv = (locals as any)?.runtime?.env;
+		const stripeKey =
+			import.meta.env.STRIPE_SECRET_KEY ||
+			runtimeEnv?.STRIPE_SECRET_KEY ||
+			runtimeEnv?.STRIPE_SECRET;
 		if (!stripeKey) {
-			return new Response(JSON.stringify({ error: 'Stripe key not configured' }), { status: 500 });
+			return new Response(
+				JSON.stringify({
+					error: 'Stripe key not configured. Set STRIPE_SECRET_KEY in Cloudflare environment variables.',
+				}),
+				{ status: 500 },
+			);
 		}
 
 		const body = await request.json();
