@@ -28,7 +28,7 @@ const seo = getSeoMeta(page, {
 	title={seo.title}
 	description={seo.description}
 	canonical={seo.canonical}
-	content={{ collection: "pages", id: page.data.id, slug }}
+	content={{ collection: "pages", id: page.id, slug }}
 >
 	<article>
 		<h1 {...page.edit.title}>{page.data.title}</h1>

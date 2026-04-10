@@ -1,7 +1,7 @@
 ---
 import { getTerm, getEmDashCollection } from "emdash";
-import { Image } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
+import { getPostDate, getPostImageSrc, getPostIntro } from "../../utils/post-format";
 
 const { slug } = Astro.params;
 const term = slug ? await getTerm("category", slug) : null;
@@ -24,19 +24,38 @@ const { entries: posts } = await getEmDashCollection("posts", {
 		posts.length === 0 ? (
 			<p>No posts in this category yet.</p>
 		) : (
-			<ul>
-				{posts.map((post) => (
-					<li>
-						<a href={`/posts/${post.id}`}>
-							{post.data.featured_image && (
-								<Image image={post.data.featured_image} />
-							)}
-							<h2>{post.data.title}</h2>
-						</a>
-						{post.data.excerpt && <p>{post.data.excerpt}</p>}
-					</li>
-				))}
-			</ul>
+			<div class="grid grid-auto">
+				{posts.map((post) => {
+					const imageSrc = getPostImageSrc(post);
+					const intro = getPostIntro(post);
+					const publishedAt = getPostDate(post);
+					const title = typeof post.data.title === "string" ? post.data.title : "Post";
+					return (
+						<article class="card">
+							<a href={`/posts/${post.id}`} style="display: block;">
+								{imageSrc && (
+									<div class="card-image">
+										<img src={imageSrc} alt={title} loading="lazy" />
+									</div>
+								)}
+								<div class="card-content">
+									<h3>{post.data.title}</h3>
+									{intro && <p>{intro}</p>}
+									{publishedAt && (
+										<time datetime={publishedAt.toISOString()}>
+											{publishedAt.toLocaleDateString("en-US", {
+												year: "numeric",
+												month: "long",
+												day: "numeric",
+											})}
+										</time>
+									)}
+								</div>
+							</a>
+						</article>
+					);
+				})}
+			</div>
 		)
 	}
 </Base>
