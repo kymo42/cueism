@@ -55,7 +55,6 @@ const normalize = (value: string) => value.toLowerCase().replace(/[_\s-]/g, '');
 
 function scoreIcon(icon: string, rawQuery: string): number {
 	if (!rawQuery) return 1;
-
 	const query = normalize(rawQuery);
 	const iconKey = normalize(icon);
 	const iconWords = icon.toLowerCase().split('_');
@@ -77,7 +76,6 @@ function scoreIcon(icon: string, rawQuery: string): number {
 		if (iconKey[i] === query[qIndex]) qIndex += 1;
 	}
 	if (qIndex === query.length) return 30;
-
 	return 0;
 }
 
@@ -96,65 +94,35 @@ export default function ProductPurchase({
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const [selectedVariantId, setSelectedVariantId] = useState(hasVariants ? variants[0]?.id || '' : '');
-
 	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>('none');
 	const [textOption, setTextOption] = useState('');
 	const [nfcIcon, setNfcIcon] = useState('person');
 	const [nfcName, setNfcName] = useState('');
 	const [iconSearch, setIconSearch] = useState('');
 
-	const selectedVariant = useMemo(
-		() => variants.find((variant) => variant.id === selectedVariantId),
-		[variants, selectedVariantId],
-	);
-
+	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
 	const personalizationSelected = personalizationType === 'text' || personalizationType === 'nfc';
-	const personalizationValid =
-		personalizationType === 'none' ||
-		(personalizationType === 'text' && textOption.trim().length > 0) ||
-		(personalizationType === 'nfc' && nfcName.trim().length > 0);
-
+	const personalizationValid = personalizationType === 'none' || (personalizationType === 'text' && textOption.trim().length > 0) || (personalizationType === 'nfc' && nfcName.trim().length > 0);
 	const baseUnitPrice = selectedVariant?.price ?? basePrice;
 	const unitPrice = baseUnitPrice + (personalizationSelected ? PERSONALIZATION_SURCHARGE : 0);
 	const unitStock = selectedVariant?.stock ?? baseStock;
 	const unitWeightGrams = selectedVariant?.weightGrams ?? baseWeightGrams;
 	const variantLabel = selectedVariant?.label;
 	const disabled = (trackStock && unitStock <= 0) || !personalizationValid;
-
 	const hasPersonalization = hasTextOption || hasNfcOption;
 
-	const filteredIcons = useMemo(() => {
-		const scored = GOOGLE_MATERIAL_ICONS.map((icon) => ({ icon, score: scoreIcon(icon, iconSearch) }))
-			.filter((item) => item.score > 0)
-			.sort((a, b) => b.score - a.score || a.icon.localeCompare(b.icon))
-			.slice(0, 120)
-			.map((item) => item.icon);
-		return scored.length > 0 ? scored : GOOGLE_MATERIAL_ICONS.slice(0, 120);
+	const sortedIcons = useMemo(() => {
+		const scored = GOOGLE_MATERIAL_ICONS.map((icon) => ({ icon, score: scoreIcon(icon, iconSearch) })).sort((a, b) => b.score - a.score || a.icon.localeCompare(b.icon));
+		return scored.map((entry) => entry.icon);
 	}, [iconSearch]);
 
 	const handleAdd = () => {
 		let personalization: string | undefined;
-
-		if (personalizationType === 'text' && textOption.trim()) {
-			personalization = `Text (+$${PERSONALIZATION_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
-		} else if (personalizationType === 'nfc' && nfcName.trim()) {
-			personalization = `NFC (+$${PERSONALIZATION_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
-		}
+		if (personalizationType === 'text' && textOption.trim()) personalization = `Text (+$${PERSONALIZATION_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
+		else if (personalizationType === 'nfc' && nfcName.trim()) personalization = `NFC (+$${PERSONALIZATION_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
 
 		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}`;
-		addCartItem({
-			id: lineId,
-			productId,
-			slug,
-			title,
-			price: unitPrice,
-			image,
-			variantId: selectedVariant?.id,
-			variantLabel,
-			sku: selectedVariant?.sku,
-			weightGrams: unitWeightGrams,
-			personalization,
-		});
+		addCartItem({ id: lineId, productId, slug, title, price: unitPrice, image, variantId: selectedVariant?.id, variantLabel, sku: selectedVariant?.sku, weightGrams: unitWeightGrams, personalization });
 	};
 
 	const baseId = `${productId}::${selectedVariant?.id || 'base'}`;
@@ -164,15 +132,9 @@ export default function ProductPurchase({
 			{hasVariants && (
 				<label style={{ display: 'grid', gap: '0.375rem' }}>
 					<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Options</span>
-					<select
-						value={selectedVariantId}
-						onChange={(event) => setSelectedVariantId(event.target.value)}
-						style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)' }}
-					>
+					<select value={selectedVariantId} onChange={(event) => setSelectedVariantId(event.target.value)} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)' }}>
 						{variants.map((variant) => (
-							<option key={variant.id} value={variant.id}>
-								{variant.label} - ${variant.price.toFixed(2)}
-							</option>
+							<option key={variant.id} value={variant.id}>{variant.label} - ${variant.price.toFixed(2)}</option>
 						))}
 					</select>
 				</label>
@@ -181,39 +143,16 @@ export default function ProductPurchase({
 			{hasPersonalization && (
 				<div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', display: 'grid', gap: '0.75rem' }}>
 					<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization (+$5.00)</span>
-
 					<div style={{ display: 'flex', gap: '0.5rem' }}>
-						<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-							<input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} />
-							<span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>None</span>
-						</label>
-
-						{hasTextOption && (
-							<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-								<input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'text'} onChange={() => setPersonalizationType('text')} />
-								<span style={{ fontSize: '0.875rem', color: personalizationType === 'text' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'text' ? 600 : 400 }}>Text (+$5)</span>
-							</label>
-						)}
-
-						{hasNfcOption && (
-							<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-								<input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} />
-								<span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>NFC (+$5)</span>
-							</label>
-						)}
+						<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>None</span></label>
+						{hasTextOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'text'} onChange={() => setPersonalizationType('text')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'text' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'text' ? 600 : 400 }}>Text (+$5)</span></label>}
+						{hasNfcOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>NFC (+$5)</span></label>}
 					</div>
 
 					{personalizationType === 'text' && (
 						<div style={{ display: 'grid', gap: '0.5rem' }}>
 							<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>Enter text for top of product:</label>
-							<input
-								type="text"
-								value={textOption}
-								onChange={(e) => setTextOption(e.target.value)}
-								placeholder="Your name or text (max 30 chars)"
-								maxLength={30}
-								style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }}
-							/>
+							<input type="text" value={textOption} onChange={(e) => setTextOption(e.target.value)} placeholder="Your name or text (max 30 chars)" maxLength={30} style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
 						</div>
 					)}
 
@@ -221,59 +160,29 @@ export default function ProductPurchase({
 						<div style={{ display: 'grid', gap: '0.75rem' }}>
 							<div>
 								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Search Google Material icons:</label>
-								<input
-									type="text"
-									value={iconSearch}
-									onChange={(e) => setIconSearch(e.target.value)}
-									placeholder="Search icons (person, security, car, medical, business...)"
-									style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }}
-								/>
+								<input type="text" value={iconSearch} onChange={(e) => setIconSearch(e.target.value)} placeholder="Search icons (person, security, car, medical, business...)" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
 							</div>
 
 							<div style={{ padding: '0.625rem 0.75rem', background: 'var(--color-bg-surface)', border: '1px solid var(--color-border-light)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
 								<span className="material-symbols-outlined" style={{ fontSize: '24px', color: 'var(--color-accent)' }}>{nfcIcon}</span>
-								<span style={{ color: 'var(--color-accent)', fontWeight: 600, fontSize: '0.9rem' }}>Selected icon: {nfcIcon.replace(/_/g, ' ')}</span>
+								<span style={{ color: 'var(--color-accent)', fontWeight: 700, fontSize: '0.95rem' }}>Selected icon: {nfcIcon.replace(/_/g, ' ')}</span>
 							</div>
 
 							<div>
-								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Select icon:</label>
-								<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))', gap: '0.375rem', maxHeight: '220px', overflowY: 'auto', paddingRight: '0.25rem' }}>
-									{filteredIcons.map((icon) => (
-										<button
-											key={icon}
-											type="button"
-											onClick={() => setNfcIcon(icon)}
-											style={{
-												width: '44px',
-												height: '44px',
-												display: 'flex',
-												alignItems: 'center',
-												justifyContent: 'center',
-												border: nfcIcon === icon ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
-												borderRadius: 'var(--radius-sm)',
-												background: nfcIcon === icon ? 'var(--color-bg-surface)' : 'var(--color-bg-base)',
-												cursor: 'pointer',
-											}}
-											title={icon.replace(/_/g, ' ')}
-										>
+								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Choose icon ({sortedIcons.length} shown):</label>
+								<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))', gap: '0.375rem', maxHeight: '60vh', overflowY: 'auto', paddingRight: '0.25rem' }}>
+									{sortedIcons.map((icon) => (
+										<button key={icon} type="button" onClick={() => setNfcIcon(icon)} style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: nfcIcon === icon ? '2px solid var(--color-accent)' : '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: nfcIcon === icon ? 'var(--color-bg-surface)' : 'var(--color-bg-base)', cursor: 'pointer' }} title={icon.replace(/_/g, ' ')}>
 											<span className="material-symbols-outlined" style={{ fontSize: '20px', color: nfcIcon === icon ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>{icon}</span>
 										</button>
 									))}
 								</div>
-								<div style={{ marginTop: '0.375rem', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>
-									Showing {filteredIcons.length} icons. Full set: <a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer">Google Icons</a>
-								</div>
+								<div style={{ marginTop: '0.375rem', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>Results are ranked but the full icon list remains available.</div>
 							</div>
 
 							<div>
 								<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem', display: 'block' }}>Enter name/details for NFC:</label>
-								<input
-									type="text"
-									value={nfcName}
-									onChange={(e) => setNfcName(e.target.value)}
-									placeholder="e.g. John Smith, or 'Call 0412 345 678'"
-									style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }}
-								/>
+								<input type="text" value={nfcName} onChange={(e) => setNfcName(e.target.value)} placeholder="e.g. John Smith, or 'Call 0412 345 678'" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
 							</div>
 						</div>
 					)}
@@ -285,12 +194,7 @@ export default function ProductPurchase({
 				{personalizationSelected && <span> (includes +$5.00 personalization)</span>}
 			</div>
 
-			<button
-				className="btn btn-primary"
-				style={{ width: '100%', padding: '0.875rem 1.5rem', fontSize: '0.9375rem', fontWeight: 500, opacity: disabled ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'pointer', borderRadius: 'var(--radius-sm)' }}
-				disabled={disabled}
-				onClick={handleAdd}
-			>
+			<button className="btn btn-primary" style={{ width: '100%', padding: '0.875rem 1.5rem', fontSize: '0.9375rem', fontWeight: 500, opacity: disabled ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'pointer', borderRadius: 'var(--radius-sm)' }} disabled={disabled} onClick={handleAdd}>
 				{disabled ? 'Out of Stock' : 'Add to Cart'}
 			</button>
 		</div>
