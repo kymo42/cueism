@@ -219,6 +219,61 @@
 					"settings": { "count": 5 }
 				}
 			]
+		},
+		{
+			"name": "global-top",
+			"label": "Global Top",
+			"description": "Widgets shown above page content",
+			"widgets": []
+		},
+		{
+			"name": "global-bottom",
+			"label": "Global Bottom",
+			"description": "Widgets shown below page content",
+			"widgets": []
+		},
+		{
+			"name": "footer",
+			"label": "Footer",
+			"description": "Footer widget area",
+			"widgets": []
+		},
+		{
+			"name": "home-top",
+			"label": "Home Top",
+			"description": "Homepage widgets above hero",
+			"widgets": []
+		},
+		{
+			"name": "home-before-journal",
+			"label": "Home Before Journal",
+			"description": "Homepage widgets before latest journal",
+			"widgets": [
+				{
+					"type": "component",
+					"componentId": "core:recent-posts",
+					"title": "Latest News",
+					"settings": { "count": 4 }
+				}
+			]
+		},
+		{
+			"name": "home-after-journal",
+			"label": "Home After Journal",
+			"description": "Homepage widgets after latest journal",
+			"widgets": []
+		},
+		{
+			"name": "shop-top",
+			"label": "Shop Top",
+			"description": "Shop widgets before product grid",
+			"widgets": []
+		},
+		{
+			"name": "shop-bottom",
+			"label": "Shop Bottom",
+			"description": "Shop widgets below product grid",
+			"widgets": []
 		}
 	],
 

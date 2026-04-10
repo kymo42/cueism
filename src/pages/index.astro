@@ -1,6 +1,6 @@
 ---
 import { getEmDashCollection } from "emdash";
-import { Image } from "emdash/ui";
+import { Image, WidgetArea } from "emdash/ui";
 import Base from "../layouts/Base.astro";
 
 const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
@@ -10,12 +10,14 @@ Astro.cache.set(cacheHint);
 ---
 
 <Base title="Cueism | Premium 3D Printed Accessories">
+	<WidgetArea name="home-top" />
 	<section class="hero">
 		<h1>Precision. Crafted.</h1>
 		<p>Australian-made accessories designed for those who appreciate the finer details of the game.</p>
 		<a href="/shop" class="btn btn-primary">Shop the Collection</a>
 	</section>
 
+	<WidgetArea name="home-before-journal" />
 	<section>
 		<h2>Latest Journal</h2>
 		<div class="grid grid-auto">
@@ -54,4 +56,5 @@ Astro.cache.set(cacheHint);
 			}
 		</div>
 	</section>
+	<WidgetArea name="home-after-journal" />
 </Base>

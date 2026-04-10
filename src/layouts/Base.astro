@@ -1,6 +1,7 @@
 ---
 import { getMenu } from "emdash";
 import {
+	WidgetArea,
 	EmDashHead,
 	EmDashBodyStart,
 	EmDashBodyEnd,
@@ -62,10 +63,13 @@ const pageCtx = createPublicPageContext({
 		</header>
 
 		<main>
+			<WidgetArea name="global-top" />
 			<slot />
+			<WidgetArea name="global-bottom" />
 		</main>
 
 		<footer>
+			<WidgetArea name="footer" />
 			<p>&copy; {new Date().getFullYear()} Cueism. All rights reserved.</p>
 		</footer>
 
