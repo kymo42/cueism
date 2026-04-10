@@ -248,14 +248,7 @@
 			"name": "home-before-journal",
 			"label": "Home Before Journal",
 			"description": "Homepage widgets before latest journal",
-			"widgets": [
-				{
-					"type": "component",
-					"componentId": "core:recent-posts",
-					"title": "Latest News",
-					"settings": { "count": 4 }
-				}
-			]
+			"widgets": []
 		},
 		{
 			"name": "home-after-journal",

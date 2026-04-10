@@ -7,6 +7,21 @@ const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
 	orderBy: { published_at: "desc" },
 });
 Astro.cache.set(cacheHint);
+
+const getIntro = (post: any) => {
+	if (typeof post.data.excerpt === "string" && post.data.excerpt.trim().length > 0) {
+		return post.data.excerpt;
+	}
+	if (!Array.isArray(post.data.content)) return "";
+	for (const block of post.data.content) {
+		if (!Array.isArray(block?.children)) continue;
+		const text = block.children.map((child: any) => child?.text || "").join(" ").trim();
+		if (text.length > 0) {
+			return text.length > 140 ? `${text.slice(0, 140)}...` : text;
+		}
+	}
+	return "";
+};
 ---
 
 <Base title="Cueism | Premium 3D Printed Accessories">
@@ -28,30 +43,33 @@ Astro.cache.set(cacheHint);
 						<a href="/_emdash/admin/content/posts/new" class="btn btn-primary">Write the first entry</a>
 					</div>
 				) : (
-					posts.map((post) => (
-						<article class="card">
-							<a href={`/posts/${post.id}`} style="display: block;">
-								{post.data.featured_image && (
-									<div class="card-image">
-										<Image image={post.data.featured_image} />
-									</div>
-								)}
-								<div class="card-content">
-									<h3>{post.data.title}</h3>
-									{post.data.excerpt && <p>{post.data.excerpt}</p>}
-									{post.data.publishedAt && (
-										<time datetime={post.data.publishedAt.toISOString()}>
-											{post.data.publishedAt.toLocaleDateString("en-US", {
-												year: "numeric",
-												month: "long",
-												day: "numeric",
-											})}
-										</time>
+					posts.map((post) => {
+						const intro = getIntro(post);
+						return (
+							<article class="card">
+								<a href={`/posts/${post.id}`} style="display: block;">
+									{post.data.featured_image && (
+										<div class="card-image">
+											<Image image={post.data.featured_image} />
+										</div>
 									)}
-								</div>
-							</a>
-						</article>
-					))
+									<div class="card-content">
+										<h3>{post.data.title}</h3>
+										{intro && <p>{intro}</p>}
+										{post.data.publishedAt && (
+											<time datetime={post.data.publishedAt.toISOString()}>
+												{post.data.publishedAt.toLocaleDateString("en-US", {
+													year: "numeric",
+													month: "long",
+													day: "numeric",
+												})}
+											</time>
+										)}
+									</div>
+								</a>
+							</article>
+						);
+					})
 				)
 			}
 		</div>
