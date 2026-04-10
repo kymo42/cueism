@@ -123,10 +123,6 @@ export function getPostImageSrc(post: PostLike): string | undefined {
 		}
 	}
 
-	return undefined;
-}
-	}
-
 	if (typeof data.content === "string") {
 		const match = data.content.match(/<img[^>]+src=["']([^"']+)["']/i);
 		if (match?.[1]) return normalizeImageUrl(match[1]);
