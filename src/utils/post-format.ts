@@ -62,13 +62,28 @@ export function getPostImageValue(post: PostLike): any {
 		"thumbnail_url",
 		"featuredMedia",
 		"featured_media",
+		"featuredImg",
+		"featured_img",
+		"hero_image",
+		"heroImage",
 		"acf",
 		"meta",
+		"custom_fields",
+		"customFields",
 	];
 
 	for (const key of keys) {
 		const value = data[key as keyof typeof data];
 		if (value) return value;
+	}
+
+	// Check ACF fields if they exist
+	if (data.acf) {
+		const acfKeys = ["featured_image", "image", "thumbnail", "hero_image"];
+		for (const key of acfKeys) {
+			const value = data.acf[key];
+			if (value) return value;
+		}
 	}
 
 	return undefined;
@@ -156,8 +171,20 @@ export function getPostDate(post: PostLike): Date | undefined {
 }
 
 export function getPostHtmlContent(post: PostLike): string | undefined {
-	const value = post?.data?.content;
+	const data = post?.data || {};
+
+	// Check direct content field
+	const value = data.content;
 	if (typeof value === "string" && value.trim().length > 0) return value;
+
+	// Check if content is array of blocks with HTML
+	if (Array.isArray(value)) {
+		const htmlBlocks = value.filter(block => block._type === "html" && typeof block.html === "string");
+		if (htmlBlocks.length > 0) {
+			return htmlBlocks.map(block => block.html).join("\n");
+		}
+	}
+
 	return undefined;
 }
 

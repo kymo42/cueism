@@ -11,8 +11,16 @@ Astro.cache.set(cacheHint);
 
 const postsWithTags = await Promise.all(
 	posts.map(async (post) => {
-		const slugOrId = post.id;
-		const { entry: fullPost } = await getEmDashEntry("posts", slugOrId).catch(() => ({ entry: null }));
+		// Try slug first, then ID
+		const identifiers = [post.slug, post.id].filter(Boolean);
+		let fullPost = null;
+		for (const identifier of identifiers) {
+			const result = await getEmDashEntry("posts", identifier).catch(() => null);
+			if (result?.entry) {
+				fullPost = result.entry;
+				break;
+			}
+		}
 		const normalizedPost = fullPost || post;
 		const entryId = typeof normalizedPost?.data?.id === "string" ? normalizedPost.data.id : normalizedPost.id;
 		const tags = await getEntryTerms("posts", entryId, "tag");
