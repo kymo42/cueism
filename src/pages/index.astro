@@ -33,12 +33,23 @@ const getIntro = (post: any) => {
 	return "";
 };
 
+const normalizeImageUrl = (value?: string) => {
+	if (!value) return undefined;
+	if (value.startsWith("//")) return `https:${value}`;
+	return value;
+};
+
 const getPostImageSrc = (post: any) => {
 	const image = post?.data?.featured_image ?? post?.data?.featuredImage ?? post?.data?.image;
-	if (!image) return undefined;
-	if (typeof image === "string") return image;
-	if (typeof image?.src === "string") return image.src;
-	if (typeof image?.url === "string") return image.url;
+	if (typeof image === "string") return normalizeImageUrl(image);
+	if (typeof image?.src === "string") return normalizeImageUrl(image.src);
+	if (typeof image?.url === "string") return normalizeImageUrl(image.url);
+
+	if (typeof post?.data?.content === "string") {
+		const match = post.data.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+		if (match?.[1]) return normalizeImageUrl(match[1]);
+	}
+
 	return undefined;
 };
 ---
