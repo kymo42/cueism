@@ -41,41 +41,246 @@ const title = typeof post.data.title === "string" ? post.data.title : "Post";
 	image={seo.ogImage}
 	content={{ collection: "posts", id: entryId, slug }}
 >
-	<article>
+	<article class="post-article">
 		{imageSrc && (
-			<div>
-				<img src={imageSrc} alt={title} loading="eager" style="width: 100%; border-radius: var(--radius-md);" />
+			<div class="post-featured-image">
+				<img src={imageSrc} alt={title} loading="eager" />
 			</div>
 		)}
 
-		<h1>{post.data.title}</h1>
+		<header class="post-header">
+			<h1 class="post-title">{post.data.title}</h1>
+			
+			<div class="post-meta">
+				{publishedAt && (
+					<time datetime={publishedAt.toISOString()}>
+						{publishedAt.toLocaleDateString("en-US", {
+							year: "numeric",
+							month: "long",
+							day: "numeric",
+						})}
+					</time>
+				)}
 
-		{publishedAt && (
-			<time datetime={publishedAt.toISOString()}>
-				{publishedAt.toLocaleDateString("en-US", {
-					year: "numeric",
-					month: "long",
-					day: "numeric",
-				})}
-			</time>
-		)}
+				{categories.length > 0 && (
+					<div class="post-categories">
+						{categories.map((category, index) => (
+							<>
+								<a href={`/category/${category.slug}`} class="post-category">{category.label}</a>
+								{index < categories.length - 1 && <span class="separator">•</span>}
+							</>
+						))}
+					</div>
+				)}
+			</div>
+		</header>
 
-		{categories.length > 0 && (
-			<p>{categories.map((category) => category.label).join(" • ")}</p>
-		)}
-
-		{hasPortableTextContent(post) ? (
-			<div>
+		<div class="post-content">
+			{hasPortableTextContent(post) ? (
 				<PortableText value={post.data.content} />
-			</div>
-		) : htmlContent ? (
-			<div set:html={htmlContent} />
-		) : null}
+			) : htmlContent ? (
+				<div set:html={htmlContent} />
+			) : null}
+		</div>
 
-		{tags.length > 0 && <p>{tags.map((tag) => tag.label).join(" • ")}</p>}
+		{tags.length > 0 && (
+			<footer class="post-footer">
+				<span class="tags-label">Tags:</span>
+				<div class="post-tags">
+					{tags.map((tag) => (
+						<a href={`/tag/${tag.slug}`} class="post-tag">{tag.label}</a>
+					))}
+				</div>
+			</footer>
+		)}
 	</article>
 
-	<aside>
+	<aside class="post-sidebar">
 		<WidgetArea name="sidebar" />
 	</aside>
 </Base>
+
+<style>
+	.post-article {
+		max-width: 720px;
+		margin: 0 auto;
+	}
+
+	.post-featured-image {
+		margin-bottom: var(--spacing-lg);
+		border-radius: var(--radius-md);
+		overflow: hidden;
+	}
+
+	.post-featured-image img {
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+
+	.post-header {
+		margin-bottom: var(--spacing-lg);
+	}
+
+	.post-title {
+		font-size: 2.25rem;
+		font-weight: 500;
+		line-height: 1.3;
+		margin-bottom: var(--spacing-sm);
+	}
+
+	.post-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--spacing-sm);
+		color: var(--color-text-secondary);
+		font-size: 0.875rem;
+	}
+
+	.post-categories {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.post-category {
+		color: var(--color-accent);
+		text-decoration: none;
+		padding: 0.25rem 0.5rem;
+		border-radius: var(--radius-sm);
+		background: var(--color-bg-surface);
+		font-size: 0.8125rem;
+		transition: var(--transition-fast);
+	}
+
+	.post-category:hover {
+		background: var(--color-bg-hover);
+		color: var(--color-accent-hover);
+	}
+
+	.separator {
+		color: var(--color-text-tertiary);
+	}
+
+	.post-content {
+		font-size: 1.0625rem;
+		line-height: 1.75;
+		color: var(--color-text-primary);
+	}
+
+	.post-content :global(h1),
+	.post-content :global(h2),
+	.post-content :global(h3),
+	.post-content :global(h4) {
+		margin-top: var(--spacing-lg);
+		margin-bottom: var(--spacing-sm);
+		font-weight: 500;
+	}
+
+	.post-content :global(p) {
+		margin-bottom: var(--spacing-md);
+	}
+
+	.post-content :global(a) {
+		color: var(--color-accent);
+		text-decoration: underline;
+	}
+
+	.post-content :global(a:hover) {
+		color: var(--color-accent-hover);
+	}
+
+	.post-content :global(img) {
+		max-width: 100%;
+		height: auto;
+		border-radius: var(--radius-md);
+		margin: var(--spacing-md) 0;
+	}
+
+	.post-content :global(figure) {
+		margin: var(--spacing-md) 0;
+	}
+
+	.post-content :global(ul),
+	.post-content :global(ol) {
+		margin: var(--spacing-md) 0;
+		padding-left: var(--spacing-lg);
+	}
+
+	.post-content :global(li) {
+		margin-bottom: 0.5rem;
+	}
+
+	.post-content :global(blockquote) {
+		border-left: 3px solid var(--color-accent);
+		padding-left: var(--spacing-md);
+		margin: var(--spacing-md) 0;
+		color: var(--color-text-secondary);
+		font-style: italic;
+	}
+
+	.post-content :global(pre) {
+		background: var(--color-bg-surface);
+		padding: var(--spacing-md);
+		border-radius: var(--radius-md);
+		overflow-x: auto;
+		margin: var(--spacing-md) 0;
+	}
+
+	.post-content :global(hr) {
+		border: none;
+		border-top: 1px solid var(--color-border);
+		margin: var(--spacing-lg) 0;
+	}
+
+	.post-footer {
+		margin-top: var(--spacing-xl);
+		padding-top: var(--spacing-md);
+		border-top: 1px solid var(--color-border-light);
+	}
+
+	.tags-label {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary);
+		margin-right: var(--spacing-sm);
+	}
+
+	.post-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: var(--spacing-sm);
+	}
+
+	.post-tag {
+		color: var(--color-text-secondary);
+		text-decoration: none;
+		padding: 0.375rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-full);
+		font-size: 0.8125rem;
+		transition: var(--transition-fast);
+	}
+
+	.post-tag:hover {
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+		background: var(--color-bg-surface);
+	}
+
+	.post-sidebar {
+		margin-top: var(--spacing-xl);
+	}
+
+	@media (max-width: 768px) {
+		.post-title {
+			font-size: 1.75rem;
+		}
+
+		.post-content {
+			font-size: 1rem;
+		}
+	}
+</style>
