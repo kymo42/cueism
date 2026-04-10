@@ -170,7 +170,7 @@ export default function ProductPurchase({
 
 							<div>
 								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Choose icon ({sortedIcons.length} shown):</label>
-								<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))', gap: '0.375rem', maxHeight: '60vh', overflowY: 'auto', paddingRight: '0.25rem' }}>
+								<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(44px, 1fr))', gap: '0.375rem', height: '220px', overflowY: 'auto', paddingRight: '0.25rem', alignContent: 'start' }}>
 									{sortedIcons.map((icon) => (
 										<button key={icon} type="button" onClick={() => setNfcIcon(icon)} style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: nfcIcon === icon ? '2px solid var(--color-accent)' : '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: nfcIcon === icon ? 'var(--color-bg-surface)' : 'var(--color-bg-base)', cursor: 'pointer' }} title={icon.replace(/_/g, ' ')}>
 											<span className="material-symbols-outlined" style={{ fontSize: '20px', color: nfcIcon === icon ? 'var(--color-accent)' : 'var(--color-text-secondary)' }}>{icon}</span>
