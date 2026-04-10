@@ -97,17 +97,17 @@ const priceLabel =
 				hasTextOption={hasTextOption}
 				hasNfcOption={hasNfcOption}
 			/>
-
-			{product.data.content && (
-				<div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border-light);">
-					<h2 style="font-size: 1rem; font-weight: 500; margin-bottom: var(--spacing-sm);">Description</h2>
-					<div style="color: var(--color-text-secondary); line-height: 1.7;">
-						<PortableText value={product.data.content} />
-					</div>
-				</div>
-			)}
 		</div>
 	</div>
+
+	{product.data.content && (
+		<div style="margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 1px solid var(--color-border-light); max-width: 840px;">
+			<h2 style="font-size: 1rem; font-weight: 500; margin-bottom: var(--spacing-sm);">Description</h2>
+			<div style="color: var(--color-text-secondary); line-height: 1.7;">
+				<PortableText value={product.data.content} />
+			</div>
+		</div>
+	)}
 
 	<style>
 		@media (max-width: 768px) {
