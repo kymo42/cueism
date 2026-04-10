@@ -148,9 +148,19 @@ export function getPostIntro(post: PostLike, maxLength = 160): string {
 
 	if (Array.isArray(data.content)) {
 		for (const block of data.content) {
-			if (!Array.isArray(block?.children)) continue;
-			const text = block.children.map((child: any) => child?.text || "").join(" ").trim();
-			if (text.length > 0) return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+			// Handle Portable Text children format
+			if (Array.isArray(block?.children)) {
+				const text = block.children.map((child: any) => child?.text || "").join(" ").trim();
+				if (text.length > 0) return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+			}
+			// Handle Gutenberg HTML blocks
+			if (block?.html || block?.content || block?.value) {
+				const htmlBlock = block.html || block.content || block.value;
+				if (typeof htmlBlock === "string") {
+					const clean = stripHtml(htmlBlock).trim();
+					if (clean.length > 0) return clean.length > maxLength ? `${clean.slice(0, maxLength)}...` : clean;
+				}
+			}
 		}
 	}
 
