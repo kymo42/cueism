@@ -1,5 +1,5 @@
 ---
-import { getEmDashCollection, getEntryTerms } from "emdash";
+import { getEmDashCollection, getEmDashEntry, getEntryTerms } from "emdash";
 import Base from "../../layouts/Base.astro";
 import PostCardImage from "../../components/PostCardImage";
 import { getPostDate, getPostImageSrc, getPostIntro } from "../../utils/post-format";
@@ -11,9 +11,12 @@ Astro.cache.set(cacheHint);
 
 const postsWithTags = await Promise.all(
 	posts.map(async (post) => {
-		const entryId = typeof post?.data?.id === "string" ? post.data.id : post.id;
+		const slugOrId = post.id;
+		const { entry: fullPost } = await getEmDashEntry("posts", slugOrId).catch(() => ({ entry: null }));
+		const normalizedPost = fullPost || post;
+		const entryId = typeof normalizedPost?.data?.id === "string" ? normalizedPost.data.id : normalizedPost.id;
 		const tags = await getEntryTerms("posts", entryId, "tag");
-		return { post, tags };
+		return { post: normalizedPost, tags };
 	}),
 );
 ---

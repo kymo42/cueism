@@ -1,5 +1,5 @@
 ---
-import { getEmDashCollection } from "emdash";
+import { getEmDashCollection, getEmDashEntry } from "emdash";
 import { WidgetArea } from "emdash/ui";
 import Base from "../layouts/Base.astro";
 import PostCardImage from "../components/PostCardImage";
@@ -9,6 +9,14 @@ const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
 	orderBy: { published_at: "desc" },
 });
 Astro.cache.set(cacheHint);
+
+const normalizedPosts = await Promise.all(
+	posts.map(async (post) => {
+		const slugOrId = post.id;
+		const { entry: fullPost } = await getEmDashEntry("posts", slugOrId).catch(() => ({ entry: null }));
+		return fullPost || post;
+	}),
+);
 ---
 
 <Base title="Cueism | Premium 3D Printed Accessories">
@@ -30,7 +38,7 @@ Astro.cache.set(cacheHint);
 						<a href="/_emdash/admin/content/posts/new" class="btn btn-primary">Write the first entry</a>
 					</div>
 				) : (
-					posts.slice(0, 3).map((post) => {
+					normalizedPosts.slice(0, 3).map((post) => {
 						const intro = getPostIntro(post);
 						const imageSrc = getPostImageSrc(post);
 						const publishedAt = getPostDate(post);
