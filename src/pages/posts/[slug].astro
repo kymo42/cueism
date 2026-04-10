@@ -1,8 +1,8 @@
 ---
 import { getEmDashEntry, getEntryTerms, getSeoMeta } from "emdash";
-import { Image, PortableText, WidgetArea } from "emdash/ui";
+import { PortableText, WidgetArea } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
-import { getPostDate, getPostHtmlContent, getPostImageSrc, getPostImageValue, hasPortableTextContent } from "../../utils/post-format";
+import { getPostDate, getPostHtmlContent, getPostImageSrc, hasPortableTextContent } from "../../utils/post-format";
 
 const { slug } = Astro.params;
 
@@ -29,7 +29,6 @@ const tags = await getEntryTerms("posts", entryId, "tag");
 const categories = await getEntryTerms("posts", entryId, "category");
 
 const imageSrc = getPostImageSrc(post);
-const imageValue = getPostImageValue(post);
 const htmlContent = getPostHtmlContent(post);
 const publishedAt = getPostDate(post);
 const title = typeof post.data.title === "string" ? post.data.title : "Post";
@@ -43,15 +42,11 @@ const title = typeof post.data.title === "string" ? post.data.title : "Post";
 	content={{ collection: "posts", id: entryId, slug }}
 >
 	<article>
-		{imageValue ? (
+		{imageSrc && (
 			<div>
-				{typeof imageValue === "object" ? (
-					<Image image={imageValue} alt={title} style="width: 100%; border-radius: var(--radius-md);" />
-				) : (
-					imageSrc && <img src={imageSrc} alt={title} loading="eager" style="width: 100%; border-radius: var(--radius-md);" />
-				)}
+				<img src={imageSrc} alt={title} loading="eager" style="width: 100%; border-radius: var(--radius-md);" />
 			</div>
-		) : null}
+		)}
 
 		<h1>{post.data.title}</h1>
 

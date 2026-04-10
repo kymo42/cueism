@@ -12,23 +12,80 @@ const normalizeImageUrl = (value?: string) => {
 	return value;
 };
 
+const looksLikeImageUrl = (value: string) => {
+	return /\.(png|jpe?g|webp|gif|avif|svg)(\?.*)?$/i.test(value) || value.includes("/wp-content/uploads/");
+};
+
+const findImageUrlDeep = (input: any): string | undefined => {
+	if (!input) return undefined;
+
+	if (typeof input === "string") {
+		const normalized = normalizeImageUrl(input);
+		if (normalized && looksLikeImageUrl(normalized)) return normalized;
+		return undefined;
+	}
+
+	if (Array.isArray(input)) {
+		for (const item of input) {
+			const found = findImageUrlDeep(item);
+			if (found) return found;
+		}
+		return undefined;
+	}
+
+	if (typeof input === "object") {
+		const directCandidates = [input.src, input.url, input.href, input.original, input.image_url];
+		for (const candidate of directCandidates) {
+			if (typeof candidate === "string") {
+				const normalized = normalizeImageUrl(candidate);
+				if (normalized && looksLikeImageUrl(normalized)) return normalized;
+			}
+		}
+
+		for (const value of Object.values(input)) {
+			const found = findImageUrlDeep(value);
+			if (found) return found;
+		}
+	}
+
+	return undefined;
+};
+
 export function getPostImageValue(post: PostLike): any {
 	const data = post?.data || {};
-	return data.featured_image ?? data.featuredImage ?? data.image;
+	const preferred = data.featured_image ?? data.featuredImage ?? data.image;
+	if (preferred) return preferred;
+
+	const keys = [
+		"thumbnail",
+		"thumbnailUrl",
+		"thumbnail_url",
+		"featuredMedia",
+		"featured_media",
+		"acf",
+		"meta",
+	];
+
+	for (const key of keys) {
+		const value = data[key as keyof typeof data];
+		if (value) return value;
+	}
+
+	return undefined;
 }
 
 export function getPostImageSrc(post: PostLike): string | undefined {
 	const data = post?.data || {};
 	const image = getPostImageValue(post);
-	if (typeof image === "string") return normalizeImageUrl(image);
-	if (typeof image?.src === "string") return normalizeImageUrl(image.src);
-	if (typeof image?.url === "string") return normalizeImageUrl(image.url);
+
+	const deepImage = findImageUrlDeep(image);
+	if (deepImage) return deepImage;
 
 	if (Array.isArray(data.content)) {
 		for (const block of data.content) {
 			const candidate = block?.image ?? block?.asset ?? block?.media;
-			if (typeof candidate?.src === "string") return normalizeImageUrl(candidate.src);
-			if (typeof candidate?.url === "string") return normalizeImageUrl(candidate.url);
+			const candidateUrl = findImageUrlDeep(candidate);
+			if (candidateUrl) return candidateUrl;
 		}
 	}
 
