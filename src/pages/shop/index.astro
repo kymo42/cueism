@@ -31,12 +31,16 @@ if (cacheHint) {
 								? `$${range.min.toFixed(2)}`
 								: `$${range.min.toFixed(2)} - $${range.max.toFixed(2)}`;
 
+						const cardImage =
+							product.data.featured_image ||
+							(Array.isArray(product.data.gallery_images) ? product.data.gallery_images[0]?.image : undefined);
+
 						return (
 							<article class="product-card">
 								<a href={`/shop/${product.slug || product.id}`} style="display: block;">
-									{product.data.featured_image && (
+									{cardImage && (
 										<div class="product-card-image">
-											<Image image={product.data.featured_image} />
+											<Image image={cardImage} />
 										</div>
 									)}
 									<div class="product-card-content">

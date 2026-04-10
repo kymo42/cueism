@@ -22,6 +22,12 @@ if (!product) {
 }
 
 const featuredImage = product.data.featured_image as { src?: string; alt?: string } | undefined;
+const galleryImages = Array.isArray(product.data.gallery_images)
+	? product.data.gallery_images
+			.map((item: any) => item?.image)
+			.filter(Boolean)
+	: [];
+const displayImage = featuredImage || galleryImages[0];
 const variants = getProductVariants(product.data);
 const priceRange = getPriceRange(product.data);
 const basePrice = getBasePrice(product.data);
@@ -48,13 +54,22 @@ const priceLabel =
 
 	<div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-xl); margin-top: var(--spacing-md);">
 		<div>
-			{featuredImage ? (
+			{displayImage ? (
 				<div style="background: var(--color-bg-surface); border-radius: var(--radius-md); overflow: hidden;">
-					<Image image={product.data.featured_image} />
+					<Image image={displayImage} />
 				</div>
 			) : (
 				<div style="background: var(--color-bg-surface); border-radius: var(--radius-md); aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;">
 					<p style="color: var(--color-text-tertiary);">No image</p>
+				</div>
+			)}
+			{galleryImages.length > 1 && (
+				<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; margin-top: 0.75rem;">
+					{galleryImages.map((image: any) => (
+						<div style="border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); overflow: hidden;">
+							<Image image={image} />
+						</div>
+					))}
 				</div>
 			)}
 		</div>
@@ -73,7 +88,7 @@ const priceLabel =
 				productId={product.id}
 				slug={product.slug || product.id}
 				title={product.data.title}
-				image={featuredImage?.src}
+				image={displayImage?.src}
 				basePrice={basePrice}
 				baseStock={baseStock}
 				baseWeightGrams={baseWeightGrams}

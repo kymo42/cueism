@@ -120,8 +120,19 @@
 				},
 				{
 					"slug": "featured_image",
-					"label": "Image",
+					"label": "Primary Image",
 					"type": "image"
+				},
+				{
+					"slug": "gallery_images",
+					"label": "Gallery Images",
+					"type": "repeater",
+					"validation": {
+						"subFields": [
+							{ "slug": "image", "type": "image", "label": "Image", "required": true },
+							{ "slug": "caption", "type": "string", "label": "Caption" }
+						]
+					}
 				},
 				{
 					"slug": "excerpt",
