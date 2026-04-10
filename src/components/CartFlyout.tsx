@@ -6,6 +6,8 @@ export default function CartFlyout() {
 	const $isCartOpen = useStore(isCartOpen);
 	const $cartItems = useStore(cartItems);
 	const [isCheckingOut, setIsCheckingOut] = useState(false);
+	const [chalkType, setChalkType] = useState('');
+	const [giftOptIn, setGiftOptIn] = useState(false);
 
 	const items = Object.values($cartItems);
 	const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -16,7 +18,13 @@ export default function CartFlyout() {
 			const res = await fetch('/api/checkout', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ items }),
+				body: JSON.stringify({
+					items,
+					checkoutMeta: {
+						chalkType,
+						giftOptIn,
+					},
+				}),
 			});
 			const data = await res.json();
 			if (data.url) {
@@ -168,13 +176,46 @@ export default function CartFlyout() {
 						<span style={{ fontWeight: 500 }}>Subtotal</span>
 						<span style={{ fontWeight: 500 }}>${subtotal.toFixed(2)}</span>
 					</div>
+					<div style={{ marginBottom: 'var(--spacing-md)', display: 'grid', gap: '0.625rem' }}>
+						<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', display: 'grid', gap: '0.25rem' }}>
+							<span>What kinda chalk do you use?</span>
+							<select
+								value={chalkType}
+								onChange={(event) => setChalkType(event.target.value)}
+								style={{
+									width: '100%',
+									padding: '0.625rem 0.75rem',
+									border: '1px solid var(--color-border)',
+									borderRadius: 'var(--radius-sm)',
+									fontFamily: 'var(--font-primary)',
+									fontSize: '0.875rem',
+								}}
+							>
+								<option value="">Select chalk</option>
+								<option value="Master/tweet">Master/tweet</option>
+								<option value="Roku Hex">Roku Hex</option>
+								<option value="Predator Hex">Predator Hex</option>
+								<option value="Taom round">Taom round</option>
+							</select>
+						</label>
+
+						<label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
+							<input
+								type="checkbox"
+								checked={giftOptIn}
+								onChange={(event) => setGiftOptIn(event.target.checked)}
+							/>
+							<span>We may need to send you a gift</span>
+						</label>
+					</div>
+
 					<p style={{ fontSize: '0.8125rem', color: 'var(--color-text-tertiary)', marginBottom: 'var(--spacing-md)', textAlign: 'center' }}>
 						Shipping calculated at checkout
 					</p>
 					<button 
 						className="btn btn-primary" 
 						style={{ width: '100%', padding: '0.875rem' }}
-						disabled={items.length === 0 || isCheckingOut}
+						disabled={items.length === 0 || isCheckingOut || !chalkType}
 						onClick={handleCheckout}
 					>
 						{isCheckingOut ? 'Processing...' : 'Checkout'}

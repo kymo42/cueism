@@ -19,6 +19,10 @@ export const POST: APIRoute = async ({ request, url }) => {
 			variantId?: string;
 			quantity: number;
 		}[];
+		const checkoutMeta = body.checkoutMeta as {
+			chalkType?: string;
+			giftOptIn?: boolean;
+		} | undefined;
 
 		if (!items || items.length === 0) {
 			return new Response(JSON.stringify({ error: 'Cart is empty' }), { status: 400 });
@@ -37,6 +41,12 @@ export const POST: APIRoute = async ({ request, url }) => {
 		data.append('shipping_address_collection[allowed_countries][3]', 'NZ');
 
 		let totalItems = 0;
+		const chalkType = (checkoutMeta?.chalkType || '').trim();
+		const giftOptIn = checkoutMeta?.giftOptIn === true;
+		
+		if (!chalkType) {
+			return new Response(JSON.stringify({ error: 'Please select your chalk type' }), { status: 400 });
+		}
 
 		items.forEach((item, index) => {
 			const productId = item.productId || item.id;
@@ -73,6 +83,9 @@ export const POST: APIRoute = async ({ request, url }) => {
 		});
 
 		const shippingCost = BASE_SHIPPING_CENTS + Math.max(0, totalItems - 1) * PER_EXTRA_ITEM_CENTS;
+
+		data.append('metadata[chalk_type]', chalkType);
+		data.append('metadata[gift_opt_in]', giftOptIn ? 'yes' : 'no');
 
 		data.append('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
 		data.append('shipping_options[0][shipping_rate_data][fixed_amount][amount]', shippingCost.toString());
