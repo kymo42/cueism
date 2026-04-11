@@ -307,7 +307,26 @@ section {
 }
 
 .grid-auto {
-	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1rem;
+}
+
+.shop-grid .product-card {
+	max-width: 260px;
+	width: 100%;
+	justify-self: center;
+}
+
+.shop-grid .product-card-content {
+	padding: 0.875rem;
+}
+
+.shop-grid .product-card-content h3 {
+	font-size: 0.9375rem;
+}
+
+.shop-grid .product-card-price {
+	font-size: 1rem;
 }
 
 /* Product Card */
@@ -457,6 +476,12 @@ time {
 	}
 
 	.grid-auto {
-		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 520px) {
+	.grid-auto {
+		grid-template-columns: 1fr;
 	}
 }
