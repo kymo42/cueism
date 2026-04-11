@@ -100,6 +100,7 @@ export default function ProductPurchase({
 	const [nfcIcon, setNfcIcon] = useState('person');
 	const [nfcName, setNfcName] = useState('');
 	const [iconSearch, setIconSearch] = useState('');
+	const [selectedColor, setSelectedColor] = useState<'white' | 'black' | 'orange'>('white');
 
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
 const personalizationSurcharge = personalizationType === 'nfc' ? NFC_SURCHARGE : personalizationType === 'text' ? TEXT_SURCHARGE : 0;
@@ -127,7 +128,20 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 		else if (personalizationType === 'nfc' && nfcName.trim()) personalization = `NFC (+$${NFC_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
 
 		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}`;
-		addCartItem({ id: lineId, productId, slug, title, price: unitPrice, image, variantId: selectedVariant?.id, variantLabel, sku: selectedVariant?.sku, weightGrams: unitWeightGrams, personalization });
+		addCartItem({
+			id: `${lineId}::${selectedColor}`,
+			productId,
+			slug,
+			title,
+			price: unitPrice,
+			image,
+			variantId: selectedVariant?.id,
+			variantLabel,
+			color: selectedColor,
+			sku: selectedVariant?.sku,
+			weightGrams: unitWeightGrams,
+			personalization,
+		});
 	};
 
 	const baseId = `${productId}::${selectedVariant?.id || 'base'}`;
@@ -144,6 +158,31 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 					</select>
 				</label>
 			)}
+
+			<div style={{ display: 'grid', gap: '0.375rem' }}>
+				<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Color</span>
+				<div style={{ display: 'flex', gap: '0.5rem' }}>
+					{(['white', 'black', 'orange'] as const).map((color) => (
+						<button
+							key={color}
+							type="button"
+							onClick={() => setSelectedColor(color)}
+							style={{
+								padding: '0.5rem 0.75rem',
+								borderRadius: 'var(--radius-sm)',
+								border: selectedColor === color ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
+								background: selectedColor === color ? 'var(--color-bg-surface)' : 'var(--color-bg-base)',
+								color: selectedColor === color ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+								fontWeight: selectedColor === color ? 600 : 500,
+								textTransform: 'capitalize',
+								cursor: 'pointer',
+							}}
+						>
+							{color}
+						</button>
+					))}
+				</div>
+			</div>
 
 			{hasPersonalization && (
 				<div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', display: 'grid', gap: '0.75rem' }}>

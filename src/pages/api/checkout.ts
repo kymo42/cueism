@@ -26,6 +26,7 @@ export const POST: APIRoute = async ({ request, url, locals }) => {
 			id: string;
 			productId?: string;
 			variantId?: string;
+			color?: 'white' | 'black' | 'orange';
 			quantity: number;
 		}[];
 		const checkoutMeta = body.checkoutMeta as {
@@ -82,10 +83,9 @@ export const POST: APIRoute = async ({ request, url, locals }) => {
 			const unitAmountCents = Math.round(unitPriceDollars * 100);
 			data.append(`line_items[${index}][price_data][currency]`, 'aud');
 			data.append(`line_items[${index}][price_data][unit_amount]`, unitAmountCents.toString());
-			data.append(
-				`line_items[${index}][price_data][product_data][name]`,
-				variant ? `${dbProduct.data.title} - ${variant.label}` : dbProduct.data.title,
-			);
+			const lineNameBase = variant ? `${dbProduct.data.title} - ${variant.label}` : dbProduct.data.title;
+			const lineName = item.color ? `${lineNameBase} - ${item.color}` : lineNameBase;
+			data.append(`line_items[${index}][price_data][product_data][name]`, lineName);
 			data.append(`line_items[${index}][quantity]`, item.quantity.toString());
 
 			totalItems += item.quantity;

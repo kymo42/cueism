@@ -10,6 +10,7 @@ export type CartItem = {
 	quantity: number;
 	variantId?: string;
 	variantLabel?: string;
+	color?: 'white' | 'black' | 'orange';
 	sku?: string;
 	weightGrams?: number;
 	personalization?: string;
