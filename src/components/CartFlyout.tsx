@@ -7,7 +7,6 @@ export default function CartFlyout() {
 	const $cartItems = useStore(cartItems);
 	const [isCheckingOut, setIsCheckingOut] = useState(false);
 	const [chalkType, setChalkType] = useState('');
-	const [giftOptIn, setGiftOptIn] = useState(false);
 
 	const items = Object.values($cartItems);
 	const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -22,7 +21,7 @@ export default function CartFlyout() {
 					items,
 					checkoutMeta: {
 						chalkType,
-						giftOptIn,
+						giftOptIn: true,
 					},
 				}),
 			});
@@ -204,14 +203,10 @@ export default function CartFlyout() {
 							</select>
 						</label>
 
-						<label style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
-							<input
-								type="checkbox"
-								checked={giftOptIn}
-								onChange={(event) => setGiftOptIn(event.target.checked)}
-							/>
+						<div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+							<span style={{ fontSize: '1rem', lineHeight: 1 }} aria-hidden="true">🙂</span>
 							<span>We may need to send you a gift</span>
-						</label>
+						</div>
 					</div>
 
 					<p style={{ fontSize: '0.8125rem', color: 'var(--color-text-tertiary)', marginBottom: 'var(--spacing-md)', textAlign: 'center' }}>
