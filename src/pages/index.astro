@@ -18,7 +18,7 @@ const normalizedPosts = posts;
 	<section class="hero">
 		<h1>Precision. Crafted.</h1>
 		<p>Australian-made accessories designed for those who appreciate the finer details of the game.</p>
-		<a href="/shop" class="btn btn-primary">Shop the Collection</a>
+		<a href="/shop" class="btn btn-primary" data-astro-prefetch>Shop the Collection</a>
 	</section>
 
 	<WidgetArea name="home-before-journal" />
@@ -40,7 +40,7 @@ const normalizedPosts = posts;
 
 						return (
 							<article class="card">
-								<a href={`/posts/${post.id}`} style="display: block;">
+								<a href={`/posts/${post.id}`} style="display: block;" data-astro-prefetch>
 									<PostCardImage src={imageSrc} alt={title} />
 									<div class="card-content">
 										<h3>{post.data.title}</h3>

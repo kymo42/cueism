@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from "astro:transitions";
 import { getMenu } from "emdash";
 import {
 	WidgetArea,
@@ -47,14 +48,15 @@ const pageCtx = createPublicPageContext({
 		<EmDashHead page={pageCtx} />
 	</head>
 	<body>
+		<ClientRouter />
 		<EmDashBodyStart page={pageCtx} />
 
 		<header>
 			<nav>
-				<a href="/" class="logo">cueism</a>
+				<a href="/" class="logo" data-astro-prefetch>cueism</a>
 				<div class="nav-links">
 					{menu?.items.map((item) => (
-						<a href={item.url} target={item.target}>
+						<a href={item.url} target={item.target} data-astro-prefetch>
 							{item.label}
 						</a>
 					))}

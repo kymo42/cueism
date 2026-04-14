@@ -39,7 +39,7 @@ const normalizedPosts = posts;
 					const title = typeof post.data.title === "string" ? post.data.title : "Post";
 					return (
 						<article class="card">
-							<a href={`/posts/${post.id}`} style="display: block;">
+							<a href={`/posts/${post.id}`} style="display: block;" data-astro-prefetch>
 								<PostCardImage src={imageSrc} alt={title} />
 								<div class="card-content">
 									<h3>{post.data.title}</h3>

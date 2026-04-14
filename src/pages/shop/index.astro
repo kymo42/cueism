@@ -21,7 +21,7 @@ if (cacheHint) {
 				products.length === 0 ? (
 					<div class="card" style="grid-column: 1 / -1; text-align: center; padding: var(--spacing-lg);">
 						<p style="margin-bottom: var(--spacing-sm);">No products available yet.</p>
-						<a href="/_emdash/admin" class="btn btn-primary">Add products in Admin</a>
+						<a href="/_emdash/admin" class="btn btn-primary" data-astro-prefetch>Add products in Admin</a>
 					</div>
 				) : (
 					products.map((product) => {
@@ -37,7 +37,7 @@ if (cacheHint) {
 
 						return (
 							<article class="product-card">
-								<a href={`/shop/${product.slug || product.id}`} style="display: block;">
+								<a href={`/shop/${product.slug || product.id}`} style="display: block;" data-astro-prefetch>
 									{cardImage && (
 										<div class="product-card-image">
 											<Image image={cardImage} />
