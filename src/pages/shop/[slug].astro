@@ -1,5 +1,5 @@
 ---
-import { getEmDashCollection } from "emdash";
+import { getEmDashEntry } from "emdash";
 import { Image, PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 import ProductPurchase from "../../components/ProductPurchase";
@@ -14,11 +14,18 @@ import {
 
 const { slug } = Astro.params;
 
-const { entries: products } = await getEmDashCollection("products").catch(() => ({ entries: [] }));
-const product = products.find((p: any) => p.slug === slug || p.id === slug);
+if (!slug) {
+	return Astro.redirect("/404");
+}
+
+const { entry: product, cacheHint } = await getEmDashEntry("products", slug).catch(() => ({ entry: null, cacheHint: null }));
 
 if (!product) {
 	return Astro.redirect("/404");
+}
+
+if (cacheHint) {
+	Astro.cache.set(cacheHint);
 }
 
 const featuredImage = product.data.featured_image as { src?: string; alt?: string } | undefined;

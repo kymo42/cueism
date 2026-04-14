@@ -16,7 +16,6 @@ const { entries: posts } = await getEmDashCollection("posts", {
 	orderBy: { published_at: "desc" },
 });
 
-// Use posts directly - getEmDashCollection should return full data
 const normalizedPosts = posts;
 ---
 

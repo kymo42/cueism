@@ -38,7 +38,13 @@ export const POST: APIRoute = async ({ request, url }) => {
 			return new Response(JSON.stringify({ error: 'Cart is empty' }), { status: 400 });
 		}
 
-		const { entries: databaseProducts } = await getEmDashCollection('products').catch(() => ({ entries: [] }));
+		const { entries: databaseProducts } = await getEmDashCollection('products', {
+			orderBy: { published_at: 'desc' },
+		}).catch(() => ({ entries: [] }));
+		const productMap = new Map<string, any>();
+		databaseProducts.forEach((product: any) => {
+			productMap.set(product.id, product);
+		});
 
 		const data = new URLSearchParams();
 		data.append('payment_method_types[0]', 'card');
@@ -60,7 +66,7 @@ export const POST: APIRoute = async ({ request, url }) => {
 
 		items.forEach((item, index) => {
 			const productId = item.productId || item.id;
-			const dbProduct: any = databaseProducts.find((product: any) => product.id === productId);
+			const dbProduct: any = productMap.get(productId);
 			if (!dbProduct) throw new Error(`Product ${productId} not found.`);
 			if (!Number.isFinite(item.quantity) || item.quantity <= 0) {
 				throw new Error(`Invalid quantity for product ${productId}.`);
