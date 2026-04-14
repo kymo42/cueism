@@ -10,7 +10,7 @@
 		{
 			"binding": "DB",
 			"database_name": "cueism-db",
-			// Run `wrangler d1 create cueism-db` and paste the ID here
+			"database_id": "9af20805-6010-4474-9f3e-89c4c0563d72"
 		},
 	],
 	"r2_buckets": [
