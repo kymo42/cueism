@@ -2,14 +2,14 @@
 	"$schema": "https://emdashcms.com/seed.schema.json",
 	"version": "1",
 	"meta": {
-		"name": "Starter",
-		"description": "A minimal EmDash starter with posts and pages",
-		"author": "EmDash"
+		"name": "Cueism",
+		"description": "Premium 3D-printed pool accessories - Made in Australia",
+		"author": "Major155ues"
 	},
 
 	"settings": {
-		"title": "My Site",
-		"tagline": "Built with EmDash"
+		"title": "Cueism",
+		"tagline": "Premium 3D-Printed Pool Accessories"
 	},
 
 	"collections": [
@@ -19,29 +19,10 @@
 			"labelSingular": "Post",
 			"supports": ["drafts", "revisions", "search", "seo"],
 			"fields": [
-				{
-					"slug": "title",
-					"label": "Title",
-					"type": "string",
-					"required": true,
-					"searchable": true
-				},
-				{
-					"slug": "featured_image",
-					"label": "Featured Image",
-					"type": "image"
-				},
-				{
-					"slug": "content",
-					"label": "Content",
-					"type": "portableText",
-					"searchable": true
-				},
-				{
-					"slug": "excerpt",
-					"label": "Excerpt",
-					"type": "text"
-				}
+				{ "slug": "title", "label": "Title", "type": "string", "required": true, "searchable": true },
+				{ "slug": "featured_image", "label": "Featured Image", "type": "image" },
+				{ "slug": "content", "label": "Content", "type": "portableText", "searchable": true },
+				{ "slug": "excerpt", "label": "Excerpt", "type": "text" }
 			]
 		},
 		{
@@ -50,110 +31,39 @@
 			"labelSingular": "Product",
 			"supports": ["drafts", "search", "seo"],
 			"fields": [
-				{
-					"slug": "title",
-					"label": "Title",
-					"type": "string",
-					"required": true
-				},
-				{
-					"slug": "sku",
-					"label": "SKU",
-					"type": "string"
-				},
-				{
-					"slug": "price",
-					"label": "Base Price (Cents)",
-					"type": "number",
-					"required": true
-				},
-				{
-					"slug": "compare_at_price",
-					"label": "Compare At Price (Cents)",
-					"type": "number"
-				},
-				{
-					"slug": "track_stock",
-					"label": "Track Stock",
-					"type": "boolean"
-				},
-				{
-					"slug": "stock",
-					"label": "Base Stock",
-					"type": "integer"
-				},
-				{
-					"slug": "weight_grams",
-					"label": "Base Weight (Grams)",
-					"type": "integer"
-				},
-				{
-					"slug": "inventory_count",
-					"label": "Legacy Inventory",
-					"type": "number"
-				},
-				{
-					"slug": "status",
-					"label": "Status",
-					"type": "select",
-					"validation": {
-						"options": ["active", "draft", "discontinued"]
-					}
-				},
-				{
-					"slug": "variants",
-					"label": "Variants",
-					"type": "repeater",
-					"validation": {
-						"subFields": [
-							{ "slug": "id", "type": "string", "label": "Variant ID" },
-							{ "slug": "label", "type": "string", "label": "Label", "required": true },
-							{ "slug": "option_group", "type": "string", "label": "Option Group" },
-							{ "slug": "option_value", "type": "string", "label": "Option Value" },
-							{ "slug": "price", "type": "number", "label": "Price (Cents)", "required": true },
-							{ "slug": "stock", "type": "integer", "label": "Stock" },
-							{ "slug": "weight_grams", "type": "integer", "label": "Weight (Grams)" },
-							{ "slug": "sku", "type": "string", "label": "SKU" },
-							{ "slug": "enabled", "type": "boolean", "label": "Enabled" }
-						]
-					}
-				},
-				{
-					"slug": "featured_image",
-					"label": "Primary Image",
-					"type": "image"
-				},
-				{
-					"slug": "gallery_images",
-					"label": "Gallery Images",
-					"type": "repeater",
-					"validation": {
-						"subFields": [
-							{ "slug": "image", "type": "image", "label": "Image", "required": true },
-							{ "slug": "caption", "type": "string", "label": "Caption" }
-						]
-					}
-				},
-				{
-					"slug": "excerpt",
-					"label": "Short Description",
-					"type": "text"
-				},
-				{
-					"slug": "content",
-					"label": "Full Description",
-					"type": "portableText"
-				},
-				{
-					"slug": "has_text_option",
-					"label": "Enable Text Personalization",
-					"type": "boolean"
-				},
-				{
-					"slug": "has_nfc_option",
-					"label": "Enable NFC Personalization",
-					"type": "boolean"
-				}
+				{ "slug": "title", "label": "Title", "type": "string", "required": true },
+				{ "slug": "sku", "label": "SKU", "type": "string" },
+				{ "slug": "price", "label": "Base Price (Cents)", "type": "number", "required": true },
+				{ "slug": "compare_at_price", "label": "Compare At Price (Cents)", "type": "number" },
+				{ "slug": "track_stock", "label": "Track Stock", "type": "boolean" },
+				{ "slug": "stock", "label": "Base Stock", "type": "integer" },
+				{ "slug": "weight_grams", "label": "Base Weight (Grams)", "type": "integer" },
+				{ "slug": "inventory_count", "label": "Legacy Inventory", "type": "number" },
+				{ "slug": "status", "label": "Status", "type": "select", "validation": { "options": ["active", "draft", "discontinued"] } },
+				{ "slug": "variants", "label": "Variants", "type": "repeater", "validation": {
+					"subFields": [
+						{ "slug": "id", "type": "string", "label": "Variant ID" },
+						{ "slug": "label", "type": "string", "label": "Label", "required": true },
+						{ "slug": "option_group", "type": "string", "label": "Option Group" },
+						{ "slug": "option_value", "type": "string", "label": "Option Value" },
+						{ "slug": "price", "type": "number", "label": "Price (Cents)", "required": true },
+						{ "slug": "stock", "type": "integer", "label": "Stock" },
+						{ "slug": "weight_grams", "type": "integer", "label": "Weight (Grams)" },
+						{ "slug": "sku", "type": "string", "label": "SKU" },
+						{ "slug": "enabled", "type": "boolean", "label": "Enabled" }
+					]
+				}},
+				{ "slug": "featured_image", "label": "Primary Image", "type": "image" },
+				{ "slug": "gallery_images", "label": "Gallery Images", "type": "repeater", "validation": {
+					"subFields": [
+						{ "slug": "image", "type": "image", "label": "Image", "required": true },
+						{ "slug": "caption", "type": "string", "label": "Caption" }
+					]
+				}},
+				{ "slug": "excerpt", "label": "Short Description", "type": "text" },
+				{ "slug": "content", "label": "Full Description", "type": "portableText" },
+				{ "slug": "has_text_option", "label": "Enable Text Personalization", "type": "boolean" },
+				{ "slug": "has_nfc_option", "label": "Enable NFC Personalization", "type": "boolean" }
 			]
 		},
 		{
@@ -162,19 +72,25 @@
 			"labelSingular": "Page",
 			"supports": ["drafts", "revisions", "search"],
 			"fields": [
-				{
-					"slug": "title",
-					"label": "Title",
-					"type": "string",
-					"required": true,
-					"searchable": true
-				},
-				{
-					"slug": "content",
-					"label": "Content",
-					"type": "portableText",
-					"searchable": true
-				}
+				{ "slug": "title", "label": "Title", "type": "string", "required": true, "searchable": true },
+				{ "slug": "content", "label": "Content", "type": "portableText", "searchable": true }
+			]
+		},
+		{
+			"slug": "comp_winners",
+			"label": "Comp Winners",
+			"labelSingular": "Comp Winner",
+			"supports": ["drafts", "search"],
+			"fields": [
+				{ "slug": "winner_name", "label": "Winner Name", "type": "string", "required": true, "searchable": true },
+				{ "slug": "tournament", "label": "Tournament Name", "type": "string", "required": true },
+				{ "slug": "venue", "label": "Venue", "type": "string" },
+				{ "slug": "location", "label": "Location", "type": "string" },
+				{ "slug": "game_type", "label": "Game Type", "type": "select", "validation": { "options": ["8-ball", "9-ball", "10-ball", "snooker", "heyball", "other"] } },
+				{ "slug": "date", "label": "Date", "type": "string" },
+				{ "slug": "notes", "label": "Notes", "type": "text" },
+				{ "slug": "submitted_by", "label": "Submitted By", "type": "string" },
+				{ "slug": "featured_image", "label": "Photo", "type": "image" }
 			]
 		}
 	],
@@ -187,8 +103,10 @@
 			"hierarchical": true,
 			"collections": ["posts"],
 			"terms": [
-				{ "slug": "general", "label": "General" },
-				{ "slug": "updates", "label": "Updates" }
+				{ "slug": "news", "label": "News" },
+				{ "slug": "monthly-roundup", "label": "Monthly Roundup" },
+				{ "slug": "weekly-spotlight", "label": "Weekly Spotlight" },
+				{ "slug": "product-updates", "label": "Product Updates" }
 			]
 		},
 		{
@@ -198,8 +116,25 @@
 			"hierarchical": false,
 			"collections": ["posts"],
 			"terms": [
-				{ "slug": "starter", "label": "Starter" },
-				{ "slug": "example", "label": "Example" }
+				{ "slug": "wpa", "label": "WPA" },
+				{ "slug": "wpbsa", "label": "WPBSA" },
+				{ "slug": "snooker", "label": "Snooker" },
+				{ "slug": "pool", "label": "Pool" },
+				{ "slug": "heyball", "label": "Heyball" },
+				{ "slug": "championship", "label": "Championship" }
+			]
+		},
+		{
+			"name": "product_category",
+			"label": "Product Categories",
+			"labelSingular": "Product Category",
+			"hierarchical": true,
+			"collections": ["products"],
+			"terms": [
+				{ "slug": "chalk", "label": "Chalk" },
+				{ "slug": "racking", "label": "Racking" },
+				{ "slug": "cueing", "label": "Cueing" },
+				{ "slug": "gift-cards", "label": "Gift Cards" }
 			]
 		}
 	],
@@ -211,84 +146,25 @@
 			"items": [
 				{ "type": "custom", "label": "Home", "url": "/" },
 				{ "type": "custom", "label": "Shop", "url": "/shop" },
-				{ "type": "custom", "label": "Posts", "url": "/posts" },
+				{ "type": "custom", "label": "News", "url": "/posts" },
+				{ "type": "custom", "label": "Comp Winners", "url": "/comp-winners" },
+				{ "type": "custom", "label": "Submit Result", "url": "/submit-tournament" },
 				{ "type": "custom", "label": "About", "url": "/about" }
 			]
 		}
 	],
 
 	"widgetAreas": [
-		{
-			"name": "sidebar",
-			"label": "Sidebar",
-			"description": "Sidebar widget area",
-			"widgets": [
-				{
-					"type": "component",
-					"componentId": "core:search",
-					"title": "Search"
-				},
-				{
-					"type": "component",
-					"componentId": "core:categories",
-					"title": "Categories"
-				},
-				{
-					"type": "component",
-					"componentId": "core:recent-posts",
-					"title": "Recent Posts",
-					"settings": { "count": 5 }
-				}
-			]
-		},
-		{
-			"name": "global-top",
-			"label": "Global Top",
-			"description": "Widgets shown above page content",
-			"widgets": []
-		},
-		{
-			"name": "global-bottom",
-			"label": "Global Bottom",
-			"description": "Widgets shown below page content",
-			"widgets": []
-		},
-		{
-			"name": "footer",
-			"label": "Footer",
-			"description": "Footer widget area",
-			"widgets": []
-		},
-		{
-			"name": "home-top",
-			"label": "Home Top",
-			"description": "Homepage widgets above hero",
-			"widgets": []
-		},
-		{
-			"name": "home-before-journal",
-			"label": "Home Before Journal",
-			"description": "Homepage widgets before latest journal",
-			"widgets": []
-		},
-		{
-			"name": "home-after-journal",
-			"label": "Home After Journal",
-			"description": "Homepage widgets after latest journal",
-			"widgets": []
-		},
-		{
-			"name": "shop-top",
-			"label": "Shop Top",
-			"description": "Shop widgets before product grid",
-			"widgets": []
-		},
-		{
-			"name": "shop-bottom",
-			"label": "Shop Bottom",
-			"description": "Shop widgets below product grid",
-			"widgets": []
-		}
+		{ "name": "sidebar", "label": "Sidebar", "description": "Sidebar widget area", "widgets": [
+			{ "type": "component", "componentId": "core:search", "title": "Search" },
+			{ "type": "component", "componentId": "core:categories", "title": "Categories" },
+			{ "type": "component", "componentId": "core:recent-posts", "title": "Recent Posts", "settings": { "count": 5 } }
+		]},
+		{ "name": "global-top", "label": "Global Top", "description": "Widgets shown above page content", "widgets": [] },
+		{ "name": "global-bottom", "label": "Global Bottom", "description": "Widgets shown below page content", "widgets": [] },
+		{ "name": "footer", "label": "Footer", "description": "Footer widget area", "widgets": [] },
+		{ "name": "shop-top", "label": "Shop Top", "description": "Shop widgets before product grid", "widgets": [] },
+		{ "name": "shop-bottom", "label": "Shop Bottom", "description": "Shop widgets below product grid", "widgets": [] }
 	],
 
 	"content": {
@@ -298,61 +174,433 @@
 				"slug": "about",
 				"status": "published",
 				"data": {
-					"title": "About",
+					"title": "About Cueism",
 					"content": [
-						{
-							"_type": "block",
-							"style": "normal",
-							"children": [
-								{
-									"_type": "span",
-									"text": "This is the about page. Edit it in the admin panel or replace this template with your own design."
-								}
-							]
-						}
+						{ "_type": "block", "style": "h1", "children": [{ "_type": "span", "text": "About Cueism" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Cueism creates premium 3D-printed pool accessories in Sydney, Australia. Our products are crafted from recycled rPET and biodegradable PLA+ thermoplastics — almost entirely free from virgin fossil resources." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "What We Make" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "From chalk protectors that keep your premium chalk pristine, to rack safes that preserve your Magick Rack for life, to mini-butts that help you stretch on a 9ft table — every product is designed with sustainability, functionality, and personalization in mind." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Smart Personalization" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Most of our products support RFID/NFC chip embedding, custom text engraving, and icon selection. Store your digital contact info so if you leave your gear at the venue, it finds its way back to you." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Locally Made" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Every piece is designed, prototyped, and 3D-printed right here in Sydney. This ensures top-tier quality control, rapid iteration, and support for local manufacturing." }] }
+					]
+				}
+			},
+			{
+				"id": "submit-tournament",
+				"slug": "submit-tournament",
+				"status": "published",
+				"data": {
+					"title": "Submit Your Tournament Result",
+					"content": [
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Won a local tournament? Know someone who dominated their pub league? We want to celebrate grassroots pool players! Submit your result and we'll feature it in our Weekly Pool Spotlight." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "How to Submit" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Send us an email at 42155ues@gmail.com or message us on social media with: tournament name, venue, winner, game type, and any photos. We'll handle the rest!" }] }
+					]
+				}
+			},
+			{
+				"id": "comp-winners",
+				"slug": "comp-winners",
+				"status": "published",
+				"data": {
+					"title": "Pool Comp Winners Tracker",
+					"content": [
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "A living record of pool competition winners from around the world. From pub leagues to regional championships — every winner matters." }] }
 					]
 				}
 			}
 		],
-		"posts": [
+		"products": [
 			{
-				"id": "post-1",
-				"slug": "welcome",
+				"id": "racksafe8",
+				"slug": "racksafe8",
 				"status": "published",
 				"data": {
-					"title": "Welcome",
-					"excerpt": "Your first post. Replace this with your own content.",
+					"title": "RackSafe8",
+					"sku": "RCK-001",
+					"price": 2100,
+					"compare_at_price": null,
+					"track_stock": true,
+					"stock": 19,
+					"weight_grams": 162,
+					"status": "active",
+					"variants": [
+						{ "id": "rs8-cueism", "label": "Cueism (no personalization)", "option_group": "Personalisation", "option_value": "cueism", "price": 2100, "stock": 10, "enabled": true },
+						{ "id": "rs8-text", "label": "Text/Name", "option_group": "Personalisation", "option_value": "text", "price": 2900, "stock": 5, "enabled": true },
+						{ "id": "rs8-icon-rfid", "label": "Icon + RFID", "option_group": "Personalisation", "option_value": "icon+rfid", "price": 3000, "stock": 4, "enabled": true }
+					],
+					"excerpt": "Is your Magick Rack slightly bent and now kinda useless? Feeling frustrated? Welcome to Sanity.",
 					"content": [
-						{
-							"_type": "block",
-							"style": "normal",
-							"children": [
-								{
-									"_type": "span",
-									"text": "This is a starter post. The templates in this project show the basic patterns for querying and rendering EmDash content. Replace them with your own design."
-								}
-							]
-						},
-						{
-							"_type": "block",
-							"style": "h2",
-							"children": [{ "_type": "span", "text": "What to do next" }]
-						},
-						{
-							"_type": "block",
-							"style": "normal",
-							"children": [
-								{
-									"_type": "span",
-									"text": "Open the admin panel to add content, or edit the Astro pages in src/pages to change how content is displayed."
-								}
-							]
-						}
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Eco-Innovative Design" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Crafted from renewed rPET (recycled plastic bottle by-products) and biodegradable PLA+ thermoplastics. Handcrafted in Sydney, Australia." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Superior Protection" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Shields your pristine Magick Rack from wear, creases, and damage during transport. Designed to attach seamlessly to your bag." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Cutting-Edge Security" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Can be equipped with an RFID chip to store your digital contact information. Add your name or choose an icon for easy identification." }] },
+						{ "_type": "block", "style": "h3", "children": [{ "_type": "span", "text": "BIGTime Offer: Every RackSafe8 purchase includes a complimentary 8ball Rack" }] }
+					],
+					"has_text_option": true,
+					"has_nfc_option": true
+				},
+				"taxonomies": { "product_category": ["racking"] }
+			},
+			{
+				"id": "carbon",
+				"slug": "carbon",
+				"status": "published",
+				"data": {
+					"title": "Carbon",
+					"sku": "CHK-002",
+					"price": 800,
+					"compare_at_price": null,
+					"track_stock": true,
+					"stock": 32,
+					"weight_grams": 30,
+					"status": "active",
+					"variants": [
+						{ "id": "cb-rfid", "label": "Add RFID chip", "option_group": "Personalisation", "option_value": "rfid", "price": 1300, "stock": 10, "enabled": true },
+						{ "id": "cb-text", "label": "Add text/name", "option_group": "Personalisation", "option_value": "text", "price": 1100, "stock": 10, "enabled": true },
+						{ "id": "cb-icon", "label": "Add Icon from Google", "option_group": "Personalisation", "option_value": "icon", "price": 1000, "stock": 10, "enabled": true },
+						{ "id": "cb-rfid-text", "label": "Add RFID + icon or text", "option_group": "Personalisation", "option_value": "rfid+text", "price": 1400, "stock": 2, "enabled": true }
+					],
+					"excerpt": "\"If you own a Ferrari or a Porsche, you do not park it on the street\" - Ghandi, 1927. Keep your powder dry and your case clean.",
+					"content": [
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Premium Chalk Protection" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Carbon keeps your chalk dry and your billiards case spotless. Crafted from 80% PLA starch-based biodegradable thermoplastics." }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Squeeze the chalk-holding section while you wait your turn — 100% recyclable and biodegradable. Available for Kamui, Predator, Taom, or Square chalk." }] },
+						{ "_type": "block", "style": "h3", "children": [{ "_type": "span", "text": "Backed by our lifetime warranty." }] }
+					],
+					"has_text_option": true,
+					"has_nfc_option": true
+				},
+				"taxonomies": { "product_category": ["chalk"] }
+			},
+			{
+				"id": "metal",
+				"slug": "metal",
+				"status": "published",
+				"data": {
+					"title": "Metal",
+					"sku": "CHK-003",
+					"price": 800,
+					"compare_at_price": null,
+					"track_stock": true,
+					"stock": 35,
+					"weight_grams": 45,
+					"status": "active",
+					"variants": [
+						{ "id": "mt-rfid", "label": "Add RFID chip", "option_group": "Personalisation", "option_value": "rfid", "price": 1300, "stock": 10, "enabled": true },
+						{ "id": "mt-text", "label": "Add text/name", "option_group": "Personalisation", "option_value": "text", "price": 1100, "stock": 10, "enabled": true },
+						{ "id": "mt-icon", "label": "Add Icon from Google", "option_group": "Personalisation", "option_value": "icon", "price": 1000, "stock": 10, "enabled": true },
+						{ "id": "mt-rfid-text", "label": "Add RFID + icon or text", "option_group": "Personalisation", "option_value": "rfid+text", "price": 1400, "stock": 5, "enabled": true }
+					],
+					"excerpt": "Premium chalk holder in metal finish. Keep your powder dry and your case clean.",
+					"content": [
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Metal Chalk Holder" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Premium chalk protection with metal finish options including gold, blue, and silver. Compatible with Kamui, Predator, Taom, and Square chalk." }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Full personalization available: RFID chip, custom text, Google icon selection, or any combination." }] }
+					],
+					"has_text_option": true,
+					"has_nfc_option": true
+				},
+				"taxonomies": { "product_category": ["chalk"] }
+			},
+			{
+				"id": "cheatstick",
+				"slug": "cheatstick",
+				"status": "published",
+				"data": {
+					"title": "cheatStick",
+					"sku": "CUE-001",
+					"price": 1400,
+					"compare_at_price": null,
+					"track_stock": true,
+					"stock": 25,
+					"weight_grams": 64,
+					"status": "active",
+					"variants": [],
+					"excerpt": "Magnetic device for pool players. Lightweight, portable, and made in Australia.",
+					"content": [
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "cheatStick" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "A lightweight magnetic device designed for pool players. At just 64 grams, it's possibly the lightest mini-butt on the market." }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Made from biodegradable thermoplastics, nylons and stainless steel. Fully customizable with RFID, text, or icon options." }] }
+					],
+					"has_text_option": true,
+					"has_nfc_option": true
+				},
+				"taxonomies": { "product_category": ["cueing"] }
+			},
+			{
+				"id": "racksafe9",
+				"slug": "racksafe9",
+				"status": "published",
+				"data": {
+					"title": "RackSafe9",
+					"sku": "RCK-009",
+					"price": 2100,
+					"compare_at_price": null,
+					"track_stock": true,
+					"stock": 15,
+					"weight_grams": 162,
+					"status": "active",
+					"variants": [
+						{ "id": "rs9-cueism", "label": "Cueism (no personalization)", "option_group": "Personalisation", "option_value": "cueism", "price": 2100, "stock": 8, "enabled": true },
+						{ "id": "rs9-text", "label": "Text/Name", "option_group": "Personalisation", "option_value": "text", "price": 2900, "stock": 4, "enabled": true },
+						{ "id": "rs9-icon-rfid", "label": "Icon + RFID", "option_group": "Personalisation", "option_value": "icon+rfid", "price": 3000, "stock": 3, "enabled": true }
+					],
+					"excerpt": "Protection for your 9-ball Magick Rack. Eco-friendly, locally made in Sydney.",
+					"content": [
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "RackSafe9" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "9-ball version of our popular RackSafe. Shields your rack from damage during transport. RFID-ready for anti-loss technology." }] }
+					],
+					"has_text_option": true,
+					"has_nfc_option": true
+				},
+				"taxonomies": { "product_category": ["racking"] }
+			},
+
+		{
+			"id": "chalkable",
+			"slug": "chalkable",
+			"status": "published",
+			"data": {
+				"title": "Chalkable",
+				"sku": "CHK-044",
+				"price": 500,
+				"compare_at_price": null,
+				"track_stock": true,
+				"stock": 159,
+				"weight_grams": 20,
+				"status": "active",
+				"variants": [
+					{ "id": "ch-plain", "label": "Plain", "option_group": "Style", "option_value": "plain", "price": 500, "stock": 100, "enabled": true },
+					{ "id": "ch-text", "label": "Text/Name", "option_group": "Personalisation", "option_value": "text", "price": 700, "stock": 30, "enabled": true },
+					{ "id": "ch-rfid", "label": "RFID", "option_group": "Personalisation", "option_value": "rfid", "price": 800, "stock": 29, "enabled": true }
+				],
+				"excerpt": "Affordable chalk protection. Keep your powder dry and your case clean.",
+				"content": [
+					{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Chalkable" }] },
+					{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "An affordable chalk protector that keeps your chalk dry and your billiards case spotless. Made from recycled rPET and biodegradable PLA+." }] }
+				],
+				"has_text_option": true,
+				"has_nfc_option": true
+			},
+			"taxonomies": { "product_category": ["chalk"] }
+		},
+
+		{
+			"id": "safe9",
+			"slug": "safe9",
+			"status": "published",
+			"data": {
+				"title": "Safe9",
+				"sku": "RCK-012",
+				"price": 1600,
+				"compare_at_price": 2500,
+				"track_stock": true,
+				"stock": 25,
+				"weight_grams": 140,
+				"status": "active",
+				"variants": [],
+				"excerpt": "9-ball rack safe on sale. Was $25, now $16.",
+				"content": [
+					{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Safe9" }] },
+					{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Protect your 9-ball rack at a great price. Eco-friendly, made in Sydney." }] }
+				],
+				"has_text_option": true,
+				"has_nfc_option": true
+			},
+			"taxonomies": { "product_category": ["racking"] }
+		},
+		{
+				"id": "gifty",
+				"slug": "gifty",
+				"status": "published",
+				"data": {
+					"title": "Gifty",
+					"sku": "GFT-001",
+					"price": 4200,
+					"compare_at_price": null,
+					"track_stock": false,
+					"stock": null,
+					"weight_grams": 0,
+					"status": "active",
+					"variants": [],
+					"excerpt": "You are making a special Pool player very very very happy. Well done! Any amount you like.",
+					"content": [
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Gifty Card" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "The Minimum GUILT spend is $12, but you are welcome to make the gift certificate as much as you like. Just work out what they need and chuck it in a basket then add $10 for local postage." }] }
+					],
+					"has_text_option": false,
+					"has_nfc_option": false
+				},
+				"taxonomies": { "product_category": ["gift-cards"] }
+			},
+			{
+				"id": "mini-butt-88",
+				"slug": "mini-butt-88",
+				"status": "draft",
+				"data": {
+					"title": "88 Mini-Butt",
+					"sku": "CUE-088",
+					"price": 2500,
+					"compare_at_price": null,
+					"track_stock": true,
+					"stock": 30,
+					"weight_grams": 64,
+					"status": "draft",
+					"variants": [
+						{ "id": "88-mezz-circ-black", "label": "Mezz / Circular / Black", "option_group": "Manufacturer", "option_value": "Mezz", "price": 2500, "stock": 5, "enabled": true },
+						{ "id": "88-pred-circ-black", "label": "Predator / Circular / Black", "option_group": "Manufacturer", "option_value": "Predator", "price": 2500, "stock": 5, "enabled": true }
+					],
+					"excerpt": "I just need something that is not a million dollars, is made in Australia, is Really Really light, and I can personalise it somehow.",
+					"content": [
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "88 Mini-Butt for MEZZ or Predator Cues" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "A low-weight (64-gram) extension with 88mm (playable) or 110mm total (4.3 inches) in length. Possibly the lightest mini-butt on the market." }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Made from biodegradable thermoplastics, nylons and stainless steel. Full personalization with RFID, text, icon, or color options." }] }
+					],
+					"has_text_option": true,
+					"has_nfc_option": true
+				},
+				"taxonomies": { "product_category": ["cueing"] }
+			}
+		],
+		"posts": [
+			{
+				"id": "monthly-roundup-may-2026",
+				"slug": "monthly-roundup-may-2026",
+				"status": "published",
+				"data": {
+					"title": "Monthly Billiard News Round-Up May",
+					"excerpt": "Billiards on the Rise: Key Developments Shaping the Future of Cue Sports!",
+					"content": [
+						{ "_type": "block", "style": "h1", "children": [{ "_type": "span", "text": "Billiards on the Rise: Key Developments Shaping the Future of Cue Sports!" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "The world of billiards is buzzing with exciting news! From major international multi-sport inclusion to groundbreaking efforts in youth development and high-level recognition, cue sports are firmly on an upward trajectory." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Pool Takes Center Stage at The World Games 2029!" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "In a monumental announcement for the sport, billiards has been officially included in The World Games 2029 program! This prestigious multi-sport event, often seen as a stepping stone to the Olympic Games, offers an incredible platform for pool to shine on a global stage." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "WPA Champions Inclusivity with Junior & Parasport Heyball World Championships 2026" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "The World Pool-Billiard Association (WPA) continues its forward-thinking approach with the exciting announcement of the WPA Junior & Parasport Heyball World Championships 2026, set to take place in Oslo, Norway." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "WPBSA Drives Snooker's Influence and Inclusivity Forward" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Meanwhile, the World Professional Billiards and Snooker Association (WPBSA) has been proactive in advancing snooker's standing. A notable success was the recent World Women's Snooker Day held at the Halo World Championship." }] }
 					]
 				},
-				"taxonomies": {
-					"category": ["general"],
-					"tag": ["starter", "example"]
+				"taxonomies": { "category": ["monthly-roundup"], "tag": ["wpa", "wpbsa"] }
+			},
+			{
+				"id": "monthly-roundup-april-2026",
+				"slug": "monthly-roundup-april-2026",
+				"status": "published",
+				"data": {
+					"title": "Monthly Billiard News Round-Up April",
+					"excerpt": "Billiard World Rallies: Champions Crowned, Legends Honored, and Global Showdowns Electrify the Tables!",
+					"content": [
+						{ "_type": "block", "style": "h1", "children": [{ "_type": "span", "text": "Billiard World Rallies: Champions Crowned, Legends Honored, and Global Showdowns Electrify the Tables!" }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "WPA Honors Its Best: Jasmin Ouschan and Alexander Kazakis Crowned Athletes of the Year 2025" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "The World Pool-Billiard Association (WPA) has proudly announced Jasmin Ouschan and Alexander Kazakis as their Athletes of the Year for 2025. This esteemed accolade highlights their unwavering dedication, consistent excellence, and inspiring sportsmanship throughout the past year." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Ng On Yee Achieves Historic British Open Hat-Trick!" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Hong Kong's snooker sensation, Ng On Yee, has once again etched her name in the record books. She completed a phenomenal British Open Hat-Trick, securing her third consecutive title at the prestigious event held at the Landywood Snooker Club." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Global Billiard Festivals Ignite with World Championships and Circuit Triumphs" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "The highly anticipated Predator Pro Billiard Series Las Vegas Festival is building incredible momentum, featuring the commencement of the Predator WPA Teams World 10-Ball Championship." }] }
+					]
+				},
+				"taxonomies": { "category": ["monthly-roundup"], "tag": ["wpa", "championship"] }
+			},
+			{
+				"id": "monthly-roundup-march-2026",
+				"slug": "monthly-roundup-march-2026",
+				"status": "published",
+				"data": {
+					"title": "Monthly Billiard News Round-Up March",
+					"excerpt": "Filler's Historic Vegas Double, WNT's US Expansion, and a Fond Farewell",
+					"content": [
+						{ "_type": "block", "style": "h1", "children": [{ "_type": "span", "text": "Filler's Historic Vegas Double, WNT's US Expansion, and a Fond Farewell" }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Joshua Filler Achieves Historic Double at the Las Vegas Festival" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Germany's own Joshua Filler absolutely dominated the felt to claim the prestigious 2026 Las Vegas Men's Open title. This wasn't just any win; Filler achieved a historic double in Las Vegas, a feat that will undoubtedly be etched into the annals of pool history." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "World Nineball Tour Expands US Footprint with Inaugural Arizona Open" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "The World Nineball Tour (WNT) has officially announced its expansion into the USA with the brand-new Arizona Open Pool Championship, slated for August 13-16, 2026." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Remembering a Snooker Icon: Sindhu Pulsirivong Passes Away" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "The global billiards family is mourning the loss of a truly significant figure in the snooker world, Sindhu Pulsirivong, whose profound contributions to the sport left an indelible mark on its development and governance." }] }
+					]
+				},
+				"taxonomies": { "category": ["monthly-roundup"], "tag": ["championship", "wpa"] }
+			}
+		],
+		"comp_winners": [
+			{
+				"id": "lisa-martinez-tn-state-snooker",
+				"slug": "lisa-martinez-tn-state-snooker",
+				"status": "published",
+				"data": {
+					"winner_name": "Lisa Martinez",
+					"tournament": "Tennessee State Snooker Championships",
+					"venue": "Nashville Billiard Club",
+					"location": "Nashville, TN, USA",
+					"game_type": "snooker",
+					"date": "2026-05-18",
+					"notes": "Went undefeated throughout the tournament. First female winner in the event's history.",
+					"submitted_by": "Cnews scraper"
+				}
+			},
+			{
+				"id": "dave-crown-inn-8ball",
+				"slug": "dave-crown-inn-8ball",
+				"status": "published",
+				"data": {
+					"winner_name": "Dave Thompson",
+					"tournament": "The Crown Inn Tuesday Night 8-Ball League",
+					"venue": "The Crown Inn",
+					"location": "Manchester, UK",
+					"game_type": "8-ball",
+					"date": "2026-05-20",
+					"notes": "Won the spring season league with a 15-3 record. Beat Mike in the final 5-2.",
+					"submitted_by": "Cnews scraper"
+				}
+			},
+			{
+				"id": "syed-usman-ussa-tn",
+				"slug": "syed-usman-ussa-tn",
+				"status": "published",
+				"data": {
+					"winner_name": "Syed Usman",
+					"tournament": "USSA TN State Snooker Championships",
+					"venue": "Tennessee Snooker Club",
+					"location": "Nashville, TN, USA",
+					"game_type": "snooker",
+					"date": "2026-05-22",
+					"notes": "Went undefeated and unscored upon to win the championship.",
+					"submitted_by": "Cnews scraper"
+				}
+			},
+			{
+				"id": "marcus-wong-sydney-9ball",
+				"slug": "marcus-wong-sydney-9ball",
+				"status": "published",
+				"data": {
+					"winner_name": "Marcus Wong",
+					"tournament": "Sydney 9-Ball Open",
+					"venue": "Blacktown Pool Hall",
+					"location": "Sydney, NSW, Australia",
+					"game_type": "9-ball",
+					"date": "2026-05-15",
+					"notes": "Local player won the open division with a break-and-run in the final.",
+					"submitted_by": "Cnews scraper"
+				}
+			},
+			{
+				"id": "sarah-jenkins-apa-regional",
+				"slug": "sarah-jenkins-apa-regional",
+				"status": "published",
+				"data": {
+					"winner_name": "Sarah Jenkins",
+					"tournament": "APA Regional Championships - Skill Division 4",
+					"venue": "Hooters Casino",
+					"location": "Las Vegas, NV, USA",
+					"game_type": "8-ball",
+					"date": "2026-05-10",
+					"notes": "Represented Team Brisbane. Won $2000 prize.",
+					"submitted_by": "Cnews scraper"
 				}
 			}
 		]
