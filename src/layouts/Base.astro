@@ -7,9 +7,10 @@ import {
 	EmDashBodyStart,
 	EmDashBodyEnd,
 } from "emdash/ui";
-import { createPublicPageContext } from "emdash/page";
+import { createPublicPageContext, safeJsonLdSerialize } from "emdash/page";
 import CartFlyout from "../components/CartFlyout";
 import CartToggle from "../components/CartToggle";
+import { buildOrganization, buildWebSite } from "../utils/structured-data";
 import "../styles/global.css";
 
 interface Props {
@@ -18,22 +19,29 @@ interface Props {
 	image?: string | null;
 	canonical?: string | null;
 	content?: { collection: string; id: string; slug?: string | null };
+	/** Open Graph type, e.g. "product" or "article". Defaults to "website". */
+	ogType?: string;
+	/** Page-specific JSON-LD graph(s) to render alongside the sitewide Organization. */
+	jsonLd?: Record<string, unknown> | Record<string, unknown>[] | null;
 }
 
-const { title, description, image, canonical, content } = Astro.props;
+const { title, description, image, canonical, content, ogType, jsonLd } = Astro.props;
 
 const menu = await getMenu("primary");
 
 const pageCtx = createPublicPageContext({
 	Astro,
 	kind: content ? "content" : "custom",
-	pageType: "website",
+	pageType: ogType ?? "website",
 	title,
 	description,
 	canonical,
 	image,
 	content,
 });
+
+const siteJsonLd = [buildOrganization(Astro.url.origin), buildWebSite(Astro.url.origin)];
+const extraJsonLd = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 ---
 
 <!doctype html>
@@ -46,6 +54,12 @@ const pageCtx = createPublicPageContext({
 		{description && <meta name="description" content={description} />}
 		{canonical && <link rel="canonical" href={canonical} />}
 		<EmDashHead page={pageCtx} />
+		{siteJsonLd.map((graph) => (
+			<script type="application/ld+json" set:html={safeJsonLdSerialize(graph)} />
+		))}
+		{extraJsonLd.map((graph) => (
+			<script type="application/ld+json" set:html={safeJsonLdSerialize(graph)} />
+		))}
 	</head>
 	<body>
 		<ClientRouter />

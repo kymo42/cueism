@@ -11,6 +11,7 @@ import {
 	getProductVariants,
 	getTrackStock,
 } from "../../utils/products";
+import { buildProduct, stripToPlainText } from "../../utils/structured-data";
 
 const { slug } = Astro.params;
 
@@ -49,11 +50,16 @@ const priceLabel =
 	priceRange.min === priceRange.max
 		? `$${priceRange.min.toFixed(2)}`
 		: `$${priceRange.min.toFixed(2)} - $${priceRange.max.toFixed(2)}`;
+
+const metaDescription = stripToPlainText(product.data.excerpt ?? product.data.description) || undefined;
+const productJsonLd = buildProduct(product, Astro.url.origin);
 ---
 
-<Base 
-	title={`${product.data.title} | Cueism`} 
-	description={product.data.excerpt || undefined}
+<Base
+	title={`${product.data.title} | Cueism`}
+	description={metaDescription}
+	ogType="product"
+	jsonLd={productJsonLd}
 >
 	<div style="padding: var(--spacing-lg) 0;">
 		<a href="/shop" style="color: var(--color-text-secondary); font-size: 0.875rem;">&larr; Back to Shop</a>

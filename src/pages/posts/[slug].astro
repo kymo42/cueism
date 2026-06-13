@@ -3,6 +3,7 @@ import { getEmDashEntry, getEntryTerms, getSeoMeta } from "emdash";
 import { PortableText, WidgetArea } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 import { getPostDate, getPostHtmlContent, getPostImageSrc, hasPortableTextContent } from "../../utils/post-format";
+import { buildBlogPosting } from "../../utils/structured-data";
 
 const { slug } = Astro.params;
 
@@ -19,7 +20,7 @@ if (!post) {
 Astro.cache.set(cacheHint);
 
 const seo = getSeoMeta(post, {
-	siteTitle: "My Site",
+	siteTitle: "Cueism",
 	siteUrl: Astro.url.origin,
 	path: `/posts/${slug}`,
 });
@@ -32,6 +33,7 @@ const imageSrc = getPostImageSrc(post);
 const htmlContent = getPostHtmlContent(post);
 const publishedAt = getPostDate(post);
 const title = typeof post.data.title === "string" ? post.data.title : "Post";
+const postJsonLd = buildBlogPosting(post, Astro.url.origin);
 ---
 
 <Base
@@ -39,6 +41,7 @@ const title = typeof post.data.title === "string" ? post.data.title : "Post";
 	description={seo.description}
 	canonical={seo.canonical}
 	image={seo.ogImage}
+	jsonLd={postJsonLd}
 	content={{ collection: "posts", id: entryId, slug }}
 >
 	<article class="post-article">
