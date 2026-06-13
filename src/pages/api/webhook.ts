@@ -1,11 +1,72 @@
 import type { APIRoute } from 'astro';
 import type { D1Database } from '@cloudflare/workers-types';
 
+// Tolerance (in seconds) for the timestamp in the Stripe-Signature header.
+const SIGNATURE_TOLERANCE_SECONDS = 300;
+
+/**
+ * Verify a Stripe webhook signature using Web Crypto (Workers-compatible).
+ *
+ * Stripe signs `${timestamp}.${payload}` with HMAC-SHA256 using the webhook
+ * signing secret, and sends the result in the `Stripe-Signature` header as
+ * `t=<timestamp>,v1=<signature>`. We recompute the HMAC and compare in
+ * constant time, and reject timestamps outside the tolerance window.
+ */
+async function verifyStripeSignature(
+	payload: string,
+	header: string,
+	secret: string,
+): Promise<boolean> {
+	const parts = header.split(',').reduce<Record<string, string>>((acc, part) => {
+		const [key, value] = part.split('=');
+		if (key && value) acc[key.trim()] = value.trim();
+		return acc;
+	}, {});
+
+	const timestamp = parts.t;
+	const expected = parts.v1;
+	if (!timestamp || !expected) return false;
+
+	// Reject stale/future timestamps to prevent replay attacks.
+	const ts = Number(timestamp);
+	if (!Number.isFinite(ts)) return false;
+	const now = Math.floor(Date.now() / 1000);
+	if (Math.abs(now - ts) > SIGNATURE_TOLERANCE_SECONDS) return false;
+
+	const encoder = new TextEncoder();
+	const key = await crypto.subtle.importKey(
+		'raw',
+		encoder.encode(secret),
+		{ name: 'HMAC', hash: 'SHA-256' },
+		false,
+		['sign'],
+	);
+	const signatureBuffer = await crypto.subtle.sign(
+		'HMAC',
+		key,
+		encoder.encode(`${timestamp}.${payload}`),
+	);
+	const computed = [...new Uint8Array(signatureBuffer)]
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
+
+	return timingSafeEqual(computed, expected);
+}
+
+/** Constant-time string comparison to avoid timing leaks. */
+function timingSafeEqual(a: string, b: string): boolean {
+	if (a.length !== b.length) return false;
+	let mismatch = 0;
+	for (let i = 0; i < a.length; i++) {
+		mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+	}
+	return mismatch === 0;
+}
+
 export const POST: APIRoute = async ({ request, locals }) => {
-	const stripeKey = import.meta.env.STRIPE_SECRET_KEY;
 	const webhookSecret = import.meta.env.STRIPE_WEBHOOK_SECRET;
 
-	if (!stripeKey || !webhookSecret) {
+	if (!webhookSecret) {
 		return new Response('Missing Stripe configuration', { status: 500 });
 	}
 
@@ -15,6 +76,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 
 	const body = await request.text();
+
+	const valid = await verifyStripeSignature(body, signature, webhookSecret);
+	if (!valid) {
+		return new Response('Invalid signature', { status: 400 });
+	}
+
 	const env = locals as { runtime?: { env?: { DB?: D1Database } } };
 	const db = env.runtime?.env?.DB;
 	if (!db) {
