@@ -51,6 +51,22 @@ const findImageUrlDeep = (input: any): string | undefined => {
 	return undefined;
 };
 
+/**
+ * Resolve an EmDash image field value to a URL.
+ * Handles plain strings, `{ src }` / `{ url }` shapes, and managed media
+ * (`provider: "local"` with `meta.storageKey`, served from the media endpoint).
+ */
+export function resolveMediaUrl(image: any): string | undefined {
+	if (!image) return undefined;
+	if (typeof image === "string") return normalizeImageUrl(image);
+	if (image.provider === "local" && image.meta?.storageKey) {
+		return `/_emdash/api/media/file/${image.meta.storageKey}`;
+	}
+	if (typeof image.src === "string") return normalizeImageUrl(image.src);
+	if (typeof image.url === "string") return normalizeImageUrl(image.url);
+	return undefined;
+}
+
 export function getPostImageValue(post: PostLike): any {
 	const data = post?.data || {};
 	const preferred = data.featured_image ?? data.featuredImage ?? data.image;
@@ -92,9 +108,8 @@ export function getPostImageValue(post: PostLike): any {
 export function getPostImageSrc(post: PostLike): string | undefined {
 	const data = post?.data || {};
 	const image = getPostImageValue(post);
-	if (typeof image === "string") return normalizeImageUrl(image);
-	if (typeof image?.src === "string") return normalizeImageUrl(image.src);
-	if (typeof image?.url === "string") return normalizeImageUrl(image.url);
+	const resolved = resolveMediaUrl(image);
+	if (resolved) return resolved;
 
 	// Check Portable Text blocks for images
 	if (Array.isArray(data.content)) {

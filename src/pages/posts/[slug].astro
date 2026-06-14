@@ -40,7 +40,7 @@ const postJsonLd = buildBlogPosting(post, Astro.url.origin);
 	title={seo.title}
 	description={seo.description}
 	canonical={seo.canonical}
-	image={seo.ogImage}
+	image={imageSrc ? new URL(imageSrc, Astro.url.origin).href : seo.ogImage}
 	jsonLd={postJsonLd}
 	content={{ collection: "posts", id: entryId, slug }}
 >

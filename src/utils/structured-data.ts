@@ -5,7 +5,7 @@ import {
 	getProductVariants,
 	getTrackStock,
 } from "./products";
-import { getPostDate, getPostImageSrc, getPostIntro, type PostLike } from "./post-format";
+import { getPostDate, getPostImageSrc, getPostIntro, resolveMediaUrl, type PostLike } from "./post-format";
 
 const BRAND_NAME = "Cueism";
 const BRAND_EMAIL = "0@cueism.com";
@@ -88,11 +88,10 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 	const slug = product.slug || product.id;
 	const url = `${origin}/shop/${slug}`;
 
-	const featured = data.featured_image as { src?: string; alt?: string } | undefined;
 	const galleryFirst = Array.isArray(data.gallery_images)
-		? data.gallery_images.map((g: any) => g?.image?.src).find(Boolean)
+		? data.gallery_images.map((g: any) => resolveMediaUrl(g?.image)).find(Boolean)
 		: undefined;
-	const imageSrc = toAbsoluteUrl(featured?.src || galleryFirst, origin);
+	const imageSrc = toAbsoluteUrl(resolveMediaUrl(data.featured_image) || galleryFirst, origin);
 
 	const availability = `https://schema.org/${isInStock(data) ? "InStock" : "OutOfStock"}`;
 	const range = getPriceRange(data);
@@ -128,9 +127,6 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 	const description = stripToPlainText(data.excerpt ?? data.description);
 	if (description) graph.description = description;
 	if (imageSrc) graph.image = imageSrc;
-	if (typeof featured?.alt === "string" && featured.alt.trim()) {
-		// nothing extra; alt already conveyed via image
-	}
 
 	return graph;
 }
