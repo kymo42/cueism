@@ -11,6 +11,7 @@ export type CartItem = {
 	variantId?: string;
 	variantLabel?: string;
 	color?: 'white' | 'black' | 'orange';
+	nogennColor?: string;
 	sku?: string;
 	weightGrams?: number;
 	personalization?: string;

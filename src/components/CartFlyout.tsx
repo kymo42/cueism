@@ -103,6 +103,11 @@ export default function CartFlyout() {
 												Color: {item.color}
 											</p>
 										)}
+										{item.nogennColor && (
+											<p style={{ margin: '0 0 0.25rem', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+												Nogenn colour: {item.nogennColor}
+											</p>
+										)}
 										{item.personalization && (
 											<p style={{ margin: '0 0 0.25rem', fontSize: '0.8125rem', color: 'var(--color-accent)', fontStyle: 'italic' }}>
 												{item.personalization}

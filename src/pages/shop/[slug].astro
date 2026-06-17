@@ -46,6 +46,13 @@ const trackStock = getTrackStock(product.data);
 const hasTextOption = true;
 const hasNfcOption = true;
 
+// Per-product "Nogenn colour" add-on (the rubber grip), mirrored from the
+// legacy WordPress product options. Keyed by slug until colours move into the CMS.
+const NOGENN_COLOURS_BY_SLUG: Record<string, string[]> = {
+	cheatstick: ["white", "black", "yellow", "blue"],
+};
+const nogennColours = NOGENN_COLOURS_BY_SLUG[product.slug || product.id] ?? [];
+
 const priceLabel =
 	priceRange.min === priceRange.max
 		? `$${priceRange.min.toFixed(2)}`
@@ -109,6 +116,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				variants={variants}
 				hasTextOption={hasTextOption}
 				hasNfcOption={hasNfcOption}
+				nogennColours={nogennColours}
 			/>
 		</div>
 	</div>
