@@ -95,7 +95,7 @@ export default function ProductPurchase({
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const [selectedVariantId, setSelectedVariantId] = useState(hasVariants ? variants[0]?.id || '' : '');
-	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>('text');
+	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>('none');
 	const [textOption, setTextOption] = useState('');
 	const [nfcIcon, setNfcIcon] = useState('person');
 	const [nfcName, setNfcName] = useState('');
@@ -114,7 +114,15 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 	const unitStock = selectedVariant?.stock ?? baseStock;
 	const unitWeightGrams = selectedVariant?.weightGrams ?? baseWeightGrams;
 	const variantLabel = selectedVariant?.label;
-	const disabled = (trackStock && unitStock <= 0) || !personalizationValid;
+	const outOfStock = trackStock && unitStock <= 0;
+	const disabled = outOfStock || !personalizationValid;
+	const buttonLabel = outOfStock
+		? 'Out of Stock'
+		: !personalizationValid
+			? personalizationType === 'nfc'
+				? 'Enter NFC details'
+				: 'Enter your text'
+			: 'Add to Cart';
 	const hasPersonalization = hasTextOption || hasNfcOption;
 
 	const sortedIcons = useMemo(() => {
@@ -239,7 +247,7 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 			</div>
 
 			<button className="btn btn-primary" style={{ width: '100%', padding: '0.875rem 1.5rem', fontSize: '0.9375rem', fontWeight: 500, opacity: disabled ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'pointer', borderRadius: 'var(--radius-sm)' }} disabled={disabled} onClick={handleAdd}>
-				{disabled ? 'Out of Stock' : 'Add to Cart'}
+				{buttonLabel}
 			</button>
 		</div>
 	);
