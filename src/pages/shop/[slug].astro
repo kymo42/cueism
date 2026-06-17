@@ -43,8 +43,15 @@ const baseStock = getBaseStock(product.data);
 const baseWeightGrams = getBaseWeightGrams(product.data);
 const trackStock = getTrackStock(product.data);
 
-const hasTextOption = true;
-const hasNfcOption = true;
+// Products that do NOT offer text/NFC personalization or a body colour
+// (e.g. chalk packs, which only have a quantity/pack option).
+const NO_PERSONALIZATION = new Set(["chalkable"]);
+const NO_COLOR = new Set(["chalkable"]);
+const productKey = product.slug || product.id;
+const allowsPersonalization = !NO_PERSONALIZATION.has(productKey);
+const hasTextOption = allowsPersonalization;
+const hasNfcOption = allowsPersonalization;
+const showColor = !NO_COLOR.has(productKey);
 
 // Per-product "Nogenn colour" add-on (the rubber grip), mirrored from the
 // legacy WordPress product options. Keyed by slug until colours move into the CMS.
@@ -117,6 +124,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				hasTextOption={hasTextOption}
 				hasNfcOption={hasNfcOption}
 				nogennColours={nogennColours}
+				showColor={showColor}
 			/>
 		</div>
 	</div>

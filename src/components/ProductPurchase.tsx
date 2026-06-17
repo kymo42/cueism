@@ -15,6 +15,7 @@ type ProductPurchaseProps = {
 	hasTextOption?: boolean;
 	hasNfcOption?: boolean;
 	nogennColours?: string[];
+	showColor?: boolean;
 };
 
 type PersonalizationType = 'none' | 'text' | 'nfc';
@@ -94,6 +95,7 @@ export default function ProductPurchase({
 	hasTextOption = false,
 	hasNfcOption = false,
 	nogennColours = [],
+	showColor = true,
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const hasNogenn = nogennColours.length > 0;
@@ -149,7 +151,7 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 			image,
 			variantId: selectedVariant?.id,
 			variantLabel,
-			color: selectedColor,
+			color: showColor ? selectedColor : undefined,
 			nogennColor: hasNogenn ? selectedNogenn : undefined,
 			sku: selectedVariant?.sku,
 			weightGrams: unitWeightGrams,
@@ -172,6 +174,7 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 				</label>
 			)}
 
+			{showColor && (
 			<div style={{ display: 'grid', gap: '0.375rem' }}>
 				<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Color</span>
 				<div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -196,6 +199,7 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 					))}
 				</div>
 			</div>
+			)}
 
 			{hasNogenn && (
 				<div style={{ display: 'grid', gap: '0.375rem' }}>
