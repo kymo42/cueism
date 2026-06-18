@@ -16,6 +16,7 @@ type ProductPurchaseProps = {
 	hasNfcOption?: boolean;
 	nogennColours?: string[];
 	showColor?: boolean;
+	allowColourRequest?: boolean;
 };
 
 type PersonalizationType = 'none' | 'text' | 'nfc';
@@ -96,16 +97,19 @@ export default function ProductPurchase({
 	hasNfcOption = false,
 	nogennColours = [],
 	showColor = true,
+	allowColourRequest = false,
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const hasNogenn = nogennColours.length > 0;
+	const colourOptions = allowColourRequest ? ['white', 'black', 'orange', 'request'] : ['white', 'black', 'orange'];
 	const [selectedVariantId, setSelectedVariantId] = useState(hasVariants ? variants[0]?.id || '' : '');
 	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>('none');
 	const [textOption, setTextOption] = useState('');
 	const [nfcIcon, setNfcIcon] = useState('person');
 	const [nfcName, setNfcName] = useState('');
 	const [iconSearch, setIconSearch] = useState('');
-	const [selectedColor, setSelectedColor] = useState<'white' | 'black' | 'orange'>('white');
+	const [selectedColor, setSelectedColor] = useState<string>('white');
+	const [requestedColour, setRequestedColour] = useState('');
 	const [selectedNogenn, setSelectedNogenn] = useState(nogennColours[0] || '');
 
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
@@ -151,7 +155,11 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 			image,
 			variantId: selectedVariant?.id,
 			variantLabel,
-			color: showColor ? selectedColor : undefined,
+			color: showColor
+				? selectedColor === 'request'
+					? `Requested: ${requestedColour.trim() || '(unspecified)'}`
+					: selectedColor
+				: undefined,
 			nogennColor: hasNogenn ? selectedNogenn : undefined,
 			sku: selectedVariant?.sku,
 			weightGrams: unitWeightGrams,
@@ -177,8 +185,8 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 			{showColor && (
 			<div style={{ display: 'grid', gap: '0.375rem' }}>
 				<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Color</span>
-				<div style={{ display: 'flex', gap: '0.5rem' }}>
-					{(['white', 'black', 'orange'] as const).map((color) => (
+				<div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+					{colourOptions.map((color) => (
 						<button
 							key={color}
 							type="button"
@@ -194,10 +202,19 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 								cursor: 'pointer',
 							}}
 						>
-							{color}
+							{color === 'request' ? 'Request a colour' : color}
 						</button>
 					))}
 				</div>
+				{selectedColor === 'request' && (
+					<input
+						type="text"
+						value={requestedColour}
+						onChange={(e) => setRequestedColour(e.target.value)}
+						placeholder="Which colour would you like?"
+						style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem', marginTop: '0.25rem' }}
+					/>
+				)}
 			</div>
 			)}
 

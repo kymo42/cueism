@@ -10,8 +10,9 @@ export type CartItem = {
 	quantity: number;
 	variantId?: string;
 	variantLabel?: string;
-	color?: 'white' | 'black' | 'orange';
+	color?: string;
 	nogennColor?: string;
+	logoUrl?: string;
 	sku?: string;
 	weightGrams?: number;
 	personalization?: string;
