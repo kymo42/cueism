@@ -1,6 +1,5 @@
 ---
 import { getEmDashCollection } from "emdash";
-import { WidgetArea } from "emdash/ui";
 import Base from "../layouts/Base.astro";
 import PostCardImage from "../components/PostCardImage";
 import { getPostDate, getPostImageSrc, getPostIntro } from "../utils/post-format";
@@ -14,14 +13,12 @@ const normalizedPosts = posts;
 ---
 
 <Base title="Cueism | Premium 3D Printed Accessories">
-	<WidgetArea name="home-top" />
 	<section class="hero">
 		<h1>Precision. Crafted.</h1>
 		<p>Australian-made accessories designed for those who appreciate the finer details of the game.</p>
 		<a href="/shop" class="btn btn-primary" data-astro-prefetch>Shop the Collection</a>
 	</section>
 
-	<WidgetArea name="home-before-journal" />
 	<section>
 		<h2>Latest Journal</h2>
 		<div class="grid grid-auto">
@@ -63,5 +60,4 @@ const normalizedPosts = posts;
 			}
 		</div>
 	</section>
-	<WidgetArea name="home-after-journal" />
 </Base>

@@ -1,6 +1,6 @@
 ---
 import { getEmDashCollection } from "emdash";
-import { Image, WidgetArea } from "emdash/ui";
+import { Image } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 import { getPriceRange } from "../../utils/products";
 
@@ -14,7 +14,6 @@ if (cacheHint) {
 ---
 
 <Base title="Shop | Cueism">
-	<WidgetArea name="shop-top" />
 	<section class="shop-grid">
 		<div class="grid grid-auto">
 			{
@@ -55,5 +54,4 @@ if (cacheHint) {
 			}
 		</div>
 	</section>
-	<WidgetArea name="shop-bottom" />
 </Base>

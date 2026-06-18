@@ -1,6 +1,6 @@
 ---
 import { getEmDashEntry, getEntryTerms, getSeoMeta } from "emdash";
-import { PortableText, WidgetArea } from "emdash/ui";
+import { PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 import { getPostDate, getPostHtmlContent, getPostImageSrc, hasPortableTextContent } from "../../utils/post-format";
 import { buildBlogPosting } from "../../utils/structured-data";
@@ -97,10 +97,6 @@ const postJsonLd = buildBlogPosting(post, Astro.url.origin);
 			</footer>
 		)}
 	</article>
-
-	<aside class="post-sidebar">
-		<WidgetArea name="sidebar" />
-	</aside>
 </Base>
 
 <style>
