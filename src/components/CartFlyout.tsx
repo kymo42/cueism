@@ -108,6 +108,11 @@ export default function CartFlyout() {
 												Nogenn colour: {item.nogennColor}
 											</p>
 										)}
+										{item.logoUrl && (
+											<p style={{ margin: '0 0 0.25rem', fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+												Logo: <a href={item.logoUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>attached</a>
+											</p>
+										)}
 										{item.personalization && (
 											<p style={{ margin: '0 0 0.25rem', fontSize: '0.8125rem', color: 'var(--color-accent)', fontStyle: 'italic' }}>
 												{item.personalization}

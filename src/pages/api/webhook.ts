@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import type { D1Database } from '@cloudflare/workers-types';
+import { env } from 'cloudflare:workers';
 
 // Tolerance (in seconds) for the timestamp in the Stripe-Signature header.
 const SIGNATURE_TOLERANCE_SECONDS = 300;
@@ -63,8 +64,9 @@ function timingSafeEqual(a: string, b: string): boolean {
 	return mismatch === 0;
 }
 
-export const POST: APIRoute = async ({ request, locals }) => {
-	const webhookSecret = import.meta.env.STRIPE_WEBHOOK_SECRET;
+export const POST: APIRoute = async ({ request }) => {
+	const workerEnv = env as { STRIPE_WEBHOOK_SECRET?: string; DB?: D1Database };
+	const webhookSecret = workerEnv.STRIPE_WEBHOOK_SECRET;
 
 	if (!webhookSecret) {
 		return new Response('Missing Stripe configuration', { status: 500 });
@@ -82,8 +84,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		return new Response('Invalid signature', { status: 400 });
 	}
 
-	const env = locals as { runtime?: { env?: { DB?: D1Database } } };
-	const db = env.runtime?.env?.DB;
+	const db = workerEnv.DB;
 	if (!db) {
 		return new Response('Database binding not available', { status: 500 });
 	}

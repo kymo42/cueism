@@ -17,6 +17,7 @@ type ProductPurchaseProps = {
 	nogennColours?: string[];
 	showColor?: boolean;
 	allowColourRequest?: boolean;
+	allowLogoUpload?: boolean;
 };
 
 type PersonalizationType = 'none' | 'text' | 'nfc';
@@ -98,6 +99,7 @@ export default function ProductPurchase({
 	nogennColours = [],
 	showColor = true,
 	allowColourRequest = false,
+	allowLogoUpload = false,
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const hasNogenn = nogennColours.length > 0;
@@ -111,6 +113,32 @@ export default function ProductPurchase({
 	const [selectedColor, setSelectedColor] = useState<string>('white');
 	const [requestedColour, setRequestedColour] = useState('');
 	const [selectedNogenn, setSelectedNogenn] = useState(nogennColours[0] || '');
+	const [logoUrl, setLogoUrl] = useState('');
+	const [logoName, setLogoName] = useState('');
+	const [logoUploading, setLogoUploading] = useState(false);
+	const [logoError, setLogoError] = useState('');
+
+	const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+		setLogoError('');
+		setLogoUrl('');
+		setLogoName('');
+		setLogoUploading(true);
+		try {
+			const formData = new FormData();
+			formData.append('file', file);
+			const res = await fetch('/api/upload-logo', { method: 'POST', body: formData });
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error || 'Upload failed');
+			setLogoUrl(data.url);
+			setLogoName(data.filename || file.name);
+		} catch (err) {
+			setLogoError(err instanceof Error ? err.message : 'Upload failed');
+		} finally {
+			setLogoUploading(false);
+		}
+	};
 
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
 const personalizationSurcharge = personalizationType === 'nfc' ? NFC_SURCHARGE : personalizationType === 'text' ? TEXT_SURCHARGE : 0;
@@ -147,7 +175,7 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 
 		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}`;
 		addCartItem({
-			id: `${lineId}::${selectedColor}::${selectedNogenn}`,
+			id: `${lineId}::${selectedColor}::${requestedColour.trim()}::${selectedNogenn}::${logoUrl}`,
 			productId,
 			slug,
 			title,
@@ -161,6 +189,7 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 					: selectedColor
 				: undefined,
 			nogennColor: hasNogenn ? selectedNogenn : undefined,
+			logoUrl: allowLogoUpload && logoUrl ? logoUrl : undefined,
 			sku: selectedVariant?.sku,
 			weightGrams: unitWeightGrams,
 			personalization,
@@ -242,6 +271,18 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 							</button>
 						))}
 					</div>
+				</div>
+			)}
+
+			{allowLogoUpload && (
+				<div style={{ display: 'grid', gap: '0.375rem' }}>
+					<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Upload logo (optional)</span>
+					<input type="file" accept="image/*" onChange={handleLogoChange} style={{ fontSize: '0.8125rem' }} />
+					{logoUploading && <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-tertiary)' }}>Uploading…</span>}
+					{logoUrl && !logoUploading && (
+						<span style={{ fontSize: '0.8125rem', color: 'var(--color-accent)' }}>✓ {logoName} attached</span>
+					)}
+					{logoError && <span style={{ fontSize: '0.8125rem', color: 'crimson' }}>{logoError}</span>}
 				</div>
 			)}
 

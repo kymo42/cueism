@@ -48,12 +48,14 @@ const trackStock = getTrackStock(product.data);
 const NO_PERSONALIZATION = new Set(["chalkable"]);
 const NO_COLOR = new Set<string>([]);
 const COLOUR_REQUEST = new Set(["chalkable"]);
+const LOGO_UPLOAD = new Set(["chalkable"]);
 const productKey = product.slug || product.id;
 const allowsPersonalization = !NO_PERSONALIZATION.has(productKey);
 const hasTextOption = allowsPersonalization;
 const hasNfcOption = allowsPersonalization;
 const showColor = !NO_COLOR.has(productKey);
 const allowColourRequest = COLOUR_REQUEST.has(productKey);
+const allowLogoUpload = LOGO_UPLOAD.has(productKey);
 
 // Per-product "Nogenn colour" add-on (the rubber grip), mirrored from the
 // legacy WordPress product options. Keyed by slug until colours move into the CMS.
@@ -128,6 +130,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				nogennColours={nogennColours}
 				showColor={showColor}
 				allowColourRequest={allowColourRequest}
+				allowLogoUpload={allowLogoUpload}
 			/>
 		</div>
 	</div>

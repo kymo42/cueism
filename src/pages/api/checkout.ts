@@ -26,8 +26,9 @@ export const POST: APIRoute = async ({ request, url }) => {
 			id: string;
 			productId?: string;
 			variantId?: string;
-			color?: 'white' | 'black' | 'orange';
+			color?: string;
 			nogennColor?: string;
+			logoUrl?: string;
 			quantity: number;
 		}[];
 		const checkoutMeta = body.checkoutMeta as {
@@ -97,6 +98,11 @@ export const POST: APIRoute = async ({ request, url }) => {
 			const lineName = colourSuffix ? `${lineNameBase} - ${colourSuffix}` : lineNameBase;
 			data.append(`line_items[${index}][price_data][product_data][name]`, lineName);
 			data.append(`line_items[${index}][quantity]`, item.quantity.toString());
+
+			if (item.logoUrl) {
+				const absoluteLogo = item.logoUrl.startsWith('http') ? item.logoUrl : `${url.origin}${item.logoUrl}`;
+				data.append(`metadata[logo_${index}]`, absoluteLogo);
+			}
 
 			totalItems += item.quantity;
 		});
