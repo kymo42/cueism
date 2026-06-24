@@ -5,7 +5,7 @@ import PostCardImage from "../components/PostCardImage";
 import { getPostDate, getPostImageSrc, getPostIntro } from "../utils/post-format";
 
 const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
-	orderBy: { published_at: "desc" },
+	orderBy: { created_at: "desc" },
 });
 Astro.cache.set(cacheHint);
 
@@ -29,7 +29,7 @@ const normalizedPosts = posts;
 						<a href="/_emdash/admin/content/posts/new" class="btn btn-primary">Write the first entry</a>
 					</div>
 				) : (
-					normalizedPosts.slice(0, 3).map((post) => {
+					normalizedPosts.slice(0, 2).map((post) => {
 						const intro = getPostIntro(post);
 						const imageSrc = getPostImageSrc(post);
 						const publishedAt = getPostDate(post);
