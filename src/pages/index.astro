@@ -29,7 +29,7 @@ const normalizedPosts = posts;
 						<a href="/_emdash/admin/content/posts/new" class="btn btn-primary">Write the first entry</a>
 					</div>
 				) : (
-					normalizedPosts.slice(0, 2).map((post) => {
+					normalizedPosts.slice(0, 4).map((post) => {
 						const intro = getPostIntro(post);
 						const imageSrc = getPostImageSrc(post);
 						const publishedAt = getPostDate(post);
