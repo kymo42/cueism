@@ -24,7 +24,7 @@ export const GET: APIRoute = async ({ url }) => {
 	for (const product of products) {
 		const slug = (product as any).slug || product.id;
 		const title = (product as any).data?.title ?? slug;
-		lines.push(`- [${title}](${origin}/shop/${slug})`);
+		lines.push(`- [${title}](${origin}/products/${slug})`);
 	}
 
 	lines.push("", "## Journal", "");
@@ -39,7 +39,7 @@ export const GET: APIRoute = async ({ url }) => {
 		"",
 		"## Pages",
 		"",
-		`- [Shop](${origin}/shop)`,
+		`- [Shop](${origin}/products)`,
 		`- [Journal](${origin}/posts)`,
 		`- [About](${origin}/about)`,
 		"",

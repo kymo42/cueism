@@ -36,7 +36,7 @@ if (cacheHint) {
 
 						return (
 							<article class="product-card">
-								<a href={`/shop/${product.slug || product.id}`} style="display: block;" data-astro-prefetch>
+								<a href={`/products/${product.slug || product.id}`} style="display: block;" data-astro-prefetch>
 									{cardImage && (
 										<div class="product-card-image">
 											<Image image={cardImage} />

@@ -86,7 +86,7 @@ function isInStock(data: Record<string, any>): boolean {
 export function buildProduct(product: ProductEntry, origin: string): Record<string, unknown> {
 	const data = product.data;
 	const slug = product.slug || product.id;
-	const url = `${origin}/shop/${slug}`;
+	const url = `${origin}/products/${slug}`;
 
 	const galleryFirst = Array.isArray(data.gallery_images)
 		? data.gallery_images.map((g: any) => resolveMediaUrl(g?.image)).find(Boolean)

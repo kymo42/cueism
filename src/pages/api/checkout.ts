@@ -51,8 +51,8 @@ export const POST: APIRoute = async ({ request, url }) => {
 		const data = new URLSearchParams();
 		data.append('payment_method_types[0]', 'card');
 		data.append('mode', 'payment');
-		data.append('success_url', `${url.origin}/shop?success=true`);
-		data.append('cancel_url', `${url.origin}/shop?canceled=true`);
+		data.append('success_url', `${url.origin}/products?success=true`);
+		data.append('cancel_url', `${url.origin}/products?canceled=true`);
 		data.append('shipping_address_collection[allowed_countries][0]', 'AU');
 		data.append('shipping_address_collection[allowed_countries][1]', 'US');
 		data.append('shipping_address_collection[allowed_countries][2]', 'GB');
