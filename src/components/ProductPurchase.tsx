@@ -120,9 +120,7 @@ export default function ProductPurchase({
 	const [logoName, setLogoName] = useState('');
 	const [logoUploading, setLogoUploading] = useState(false);
 	const [logoError, setLogoError] = useState('');
-	const [nfcEmail, setNfcEmail] = useState('');
-	const [nfcMobile, setNfcMobile] = useState('');
-	const [nfcSocials, setNfcSocials] = useState('');
+	const [nfcInfo, setNfcInfo] = useState('');
 
 	const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -153,7 +151,7 @@ const personalizationValid =
 	personalizationType === 'none' ||
 	(personalizationType === 'text' && textOption.trim().length > 0) ||
 	(personalizationType === 'nfc' && !embeddedNfcOnly && nfcName.trim().length > 0) ||
-	(embeddedNfcOnly && (nfcEmail.trim() || nfcMobile.trim() || nfcSocials.trim()).length > 0);
+	(embeddedNfcOnly && nfcInfo.trim().length > 0);
 const baseUnitPrice = selectedVariant?.price ?? basePrice;
 const unitPrice = baseUnitPrice + personalizationSurcharge;
 	const unitStock = selectedVariant?.stock ?? baseStock;
@@ -181,15 +179,11 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 		let personalization: string | undefined;
 		if (personalizationType === 'text' && textOption.trim()) personalization = `Text (+$${TEXT_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
 		else if (personalizationType === 'nfc' && nfcName.trim()) personalization = `NFC (+$${NFC_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
-		else if (embeddedNfcOnly && (nfcEmail.trim() || nfcMobile.trim() || nfcSocials.trim())) {
-			const parts = [];
-			if (nfcEmail.trim()) parts.push(`Email: ${nfcEmail.trim()}`);
-			if (nfcMobile.trim()) parts.push(`Mobile: ${nfcMobile.trim()}`);
-			if (nfcSocials.trim()) parts.push(`Socials: ${nfcSocials.trim()}`);
-			personalization = `NFC: ${parts.join(' | ')}`;
+		else if (embeddedNfcOnly && nfcInfo.trim()) {
+			personalization = `NFC: ${nfcInfo.trim()}`;
 		}
 
-		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}::${nfcEmail}::${nfcMobile}::${nfcSocials}`;
+		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}::${nfcInfo}`;
 		addCartItem({
 			id: `${lineId}::${selectedColor}::${requestedColour.trim()}::${selectedNogenn}::${logoUrl}`,
 			productId,
@@ -354,21 +348,10 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 					)}
 
 					{embeddedNfcOnly && (
-						<div style={{ display: 'grid', gap: '0.75rem' }}>
-							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>NFC Contact Details</span>
-							<span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>Your Safe9 has built-in NFC. Enter the details you'd like stored — at least one is required.</span>
-							<div>
-								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Email</label>
-								<input type="email" value={nfcEmail} onChange={(e) => setNfcEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
-							</div>
-							<div>
-								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Mobile</label>
-								<input type="tel" value={nfcMobile} onChange={(e) => setNfcMobile(e.target.value)} placeholder="0412 345 678" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
-							</div>
-							<div>
-								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Socials (Instagram, Facebook, LinkedIn, etc.)</label>
-								<input type="text" value={nfcSocials} onChange={(e) => setNfcSocials(e.target.value)} placeholder="@handle or link" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
-							</div>
+						<div style={{ display: 'grid', gap: '0.5rem' }}>
+							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>NFC Details</span>
+							<span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>Enter the info to program onto your Safe9's NFC chip — an email, mobile number, social handle, or anything else.</span>
+							<input type="text" value={nfcInfo} onChange={(e) => setNfcInfo(e.target.value)} placeholder="e.g. 0412 345 678 or @yourhandle" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
 						</div>
 					)}
 				</div>
