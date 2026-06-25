@@ -409,13 +409,15 @@
 					{ "id": "safe9-grey", "label": "Grey", "option_group": "Colour", "option_value": "grey", "price": 1600, "stock": 6, "enabled": true },
 					{ "id": "safe9-blue", "label": "Blue", "option_group": "Colour", "option_value": "blue", "price": 1600, "stock": 6, "enabled": true }
 				],
-				"excerpt": "9-ball rack safe on sale. Was $25, now $16.",
-				"content": [
-					{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Safe9" }] },
-					{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Protect your 9-ball rack at a great price. Eco-friendly, made in Sydney." }] }
-				],
-				"has_text_option": false,
-				"has_nfc_option": false
+				"excerpt": "9-ball rack safe with built-in NFC. Was $25, now $16. Supply your digital details — socials, email, mobile — and we'll program it for you.",
+						"content": [
+							{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Safe9" }] },
+							{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Protect your 9-ball rack with built-in NFC technology. Each Safe9 comes pre-programmed with your digital contact details." }] },
+							{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "How It Works" }] },
+							{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "After purchase, we'll contact you to collect your digital details — social media profiles, email, mobile number, or any other contact information you'd like to store. We program the NFC chip so your rack can share your details with a simple tap." }] }
+						],
+						"has_text_option": false,
+						"has_nfc_option": true
 			},
 			"taxonomies": { "product_category": ["racking"] }
 		},
