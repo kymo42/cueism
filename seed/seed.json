@@ -403,14 +403,19 @@
 				"stock": 25,
 				"weight_grams": 140,
 				"status": "active",
-				"variants": [],
+				"variants": [
+					{ "id": "safe9-pink", "label": "Pink", "option_group": "Colour", "option_value": "pink", "price": 1600, "stock": 7, "enabled": true },
+					{ "id": "safe9-yellow", "label": "Yellow", "option_group": "Colour", "option_value": "yellow", "price": 1600, "stock": 6, "enabled": true },
+					{ "id": "safe9-grey", "label": "Grey", "option_group": "Colour", "option_value": "grey", "price": 1600, "stock": 6, "enabled": true },
+					{ "id": "safe9-blue", "label": "Blue", "option_group": "Colour", "option_value": "blue", "price": 1600, "stock": 6, "enabled": true }
+				],
 				"excerpt": "9-ball rack safe on sale. Was $25, now $16.",
 				"content": [
 					{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Safe9" }] },
 					{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Protect your 9-ball rack at a great price. Eco-friendly, made in Sydney." }] }
 				],
-				"has_text_option": true,
-				"has_nfc_option": true
+				"has_text_option": false,
+				"has_nfc_option": false
 			},
 			"taxonomies": { "product_category": ["racking"] }
 		},
