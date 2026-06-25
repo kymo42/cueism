@@ -404,17 +404,18 @@
 				"weight_grams": 140,
 				"status": "active",
 				"variants": [
-					{ "id": "safe9-pink", "label": "Pink", "option_group": "Colour", "option_value": "pink", "price": 1600, "stock": 7, "enabled": true },
-					{ "id": "safe9-yellow", "label": "Yellow", "option_group": "Colour", "option_value": "yellow", "price": 1600, "stock": 6, "enabled": true },
-					{ "id": "safe9-grey", "label": "Grey", "option_group": "Colour", "option_value": "grey", "price": 1600, "stock": 6, "enabled": true },
-					{ "id": "safe9-blue", "label": "Blue", "option_group": "Colour", "option_value": "blue", "price": 1600, "stock": 6, "enabled": true }
+					{ "id": "safe9-pink", "label": "Pink", "option_group": "Colour", "option_value": "pink", "price": 1600, "stock": 6, "enabled": true },
+					{ "id": "safe9-blue", "label": "Blue", "option_group": "Colour", "option_value": "blue", "price": 1600, "stock": 9, "enabled": true },
+					{ "id": "safe9-grey", "label": "Grey", "option_group": "Colour", "option_value": "grey", "price": 1600, "stock": 5, "enabled": true },
+					{ "id": "safe9-yellow", "label": "Yellow", "option_group": "Colour", "option_value": "yellow", "price": 1600, "stock": 3, "enabled": true },
+					{ "id": "safe9-green", "label": "Green", "option_group": "Colour", "option_value": "green", "price": 1600, "stock": 3, "enabled": true }
 				],
-				"excerpt": "9-ball rack safe with built-in NFC. Was $25, now $16. Supply your digital details — socials, email, mobile — and we'll program it for you.",
+				"excerpt": "9-ball rack safe with built-in NFC. Was $25, now $16. Enter your digital info below and we'll program the chip for you.",
 						"content": [
 							{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Safe9" }] },
 							{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Protect your 9-ball rack with built-in NFC technology. Each Safe9 comes pre-programmed with your digital contact details." }] },
 							{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "How It Works" }] },
-							{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "After purchase, we'll contact you to collect your digital details — social media profiles, email, mobile number, or any other contact information you'd like to store. We program the NFC chip so your rack can share your details with a simple tap." }] }
+							{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Enter the single piece of digital info you'd like stored on the NFC chip (a URL, phone number, email, social handle — one thing only, the chip is small). We program it for you before shipping." }] }
 						],
 						"has_text_option": false,
 						"has_nfc_option": true

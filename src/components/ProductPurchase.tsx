@@ -115,12 +115,12 @@ export default function ProductPurchase({
 	const [requestedColour, setRequestedColour] = useState('');
 	const [selectedNogenn, setSelectedNogenn] = useState(nogennColours[0] || '');
 	const [logoUrl, setLogoUrl] = useState('');
-	// Auto-select NFC for embedded-NFC-only products
-	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>(embeddedNfcOnly ? 'nfc' : 'none');
 	const [logoName, setLogoName] = useState('');
 	const [logoUploading, setLogoUploading] = useState(false);
+	// Auto-select NFC for embedded-NFC-only products
+	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>(embeddedNfcOnly ? 'nfc' : 'none');
 	const [logoError, setLogoError] = useState('');
-	const [nfcInfo, setNfcInfo] = useState('');
+	const [nfcDigitalInfo, setNfcDigitalInfo] = useState('');
 
 	const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -151,7 +151,7 @@ const personalizationValid =
 	personalizationType === 'none' ||
 	(personalizationType === 'text' && textOption.trim().length > 0) ||
 	(personalizationType === 'nfc' && !embeddedNfcOnly && nfcName.trim().length > 0) ||
-	(embeddedNfcOnly && nfcInfo.trim().length > 0);
+	(embeddedNfcOnly && nfcDigitalInfo.trim().length > 0);
 const baseUnitPrice = selectedVariant?.price ?? basePrice;
 const unitPrice = baseUnitPrice + personalizationSurcharge;
 	const unitStock = selectedVariant?.stock ?? baseStock;
@@ -179,11 +179,11 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 		let personalization: string | undefined;
 		if (personalizationType === 'text' && textOption.trim()) personalization = `Text (+$${TEXT_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
 		else if (personalizationType === 'nfc' && nfcName.trim()) personalization = `NFC (+$${NFC_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
-		else if (embeddedNfcOnly && nfcInfo.trim()) {
-			personalization = `NFC: ${nfcInfo.trim()}`;
+		else if (embeddedNfcOnly && nfcDigitalInfo.trim()) {
+			personalization = `NFC: ${nfcDigitalInfo.trim()}`;
 		}
 
-		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}::${nfcInfo}`;
+		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}::${nfcDigitalInfo}`;
 		addCartItem({
 			id: `${lineId}::${selectedColor}::${requestedColour.trim()}::${selectedNogenn}::${logoUrl}`,
 			productId,
@@ -209,8 +209,23 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 	const baseId = `${productId}::${selectedVariant?.id || 'base'}`;
 
 	return (
-		<div style={{ display: 'grid', gap: '1rem' }}>
-			{hasVariants && (
+	<div style={{ display: 'grid', gap: '1rem' }}>
+		{hasVariants && (
+			embeddedNfcOnly ? (
+				<div style={{ display: 'grid', gap: '0.375rem' }}>
+					<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Colour</span>
+					<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+						{variants.map((variant) => (
+							<label key={variant.id} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer', padding: '0.5rem 0.75rem', border: selectedVariantId === variant.id ? '2px solid var(--color-accent)' : '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: selectedVariantId === variant.id ? 'var(--color-bg-surface)' : 'var(--color-bg-base)' }}>
+								<input type="radio" name={`variant-${baseId}`} value={variant.id} checked={selectedVariantId === variant.id} onChange={() => setSelectedVariantId(variant.id)} style={{ accentColor: 'var(--color-accent)' }} />
+								<span style={{ fontSize: '0.875rem', textTransform: 'capitalize', color: selectedVariantId === variant.id ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: selectedVariantId === variant.id ? 600 : 400 }}>
+									{variant.label} ({variant.stock} left)
+								</span>
+							</label>
+						))}
+					</div>
+				</div>
+			) : (
 				<label style={{ display: 'grid', gap: '0.375rem' }}>
 					<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Options</span>
 					<select value={selectedVariantId} onChange={(event) => setSelectedVariantId(event.target.value)} style={{ width: '100%', padding: '0.75rem 1rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)' }}>
@@ -219,7 +234,8 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 						))}
 					</select>
 				</label>
-			)}
+			)
+		)}
 
 			{showColor && (
 			<div style={{ display: 'grid', gap: '0.375rem' }}>
@@ -348,10 +364,10 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 					)}
 
 					{embeddedNfcOnly && (
-						<div style={{ display: 'grid', gap: '0.5rem' }}>
-							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>NFC Details</span>
-							<span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>Enter the info to program onto your Safe9's NFC chip — an email, mobile number, social handle, or anything else.</span>
-							<input type="text" value={nfcInfo} onChange={(e) => setNfcInfo(e.target.value)} placeholder="e.g. 0412 345 678 or @yourhandle" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
+						<div style={{ display: 'grid', gap: '0.75rem' }}>
+							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>NFC Digital Info</span>
+							<span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>Enter the one thing you'd like on the NFC chip — a URL, phone number, email, or social handle (one item only, the chip is tiny).</span>
+							<input type="text" value={nfcDigitalInfo} onChange={(e) => setNfcDigitalInfo(e.target.value)} placeholder="e.g. 0412345678 or @yourhandle" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
 						</div>
 					)}
 				</div>
