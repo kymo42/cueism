@@ -58,8 +58,8 @@ const trackStock = getTrackStock(product.data);
 
 // Products that do NOT offer text/NFC personalization or a body colour
 // (e.g. chalk packs, which only have a quantity/pack option).
-const NO_PERSONALIZATION = new Set(["chalkable"]);
-const NO_COLOR = new Set<string>([]);
+const NO_PERSONALIZATION = new Set(["chalkable", "safe9"]);
+const NO_COLOR = new Set<string>(["safe9"]);
 const COLOUR_REQUEST = new Set(["chalkable"]);
 const LOGO_UPLOAD = new Set(["chalkable"]);
 const productKey = product.slug || product.id;

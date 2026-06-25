@@ -1,0 +1,10 @@
+name = "cueism-tournament-submissions"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[[r2_buckets]]
+binding = "SUBMISSIONS"
+bucket_name = "cueism-submissions"
+
+[vars]
+ADMIN_TOKEN = "tournament-admin-2026"
