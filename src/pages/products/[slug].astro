@@ -12,6 +12,7 @@ import {
 	getTrackStock,
 } from "../../utils/products";
 import { buildProduct, stripToPlainText } from "../../utils/structured-data";
+import { resolveMediaUrl } from "../../utils/post-format";
 
 const { slug } = Astro.params;
 
@@ -36,6 +37,18 @@ const galleryImages = Array.isArray(product.data.gallery_images)
 			.filter(Boolean)
 	: [];
 const displayImage = featuredImage || galleryImages[0];
+
+// All images for the gallery: featured first, then gallery, de-duplicated.
+const galleryAll = [featuredImage, ...galleryImages].filter(Boolean) as any[];
+const seenImg = new Set<string>();
+const galleryUnique = galleryAll.filter((img) => {
+	const key = img?.meta?.storageKey || img?.src || img?.id || JSON.stringify(img);
+	if (seenImg.has(key)) return false;
+	seenImg.add(key);
+	return true;
+});
+const displayImageUrl = resolveMediaUrl(displayImage);
+
 const variants = getProductVariants(product.data);
 const priceRange = getPriceRange(product.data);
 const basePrice = getBasePrice(product.data);
@@ -85,22 +98,38 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 
 	<div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-xl); margin-top: var(--spacing-md);">
 		<div>
-			{displayImage ? (
-				<div style="background: var(--color-bg-surface); border-radius: var(--radius-md); overflow: hidden;">
-					<Image image={displayImage} />
+			{galleryUnique.length > 0 ? (
+				<div class="product-gallery">
+					<div class="product-gallery-main">
+						{galleryUnique.map((image: any, i: number) => (
+							<div
+								class="product-gallery-slide"
+								data-gallery-index={i}
+								style={`background: var(--color-bg-surface); border-radius: var(--radius-md); overflow: hidden;${i === 0 ? "" : " display: none;"}`}
+							>
+								<Image image={image} />
+							</div>
+						))}
+					</div>
+					{galleryUnique.length > 1 && (
+						<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 0.5rem; margin-top: 0.75rem;">
+							{galleryUnique.map((image: any, i: number) => (
+								<button
+									type="button"
+									class="product-gallery-thumb"
+									data-gallery-index={i}
+									aria-label={`View image ${i + 1}`}
+									style="border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); overflow: hidden; padding: 0; background: none; cursor: pointer; line-height: 0;"
+								>
+									<Image image={image} />
+								</button>
+							))}
+						</div>
+					)}
 				</div>
 			) : (
 				<div style="background: var(--color-bg-surface); border-radius: var(--radius-md); aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;">
 					<p style="color: var(--color-text-tertiary);">No image</p>
-				</div>
-			)}
-			{galleryImages.length > 1 && (
-				<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; margin-top: 0.75rem;">
-					{galleryImages.map((image: any) => (
-						<div style="border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); overflow: hidden;">
-							<Image image={image} />
-						</div>
-					))}
 				</div>
 			)}
 		</div>
@@ -119,7 +148,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				productId={product.id}
 				slug={product.slug || product.id}
 				title={product.data.title}
-				image={displayImage?.src}
+				image={displayImageUrl}
 				basePrice={basePrice}
 				baseStock={baseStock}
 				baseWeightGrams={baseWeightGrams}
@@ -150,5 +179,47 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				grid-template-columns: 1fr !important;
 			}
 		}
+		.product-gallery-thumb {
+			transition: outline-color 0.15s ease;
+			outline: 2px solid transparent;
+			outline-offset: -2px;
+		}
+		.product-gallery-thumb[aria-current="true"] {
+			outline-color: var(--color-accent);
+		}
+		.product-gallery-thumb:hover {
+			outline-color: var(--color-border);
+		}
 	</style>
+
+	<script>
+		function initProductGalleries() {
+			document.querySelectorAll(".product-gallery").forEach((gallery) => {
+				if (gallery.dataset.galleryReady === "1") return; // avoid double-binding
+				gallery.dataset.galleryReady = "1";
+
+				const slides = gallery.querySelectorAll(".product-gallery-slide");
+				const thumbs = gallery.querySelectorAll(".product-gallery-thumb");
+				if (!thumbs.length) return;
+
+				const show = (index) => {
+					slides.forEach((s) => {
+						s.style.display = s.dataset.galleryIndex === index ? "" : "none";
+					});
+					thumbs.forEach((t) => {
+						t.setAttribute("aria-current", t.dataset.galleryIndex === index ? "true" : "false");
+					});
+				};
+
+				thumbs.forEach((thumb) => {
+					thumb.addEventListener("click", () => show(thumb.dataset.galleryIndex || "0"));
+				});
+				show("0");
+			});
+		}
+
+		// Run now (covers direct loads) and after each view-transition navigation.
+		initProductGalleries();
+		document.addEventListener("astro:page-load", initProductGalleries);
+	</script>
 </Base>
