@@ -58,17 +58,21 @@ const trackStock = getTrackStock(product.data);
 
 // Products that do NOT offer text/NFC personalization or a body colour
 // (e.g. chalk packs, which only have a quantity/pack option).
-const NO_PERSONALIZATION = new Set(["chalkable", "safe9"]);
+const NO_PERSONALIZATION = new Set(["chalkable"]);
 const NO_COLOR = new Set<string>(["safe9"]);
 const COLOUR_REQUEST = new Set(["chalkable"]);
 const LOGO_UPLOAD = new Set(["chalkable"]);
+
+// Products with embedded NFC (always enabled, no surcharge)
+const EMBEDDED_NFC_ONLY = new Set(["safe9"]);
 const productKey = product.slug || product.id;
 const allowsPersonalization = !NO_PERSONALIZATION.has(productKey);
 const hasTextOption = allowsPersonalization;
-const hasNfcOption = allowsPersonalization;
+const hasNfcOption = allowsPersonalization || EMBEDDED_NFC_ONLY.has(productKey);
 const showColor = !NO_COLOR.has(productKey);
 const allowColourRequest = COLOUR_REQUEST.has(productKey);
 const allowLogoUpload = LOGO_UPLOAD.has(productKey);
+const embeddedNfcOnly = EMBEDDED_NFC_ONLY.has(productKey);
 
 // Per-product "Nogenn colour" add-on (the rubber grip), mirrored from the
 // legacy WordPress product options. Keyed by slug until colours move into the CMS.
@@ -160,6 +164,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				showColor={showColor}
 				allowColourRequest={allowColourRequest}
 				allowLogoUpload={allowLogoUpload}
+				embeddedNfcOnly={embeddedNfcOnly}
 			/>
 		</div>
 	</div>

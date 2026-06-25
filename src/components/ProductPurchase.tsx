@@ -18,6 +18,7 @@ type ProductPurchaseProps = {
 	showColor?: boolean;
 	allowColourRequest?: boolean;
 	allowLogoUpload?: boolean;
+	embeddedNfcOnly?: boolean;
 };
 
 type PersonalizationType = 'none' | 'text' | 'nfc';
@@ -100,12 +101,12 @@ export default function ProductPurchase({
 	showColor = true,
 	allowColourRequest = false,
 	allowLogoUpload = false,
+	embeddedNfcOnly = false,
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const hasNogenn = nogennColours.length > 0;
 	const colourOptions = allowColourRequest ? ['white', 'black', 'orange', 'request'] : ['white', 'black', 'orange'];
 	const [selectedVariantId, setSelectedVariantId] = useState(hasVariants ? variants[0]?.id || '' : '');
-	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>('none');
 	const [textOption, setTextOption] = useState('');
 	const [nfcIcon, setNfcIcon] = useState('person');
 	const [nfcName, setNfcName] = useState('');
@@ -114,9 +115,14 @@ export default function ProductPurchase({
 	const [requestedColour, setRequestedColour] = useState('');
 	const [selectedNogenn, setSelectedNogenn] = useState(nogennColours[0] || '');
 	const [logoUrl, setLogoUrl] = useState('');
+	// Auto-select NFC for embedded-NFC-only products
+	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>(embeddedNfcOnly ? 'nfc' : 'none');
 	const [logoName, setLogoName] = useState('');
 	const [logoUploading, setLogoUploading] = useState(false);
 	const [logoError, setLogoError] = useState('');
+	const [nfcEmail, setNfcEmail] = useState('');
+	const [nfcMobile, setNfcMobile] = useState('');
+	const [nfcSocials, setNfcSocials] = useState('');
 
 	const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -141,12 +147,13 @@ export default function ProductPurchase({
 	};
 
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
-const personalizationSurcharge = personalizationType === 'nfc' ? NFC_SURCHARGE : personalizationType === 'text' ? TEXT_SURCHARGE : 0;
+const personalizationSurcharge = embeddedNfcOnly ? 0 : personalizationType === 'nfc' ? NFC_SURCHARGE : personalizationType === 'text' ? TEXT_SURCHARGE : 0;
 const personalizationSelected = personalizationSurcharge > 0;
 const personalizationValid =
 	personalizationType === 'none' ||
 	(personalizationType === 'text' && textOption.trim().length > 0) ||
-	(personalizationType === 'nfc' && nfcName.trim().length > 0);
+	(personalizationType === 'nfc' && !embeddedNfcOnly && nfcName.trim().length > 0) ||
+	(embeddedNfcOnly && (nfcEmail.trim() || nfcMobile.trim() || nfcSocials.trim()).length > 0);
 const baseUnitPrice = selectedVariant?.price ?? basePrice;
 const unitPrice = baseUnitPrice + personalizationSurcharge;
 	const unitStock = selectedVariant?.stock ?? baseStock;
@@ -155,12 +162,14 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 	const outOfStock = trackStock && unitStock <= 0;
 	const disabled = outOfStock || !personalizationValid;
 	const buttonLabel = outOfStock
-		? 'Out of Stock'
-		: !personalizationValid
-			? personalizationType === 'nfc'
-				? 'Enter NFC details'
-				: 'Enter your text'
-			: 'Add to Cart';
+			? 'Out of Stock'
+			: !personalizationValid
+				? embeddedNfcOnly
+					? 'Enter your digital details'
+					: personalizationType === 'nfc'
+						? 'Enter NFC details'
+						: 'Enter your text'
+				: 'Add to Cart';
 	const hasPersonalization = hasTextOption || hasNfcOption;
 
 	const sortedIcons = useMemo(() => {
@@ -172,8 +181,15 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 		let personalization: string | undefined;
 		if (personalizationType === 'text' && textOption.trim()) personalization = `Text (+$${TEXT_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
 		else if (personalizationType === 'nfc' && nfcName.trim()) personalization = `NFC (+$${NFC_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
+		else if (embeddedNfcOnly && (nfcEmail.trim() || nfcMobile.trim() || nfcSocials.trim())) {
+			const parts = [];
+			if (nfcEmail.trim()) parts.push(`Email: ${nfcEmail.trim()}`);
+			if (nfcMobile.trim()) parts.push(`Mobile: ${nfcMobile.trim()}`);
+			if (nfcSocials.trim()) parts.push(`Socials: ${nfcSocials.trim()}`);
+			personalization = `NFC: ${parts.join(' | ')}`;
+		}
 
-		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}`;
+		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}::${nfcEmail}::${nfcMobile}::${nfcSocials}`;
 		addCartItem({
 			id: `${lineId}::${selectedColor}::${requestedColour.trim()}::${selectedNogenn}::${logoUrl}`,
 			productId,
@@ -288,21 +304,25 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 
 			{hasPersonalization && (
 				<div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', display: 'grid', gap: '0.75rem' }}>
-					<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization (cueism text +$5, NFC +$7)</span>
-					<div style={{ display: 'flex', gap: '0.5rem' }}>
-						<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>cueism</span></label>
-						{hasTextOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'text'} onChange={() => setPersonalizationType('text')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'text' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'text' ? 600 : 400 }}>Text (+$5)</span></label>}
-						{hasNfcOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>NFC (+$7)</span></label>}
-					</div>
+					{!embeddedNfcOnly && (
+						<>
+							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization (cueism text +$5, NFC +$7)</span>
+							<div style={{ display: 'flex', gap: '0.5rem' }}>
+								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>cueism</span></label>
+								{hasTextOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'text'} onChange={() => setPersonalizationType('text')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'text' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'text' ? 600 : 400 }}>Text (+$5)</span></label>}
+								{hasNfcOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>NFC (+$7)</span></label>}
+							</div>
+						</>
+					)}
 
-					{personalizationType === 'text' && (
+					{personalizationType === 'text' && !embeddedNfcOnly && (
 						<div style={{ display: 'grid', gap: '0.5rem' }}>
 							<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>Enter text for top of product:</label>
 							<input type="text" value={textOption} onChange={(e) => setTextOption(e.target.value)} placeholder="Your text (max 6 chars)" maxLength={6} style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
 						</div>
 					)}
 
-					{personalizationType === 'nfc' && (
+					{personalizationType === 'nfc' && !embeddedNfcOnly && (
 						<div style={{ display: 'grid', gap: '0.75rem' }}>
 							<div>
 								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Search Google Material icons:</label>
@@ -329,6 +349,25 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 							<div>
 								<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem', display: 'block' }}>Enter name/details for NFC:</label>
 								<input type="text" value={nfcName} onChange={(e) => setNfcName(e.target.value)} placeholder="e.g. John Smith, or 'Call 0412 345 678'" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
+							</div>
+						</div>
+					)}
+
+					{embeddedNfcOnly && (
+						<div style={{ display: 'grid', gap: '0.75rem' }}>
+							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>NFC Contact Details</span>
+							<span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>Your Safe9 has built-in NFC. Enter the details you'd like stored — at least one is required.</span>
+							<div>
+								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Email</label>
+								<input type="email" value={nfcEmail} onChange={(e) => setNfcEmail(e.target.value)} placeholder="you@example.com" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
+							</div>
+							<div>
+								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Mobile</label>
+								<input type="tel" value={nfcMobile} onChange={(e) => setNfcMobile(e.target.value)} placeholder="0412 345 678" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
+							</div>
+							<div>
+								<label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem' }}>Socials (Instagram, Facebook, LinkedIn, etc.)</label>
+								<input type="text" value={nfcSocials} onChange={(e) => setNfcSocials(e.target.value)} placeholder="@handle or link" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
 							</div>
 						</div>
 					)}

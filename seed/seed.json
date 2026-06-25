@@ -145,7 +145,7 @@
 			"label": "Primary Navigation",
 			"items": [
 				{ "type": "custom", "label": "Home", "url": "/" },
-				{ "type": "custom", "label": "Shop", "url": "/shop" },
+				{ "type": "custom", "label": "Shop", "url": "/products" },
 				{ "type": "custom", "label": "News", "url": "/posts" },
 				{ "type": "custom", "label": "Comp Winners", "url": "/comp-winners" },
 				{ "type": "custom", "label": "Submit Result", "url": "/submit-tournament" },
