@@ -19,6 +19,8 @@ type ProductPurchaseProps = {
 	allowColourRequest?: boolean;
 	allowLogoUpload?: boolean;
 	embeddedNfcOnly?: boolean;
+	useRadioVariants?: boolean;
+	logoSurcharge?: number;
 };
 
 type PersonalizationType = 'none' | 'text' | 'nfc';
@@ -102,6 +104,8 @@ export default function ProductPurchase({
 	allowColourRequest = false,
 	allowLogoUpload = false,
 	embeddedNfcOnly = false,
+	useRadioVariants = false,
+	logoSurcharge = 0,
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const hasNogenn = nogennColours.length > 0;
@@ -146,6 +150,7 @@ export default function ProductPurchase({
 
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
 const personalizationSurcharge = embeddedNfcOnly ? 0 : personalizationType === 'nfc' ? NFC_SURCHARGE : personalizationType === 'text' ? TEXT_SURCHARGE : 0;
+const logoProcessingSurcharge = logoUrl && logoSurcharge > 0 ? logoSurcharge : 0;
 const personalizationSelected = personalizationSurcharge > 0;
 const personalizationValid =
 	personalizationType === 'none' ||
@@ -153,7 +158,7 @@ const personalizationValid =
 	(personalizationType === 'nfc' && !embeddedNfcOnly && nfcName.trim().length > 0) ||
 	(embeddedNfcOnly && nfcDigitalInfo.trim().length > 0);
 const baseUnitPrice = selectedVariant?.price ?? basePrice;
-const unitPrice = baseUnitPrice + personalizationSurcharge;
+const unitPrice = baseUnitPrice + personalizationSurcharge + logoProcessingSurcharge;
 	const unitStock = selectedVariant?.stock ?? baseStock;
 	const unitWeightGrams = selectedVariant?.weightGrams ?? baseWeightGrams;
 	const variantLabel = selectedVariant?.label;
@@ -211,9 +216,9 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 	return (
 	<div style={{ display: 'grid', gap: '1rem' }}>
 		{hasVariants && (
-			embeddedNfcOnly ? (
+			useRadioVariants ? (
 				<div style={{ display: 'grid', gap: '0.375rem' }}>
-					<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Colour</span>
+					<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>{variants[0]?.optionGroup || 'Options'}</span>
 					<div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
 						{variants.map((variant) => (
 							<label key={variant.id} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer', padding: '0.5rem 0.75rem', border: selectedVariantId === variant.id ? '2px solid var(--color-accent)' : '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: selectedVariantId === variant.id ? 'var(--color-bg-surface)' : 'var(--color-bg-base)' }}>
@@ -302,7 +307,7 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 
 			{allowLogoUpload && (
 				<div style={{ display: 'grid', gap: '0.375rem' }}>
-					<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Upload logo (optional)</span>
+					<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Upload logo (+${logoSurcharge.toFixed(2)} processing)</span>
 					<input type="file" accept="image/*" onChange={handleLogoChange} style={{ fontSize: '0.8125rem' }} />
 					{logoUploading && <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-tertiary)' }}>Uploading…</span>}
 					{logoUrl && !logoUploading && (
@@ -376,6 +381,7 @@ const unitPrice = baseUnitPrice + personalizationSurcharge;
 			<div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
 				Total: <strong style={{ color: 'var(--color-text-primary)' }}>${unitPrice.toFixed(2)}</strong>
 				{personalizationSelected && <span> (includes +${personalizationSurcharge.toFixed(2)} personalization)</span>}
+				{logoProcessingSurcharge > 0 && <span> (includes +${logoProcessingSurcharge.toFixed(2)} logo processing)</span>}
 			</div>
 
 			<button className="btn btn-primary" style={{ width: '100%', padding: '0.875rem 1.5rem', fontSize: '0.9375rem', fontWeight: 500, opacity: disabled ? 0.5 : 1, cursor: disabled ? 'not-allowed' : 'pointer', borderRadius: 'var(--radius-sm)' }} disabled={disabled} onClick={handleAdd}>
