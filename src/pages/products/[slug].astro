@@ -69,6 +69,8 @@ const EMBEDDED_NFC_ONLY = new Set(["safe9"]);
 const RADIO_VARIANTS = new Set(["safe9", "chalkable"]);
 // Logo upload processing surcharge (per product)
 const LOGO_SURCHARGE: Record<string, number> = { chalkable: 100 };
+// Products that only offer initials or icon personalization (no cueism, no NFC, no text)
+const INITIALS_OR_ICON_ONLY = new Set(["cheatstick"]);
 const productKey = product.slug || product.id;
 const allowsPersonalization = !NO_PERSONALIZATION.has(productKey);
 const hasTextOption = allowsPersonalization;
@@ -79,6 +81,7 @@ const allowLogoUpload = LOGO_UPLOAD.has(productKey);
 const embeddedNfcOnly = EMBEDDED_NFC_ONLY.has(productKey);
 const useRadioVariants = RADIO_VARIANTS.has(productKey);
 const logoSurcharge = LOGO_SURCHARGE[productKey] || 0;
+const initialsOrIconOnly = INITIALS_OR_ICON_ONLY.has(productKey);
 
 // Per-product "Nogenn colour" add-on (the rubber grip), mirrored from the
 // legacy WordPress product options. Keyed by slug until colours move into the CMS.
@@ -173,6 +176,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				embeddedNfcOnly={embeddedNfcOnly}
 				useRadioVariants={useRadioVariants}
 				logoSurcharge={logoSurcharge}
+				initialsOrIconOnly={initialsOrIconOnly}
 			/>
 		</div>
 	</div>
