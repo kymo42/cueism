@@ -202,23 +202,26 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				grid-template-columns: 1fr !important;
 			}
 		}
+		.product-gallery-main {
+			width: 100%;
+			aspect-ratio: 1/1; /* Square */
+			border-radius: var(--radius-md);
+			overflow: hidden;
+			background: var(--color-bg-surface);
+		}
 		.product-gallery-slide {
 			width: 100%;
-			aspect-ratio: 4/3;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			background: var(--color-bg-surface);
+			height: 100%;
 		}
 		.product-gallery-slide img,
 		.product-gallery-slide :global(img) {
 			width: 100% !important;
 			height: 100% !important;
-			object-fit: contain !important;
+			object-fit: cover !important;
 		}
 		.product-gallery-thumb {
 			width: 100%;
-			aspect-ratio: 4/3;
+			aspect-ratio: 3/4; /* Portrait */
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -229,7 +232,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 		.product-gallery-thumb :global(img) {
 			width: 100% !important;
 			height: 100% !important;
-			object-fit: contain !important;
+			object-fit: cover !important;
 		}
 		.product-gallery-thumb {
 			transition: outline-color 0.15s ease;
