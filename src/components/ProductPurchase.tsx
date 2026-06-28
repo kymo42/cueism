@@ -226,7 +226,6 @@ export default function ProductPurchase({
 	const outOfStock = trackStock && unitStock <= 0;
 	const disabled = outOfStock || !personalizationValid || !colorValid || faceUploading;
 	const buttonLabel = outOfStock
-	const buttonLabel = outOfStock
 		? 'Out of Stock'
 		: faceUploading
 			? 'Uploading photo...'
@@ -258,7 +257,6 @@ export default function ProductPurchase({
 			personalization = `NFC: ${nfcDigitalInfo.trim()}`;
 		} else if (personalizationType === 'face' && faceUrl) {
 			personalization = `Printed Face Photo (+$${FACE_SURCHARGE.toFixed(2)})`;
-		}
 		}
 
 		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}::${nfcDigitalInfo}::${initials.trim()}`;
