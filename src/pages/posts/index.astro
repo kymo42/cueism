@@ -29,7 +29,6 @@ const postsWithTags = await Promise.all(
 				{postsWithTags.map(({ post, tags }) => {
 					const imageSrc = getPostImageSrc(post);
 					const intro = getPostIntro(post);
-					const publishedAt = getPostDate(post);
 					const title = typeof post.data.title === "string" ? post.data.title : "Post";
 					return (
 						<article class="card">
@@ -38,15 +37,6 @@ const postsWithTags = await Promise.all(
 								<div class="card-content">
 									<h3>{post.data.title}</h3>
 									{intro && <p>{intro}</p>}
-									{publishedAt && (
-										<time datetime={publishedAt.toISOString()}>
-											{publishedAt.toLocaleDateString("en-US", {
-												year: "numeric",
-												month: "long",
-												day: "numeric",
-											})}
-										</time>
-									)}
 									{tags.length > 0 && (
 										<p style="margin-top: 0.5rem;">
 											{tags.map((tag) => tag.label).join(" • ")}

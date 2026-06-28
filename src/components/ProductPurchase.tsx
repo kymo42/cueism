@@ -22,9 +22,10 @@ type ProductPurchaseProps = {
 	useRadioVariants?: boolean;
 	logoSurcharge?: number;
 	initialsOrIconOnly?: boolean;
+	allowFaceUpload?: boolean;
 };
 
-type PersonalizationType = 'none' | 'text' | 'nfc' | 'initials';
+type PersonalizationType = 'none' | 'text' | 'nfc' | 'initials' | 'face';
 
 const TEXT_SURCHARGE = 5;
 const NFC_SURCHARGE = 7;
@@ -108,6 +109,7 @@ export default function ProductPurchase({
 	useRadioVariants = false,
 	logoSurcharge = 0,
 	initialsOrIconOnly = false,
+	allowFaceUpload = false,
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const hasNogenn = nogennColours.length > 0;
@@ -117,7 +119,7 @@ export default function ProductPurchase({
 	const [nfcIcon, setNfcIcon] = useState('person');
 	const [nfcName, setNfcName] = useState('');
 	const [iconSearch, setIconSearch] = useState('');
-	const [selectedColor, setSelectedColor] = useState<string>('white');
+	const [selectedColor, setSelectedColor] = useState<string>(showColor ? '' : 'white');
 	const [requestedColour, setRequestedColour] = useState('');
 	const [selectedNogenn, setSelectedNogenn] = useState(nogennColours[0] || '');
 	const [logoUrl, setLogoUrl] = useState('');
@@ -128,6 +130,10 @@ export default function ProductPurchase({
 	const [personalizationType, setPersonalizationType] = useState<PersonalizationType>(embeddedNfcOnly ? 'nfc' : 'none');
 	const [logoError, setLogoError] = useState('');
 	const [nfcDigitalInfo, setNfcDigitalInfo] = useState('');
+	const [faceUrl, setFaceUrl] = useState('');
+	const [faceName, setFaceName] = useState('');
+	const [faceUploading, setFaceUploading] = useState(false);
+	const [faceError, setFaceError] = useState('');
 
 	const handleLogoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -151,34 +157,91 @@ export default function ProductPurchase({
 		}
 	};
 
+	const handleFaceChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+		setFaceError('');
+		setFaceUrl('');
+		setFaceName('');
+		setFaceUploading(true);
+		try {
+			const formData = new FormData();
+			formData.append('file', file);
+			const res = await fetch('/api/upload-logo', { method: 'POST', body: formData });
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error || 'Upload failed');
+			setFaceUrl(data.url);
+			setFaceName(data.filename || file.name);
+		} catch (err) {
+			setFaceError(err instanceof Error ? err.message : 'Upload failed');
+		} finally {
+			setFaceUploading(false);
+		}
+	};
+
+	const handleColorSelect = (color: string) => {
+		setSelectedColor(color);
+		const colorsSlide = document.querySelector('.colors-group-image');
+		if (colorsSlide) {
+			const index = colorsSlide.getAttribute('data-gallery-index');
+			if (index !== null) {
+				const thumb = document.querySelector(`.product-gallery-thumb[data-gallery-index="${index}"]`);
+				if (thumb) {
+					(thumb as HTMLButtonElement).click();
+				}
+			}
+		}
+	};
+
+	const FACE_SURCHARGE = 9;
+
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
-const personalizationSurcharge = embeddedNfcOnly ? 0 : initialsOrIconOnly ? (personalizationType === 'text' ? TEXT_SURCHARGE : personalizationType === 'nfc' ? NFC_SURCHARGE : 0) : personalizationType === 'nfc' ? NFC_SURCHARGE : personalizationType === 'text' ? TEXT_SURCHARGE : 0;
-const logoProcessingSurcharge = logoUrl && logoSurcharge > 0 ? logoSurcharge : 0;
-const personalizationSelected = personalizationSurcharge > 0;
-const personalizationValid =
-	personalizationType === 'none' ||
-	(personalizationType === 'text' && textOption.trim().length > 0) ||
-	(personalizationType === 'nfc' && !embeddedNfcOnly && !initialsOrIconOnly && nfcName.trim().length > 0) ||
-	(personalizationType === 'nfc' && initialsOrIconOnly) ||
-	(embeddedNfcOnly && nfcDigitalInfo.trim().length > 0) ||
-	(initialsOrIconOnly && personalizationType === 'initials' && initials.trim().length > 0);
-const baseUnitPrice = selectedVariant?.price ?? basePrice;
-const unitPrice = baseUnitPrice + personalizationSurcharge + logoProcessingSurcharge;
+	const personalizationSurcharge = personalizationType === 'face'
+		? FACE_SURCHARGE
+		: embeddedNfcOnly
+			? 0
+			: initialsOrIconOnly
+				? (personalizationType === 'text' ? TEXT_SURCHARGE : personalizationType === 'nfc' ? NFC_SURCHARGE : 0)
+				: personalizationType === 'nfc'
+					? NFC_SURCHARGE
+					: personalizationType === 'text'
+						? TEXT_SURCHARGE
+						: 0;
+	const logoProcessingSurcharge = logoUrl && logoSurcharge > 0 ? logoSurcharge : 0;
+	const personalizationSelected = personalizationSurcharge > 0;
+	const personalizationValid =
+		personalizationType === 'none' ||
+		(personalizationType === 'text' && textOption.trim().length > 0) ||
+		(personalizationType === 'nfc' && !embeddedNfcOnly && !initialsOrIconOnly && nfcName.trim().length > 0) ||
+		(personalizationType === 'nfc' && initialsOrIconOnly) ||
+		(embeddedNfcOnly && nfcDigitalInfo.trim().length > 0) ||
+		(initialsOrIconOnly && personalizationType === 'initials' && initials.trim().length > 0) ||
+		(personalizationType === 'face' && faceUrl !== '');
+	const colorValid = !showColor || selectedColor !== '';
+	const baseUnitPrice = selectedVariant?.price ?? basePrice;
+	const unitPrice = baseUnitPrice + personalizationSurcharge + logoProcessingSurcharge;
 	const unitStock = selectedVariant?.stock ?? baseStock;
 	const unitWeightGrams = selectedVariant?.weightGrams ?? baseWeightGrams;
 	const variantLabel = selectedVariant?.label;
 	const outOfStock = trackStock && unitStock <= 0;
-	const disabled = outOfStock || !personalizationValid;
+	const disabled = outOfStock || !personalizationValid || !colorValid || faceUploading;
 	const buttonLabel = outOfStock
-			? 'Out of Stock'
-			: !personalizationValid
-				? embeddedNfcOnly
-					? 'Enter your digital details'
-					: personalizationType === 'nfc'
-						? 'Enter NFC details'
-						: 'Enter your text'
-				: 'Add to Cart';
-	const hasPersonalization = hasTextOption || hasNfcOption;
+	const buttonLabel = outOfStock
+		? 'Out of Stock'
+		: faceUploading
+			? 'Uploading photo...'
+			: !colorValid
+				? 'Select a Color'
+				: !personalizationValid
+					? embeddedNfcOnly
+						? 'Enter your digital details'
+						: personalizationType === 'nfc'
+							? 'Enter NFC details'
+							: personalizationType === 'text'
+								? 'Enter your text'
+								: 'Upload your face photo'
+					: 'Add to Cart';
+	const hasPersonalization = hasTextOption || hasNfcOption || allowFaceUpload;
 
 	const sortedIcons = useMemo(() => {
 		const scored = GOOGLE_MATERIAL_ICONS.map((icon) => ({ icon, score: scoreIcon(icon, iconSearch) })).sort((a, b) => b.score - a.score || a.icon.localeCompare(b.icon));
@@ -187,15 +250,20 @@ const unitPrice = baseUnitPrice + personalizationSurcharge + logoProcessingSurch
 
 	const handleAdd = () => {
 		let personalization: string | undefined;
-		if (personalizationType === 'text' && textOption.trim()) personalization = `Text (+$${TEXT_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
-		else if (personalizationType === 'nfc' && nfcName.trim()) personalization = `NFC (+$${NFC_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
-		else if (embeddedNfcOnly && nfcDigitalInfo.trim()) {
+		if (personalizationType === 'text' && textOption.trim()) {
+			personalization = `Text (+$${TEXT_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
+		} else if (personalizationType === 'nfc' && nfcName.trim()) {
+			personalization = `NFC (+$${NFC_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
+		} else if (embeddedNfcOnly && nfcDigitalInfo.trim()) {
 			personalization = `NFC: ${nfcDigitalInfo.trim()}`;
+		} else if (personalizationType === 'face' && faceUrl) {
+			personalization = `Printed Face Photo (+$${FACE_SURCHARGE.toFixed(2)})`;
+		}
 		}
 
 		const lineId = `${productId}::${selectedVariant?.id || 'base'}::${personalizationType}::${textOption.trim()}::${nfcIcon}::${nfcName.trim()}::${nfcDigitalInfo}::${initials.trim()}`;
 		addCartItem({
-			id: `${lineId}::${selectedColor}::${requestedColour.trim()}::${selectedNogenn}::${logoUrl}`,
+			id: `${lineId}::${selectedColor}::${requestedColour.trim()}::${selectedNogenn}::${logoUrl}::${personalizationType === 'face' ? faceUrl : ''}`,
 			productId,
 			slug,
 			title,
@@ -210,6 +278,7 @@ const unitPrice = baseUnitPrice + personalizationSurcharge + logoProcessingSurch
 				: undefined,
 			nogennColor: hasNogenn ? selectedNogenn : undefined,
 			logoUrl: allowLogoUpload && logoUrl ? logoUrl : undefined,
+			faceUrl: allowFaceUpload && personalizationType === 'face' && faceUrl ? faceUrl : undefined,
 			sku: selectedVariant?.sku,
 			weightGrams: unitWeightGrams,
 			personalization,
@@ -255,7 +324,7 @@ const unitPrice = baseUnitPrice + personalizationSurcharge + logoProcessingSurch
 						<button
 							key={color}
 							type="button"
-							onClick={() => setSelectedColor(color)}
+							onClick={() => handleColorSelect(color)}
 							style={{
 								padding: '0.5rem 0.75rem',
 								borderRadius: 'var(--radius-sm)',
@@ -326,11 +395,14 @@ const unitPrice = baseUnitPrice + personalizationSurcharge + logoProcessingSurch
 				<div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '1rem', display: 'grid', gap: '0.75rem' }}>
 					{!embeddedNfcOnly && !initialsOrIconOnly && (
 						<>
-							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization (cueism text +$5, NFC +$7)</span>
-							<div style={{ display: 'flex', gap: '0.5rem' }}>
-								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>cueism</span></label>
-								{hasTextOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'text'} onChange={() => setPersonalizationType('text')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'text' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'text' ? 600 : 400 }}>Text (+$5)</span></label>}
-								{hasNfcOption && <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>NFC (+$7)</span></label>}
+							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>
+								Personalization ({allowFaceUpload ? 'text +$5, NFC +$7, Face Print +$9' : 'cueism text +$5, NFC +$7'})
+							</span>
+							<div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+								<label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>cueism</span></label>
+								{hasTextOption && <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'text'} onChange={() => setPersonalizationType('text')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'text' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'text' ? 600 : 400 }}>Text (+$5)</span></label>}
+								{hasNfcOption && <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>NFC (+$7)</span></label>}
+								{allowFaceUpload && <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'face'} onChange={() => setPersonalizationType('face')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'face' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'face' ? 600 : 400 }}>Face Print (+$9)</span></label>}
 							</div>
 						</>
 					)}
@@ -360,6 +432,18 @@ const unitPrice = baseUnitPrice + personalizationSurcharge + logoProcessingSurch
 						</div>
 					)}
 
+					{personalizationType === 'face' && (
+						<div style={{ display: 'grid', gap: '0.5rem' }}>
+							<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>Upload a photo of your face to print on top:</label>
+							<input type="file" accept="image/*" onChange={handleFaceChange} style={{ fontSize: '0.8125rem' }} />
+							{faceUploading && <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-tertiary)' }}>Uploading…</span>}
+							{faceUrl && !faceUploading && (
+								<span style={{ fontSize: '0.8125rem', color: 'var(--color-accent)' }}>✓ {faceName} attached</span>
+							)}
+							{faceError && <span style={{ fontSize: '0.8125rem', color: 'crimson' }}>{faceError}</span>}
+						</div>
+					)}
+
 					{personalizationType === 'nfc' && !embeddedNfcOnly && (
 						<div style={{ display: 'grid', gap: '0.75rem' }}>
 							<div>
@@ -386,8 +470,8 @@ const unitPrice = baseUnitPrice + personalizationSurcharge + logoProcessingSurch
 
 							{!initialsOrIconOnly && (
 								<div>
-									<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem', display: 'block' }}>Enter name/details for NFC:</label>
-									<input type="text" value={nfcName} onChange={(e) => setNfcName(e.target.value)} placeholder="e.g. John Smith, or 'Call 0412 345 678'" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
+									<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: '0.375rem', display: 'block' }}>Socials or email or phone - has to be digital:</label>
+									<input type="text" value={nfcName} onChange={(e) => setNfcName(e.target.value)} placeholder="e.g. instagram.com/username, email@domain.com, or phone number" style={{ width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-primary)', fontSize: '0.875rem' }} />
 								</div>
 							)}
 						</div>

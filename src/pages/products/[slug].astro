@@ -82,6 +82,7 @@ const embeddedNfcOnly = EMBEDDED_NFC_ONLY.has(productKey);
 const useRadioVariants = RADIO_VARIANTS.has(productKey);
 const logoSurcharge = LOGO_SURCHARGE[productKey] || 0;
 const initialsOrIconOnly = INITIALS_OR_ICON_ONLY.has(productKey);
+const allowFaceUpload = productKey === "racksafe9";
 
 // Per-product "Nogenn colour" add-on (the rubber grip), mirrored from the
 // legacy WordPress product options. Keyed by slug until colours move into the CMS.
@@ -114,15 +115,19 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 			{galleryUnique.length > 0 ? (
 				<div class="product-gallery">
 					<div class="product-gallery-main">
-						{galleryUnique.map((image: any, i: number) => (
-							<div
-								class="product-gallery-slide"
-								data-gallery-index={i}
-								style={`background: var(--color-bg-surface); border-radius: var(--radius-md); overflow: hidden;${i === 0 ? "" : " display: none;"}`}
-							>
-								<Image image={image} />
-							</div>
-						))}
+						{galleryUnique.map((image: any, i: number) => {
+							const src = image?.src || image?.meta?.storageKey || "";
+							const isColorsImage = src.includes("racksafe9_colors.jpg");
+							return (
+								<div
+									class={`product-gallery-slide${isColorsImage ? " colors-group-image" : ""}`}
+									data-gallery-index={i}
+									style={`background: var(--color-bg-surface); border-radius: var(--radius-md); overflow: hidden;${i === 0 ? "" : " display: none;"}`}
+								>
+									<Image image={image} />
+								</div>
+							);
+						})}
 					</div>
 					{galleryUnique.length > 1 && (
 						<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 0.5rem; margin-top: 0.75rem;">
@@ -177,6 +182,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				useRadioVariants={useRadioVariants}
 				logoSurcharge={logoSurcharge}
 				initialsOrIconOnly={initialsOrIconOnly}
+				allowFaceUpload={allowFaceUpload}
 			/>
 		</div>
 	</div>

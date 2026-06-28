@@ -55,16 +55,6 @@ const postJsonLd = buildBlogPosting(post, Astro.url.origin);
 			<h1 class="post-title">{post.data.title}</h1>
 			
 			<div class="post-meta">
-				{publishedAt && (
-					<time datetime={publishedAt.toISOString()}>
-						{publishedAt.toLocaleDateString("en-US", {
-							year: "numeric",
-							month: "long",
-							day: "numeric",
-						})}
-					</time>
-				)}
-
 				{categories.length > 0 && (
 					<div class="post-categories">
 						{categories.map((category, index) => (

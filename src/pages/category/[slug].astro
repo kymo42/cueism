@@ -31,7 +31,6 @@ const normalizedPosts = posts;
 				{normalizedPosts.map((post) => {
 					const imageSrc = getPostImageSrc(post);
 					const intro = getPostIntro(post);
-					const publishedAt = getPostDate(post);
 					const title = typeof post.data.title === "string" ? post.data.title : "Post";
 					return (
 						<article class="card">
@@ -40,15 +39,6 @@ const normalizedPosts = posts;
 								<div class="card-content">
 									<h3>{post.data.title}</h3>
 									{intro && <p>{intro}</p>}
-									{publishedAt && (
-										<time datetime={publishedAt.toISOString()}>
-											{publishedAt.toLocaleDateString("en-US", {
-												year: "numeric",
-												month: "long",
-												day: "numeric",
-											})}
-										</time>
-									)}
 								</div>
 							</a>
 						</article>

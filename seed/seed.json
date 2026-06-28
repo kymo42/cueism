@@ -345,13 +345,6 @@
 					"stock": 15,
 					"weight_grams": 162,
 					"product_status": "active",
-					"featured_image": {
-						"$media": {
-							"url": "https://raw.githubusercontent.com/kymo42/cueism/main/public/IMG_20260628_174712842.jpg",
-							"alt": "Rac9safe",
-							"filename": "IMG_20260628_174712842.jpg"
-						}
-					},
 					"variants": [
 						{ "id": "rs9-cueism", "label": "Cueism (no personalization)", "option_group": "Personalisation", "option_value": "cueism", "price": 2100, "stock": 8, "enabled": true },
 						{ "id": "rs9-text", "label": "Text/Name", "option_group": "Personalisation", "option_value": "text", "price": 2900, "stock": 4, "enabled": true },
