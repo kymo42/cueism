@@ -39,7 +39,7 @@
 				{ "slug": "stock", "label": "Base Stock", "type": "integer" },
 				{ "slug": "weight_grams", "label": "Base Weight (Grams)", "type": "integer" },
 				{ "slug": "inventory_count", "label": "Legacy Inventory", "type": "number" },
-				{ "slug": "status", "label": "Status", "type": "select", "validation": { "options": ["active", "draft", "discontinued"] } },
+				{ "slug": "product_status", "label": "Status", "type": "select", "validation": { "options": ["active", "draft", "discontinued"] } },
 				{ "slug": "variants", "label": "Variants", "type": "repeater", "validation": {
 					"subFields": [
 						{ "slug": "id", "type": "string", "label": "Variant ID" },
@@ -225,7 +225,7 @@
 					"track_stock": true,
 					"stock": 19,
 					"weight_grams": 162,
-					"status": "active",
+					"product_status": "active",
 					"variants": [
 						{ "id": "rs8-cueism", "label": "Cueism (no personalization)", "option_group": "Personalisation", "option_value": "cueism", "price": 2100, "stock": 10, "enabled": true },
 						{ "id": "rs8-text", "label": "Text/Name", "option_group": "Personalisation", "option_value": "text", "price": 2900, "stock": 5, "enabled": true },
@@ -258,7 +258,7 @@
 					"track_stock": true,
 					"stock": 32,
 					"weight_grams": 30,
-					"status": "active",
+					"product_status": "active",
 					"variants": [
 						{ "id": "cb-rfid", "label": "Add RFID chip", "option_group": "Personalisation", "option_value": "rfid", "price": 1300, "stock": 10, "enabled": true },
 						{ "id": "cb-text", "label": "Add text/name", "option_group": "Personalisation", "option_value": "text", "price": 1100, "stock": 10, "enabled": true },
@@ -289,7 +289,7 @@
 					"track_stock": true,
 					"stock": 35,
 					"weight_grams": 45,
-					"status": "active",
+					"product_status": "active",
 					"variants": [
 						{ "id": "mt-rfid", "label": "Add RFID chip", "option_group": "Personalisation", "option_value": "rfid", "price": 1300, "stock": 10, "enabled": true },
 						{ "id": "mt-text", "label": "Add text/name", "option_group": "Personalisation", "option_value": "text", "price": 1100, "stock": 10, "enabled": true },
@@ -319,7 +319,7 @@
 					"track_stock": true,
 					"stock": 25,
 					"weight_grams": 64,
-					"status": "active",
+					"product_status": "active",
 					"variants": [],
 					"excerpt": "Magnetic device for pool players. Lightweight, portable, and made in Australia.",
 					"content": [
@@ -337,14 +337,21 @@
 				"slug": "racksafe9",
 				"status": "published",
 				"data": {
-					"title": "RackSafe9",
+					"title": "Rac9safe",
 					"sku": "RCK-009",
 					"price": 2100,
 					"compare_at_price": null,
 					"track_stock": true,
 					"stock": 15,
 					"weight_grams": 162,
-					"status": "active",
+					"product_status": "active",
+					"featured_image": {
+						"$media": {
+							"url": "https://raw.githubusercontent.com/kymo42/cueism/main/public/IMG_20260628_174712842.jpg",
+							"alt": "Rac9safe",
+							"filename": "IMG_20260628_174712842.jpg"
+						}
+					},
 					"variants": [
 						{ "id": "rs9-cueism", "label": "Cueism (no personalization)", "option_group": "Personalisation", "option_value": "cueism", "price": 2100, "stock": 8, "enabled": true },
 						{ "id": "rs9-text", "label": "Text/Name", "option_group": "Personalisation", "option_value": "text", "price": 2900, "stock": 4, "enabled": true },
@@ -352,7 +359,7 @@
 					],
 					"excerpt": "Protection for your 9-ball Magick Rack. Eco-friendly, locally made in Sydney.",
 					"content": [
-						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "RackSafe9" }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Rac9safe" }] },
 						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "9-ball version of our popular RackSafe. Shields your rack from damage during transport. RFID-ready for anti-loss technology." }] }
 					],
 					"has_text_option": true,
@@ -373,7 +380,7 @@
 				"track_stock": true,
 				"stock": 159,
 				"weight_grams": 20,
-				"status": "active",
+				"product_status": "active",
 				"variants": [
 					{ "id": "ch-plain", "label": "Plain", "option_group": "Style", "option_value": "plain", "price": 500, "stock": 100, "enabled": true },
 					{ "id": "ch-text", "label": "Text/Name", "option_group": "Personalisation", "option_value": "text", "price": 700, "stock": 30, "enabled": true },
@@ -402,7 +409,7 @@
 				"track_stock": true,
 				"stock": 25,
 				"weight_grams": 140,
-				"status": "active",
+				"product_status": "active",
 				"variants": [
 					{ "id": "safe9-pink", "label": "Pink", "option_group": "Colour", "option_value": "pink", "price": 1600, "stock": 6, "enabled": true },
 					{ "id": "safe9-blue", "label": "Blue", "option_group": "Colour", "option_value": "blue", "price": 1600, "stock": 9, "enabled": true },
@@ -411,14 +418,14 @@
 					{ "id": "safe9-green", "label": "Green", "option_group": "Colour", "option_value": "green", "price": 1600, "stock": 3, "enabled": true }
 				],
 				"excerpt": "9-ball rack safe with built-in NFC. Was $25, now $16. Enter your digital info below and we'll program the chip for you.",
-						"content": [
-							{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Safe9" }] },
-							{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Protect your 9-ball rack with built-in NFC technology. Each Safe9 comes pre-programmed with your digital contact details." }] },
-							{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "How It Works" }] },
-							{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Enter the single piece of digital info you'd like stored on the NFC chip (a URL, phone number, email, social handle — one thing only, the chip is small). We program it for you before shipping." }] }
-						],
-						"has_text_option": false,
-						"has_nfc_option": true
+				"content": [
+					{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Safe9" }] },
+					{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Protect your 9-ball rack with built-in NFC technology. Each Safe9 comes pre-programmed with your digital contact details." }] },
+					{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "How It Works" }] },
+					{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Enter the single piece of digital info you'd like stored on the NFC chip (a URL, phone number, email, social handle — one thing only, the chip is small). We program it for you before shipping." }] }
+				],
+				"has_text_option": false,
+				"has_nfc_option": true
 			},
 			"taxonomies": { "product_category": ["racking"] }
 		},
@@ -434,7 +441,7 @@
 					"track_stock": false,
 					"stock": null,
 					"weight_grams": 0,
-					"status": "active",
+					"product_status": "active",
 					"variants": [],
 					"excerpt": "You are making a special Pool player very very very happy. Well done! Any amount you like.",
 					"content": [
@@ -458,7 +465,7 @@
 					"track_stock": true,
 					"stock": 30,
 					"weight_grams": 64,
-					"status": "draft",
+					"product_status": "draft",
 					"variants": [
 						{ "id": "88-mezz-circ-black", "label": "Mezz / Circular / Black", "option_group": "Manufacturer", "option_value": "Mezz", "price": 2500, "stock": 5, "enabled": true },
 						{ "id": "88-pred-circ-black", "label": "Predator / Circular / Black", "option_group": "Manufacturer", "option_value": "Predator", "price": 2500, "stock": 5, "enabled": true }
