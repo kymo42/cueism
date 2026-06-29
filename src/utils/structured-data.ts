@@ -94,8 +94,14 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 	const imageSrc = toAbsoluteUrl(resolveMediaUrl(data.featured_image) || galleryFirst, origin);
 
 	const availability = `https://schema.org/${isInStock(data) ? "InStock" : "OutOfStock"}`;
+	const itemCondition = "https://schema.org/NewCondition";
 	const range = getPriceRange(data);
 	const hasSpread = range.min !== range.max;
+
+	// Google flags offers without a price-validity date; default to ~1 year out.
+	const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+		.toISOString()
+		.slice(0, 10);
 
 	const offers: Record<string, unknown> = hasSpread
 		? {
@@ -105,6 +111,8 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 				highPrice: range.max,
 				offerCount: getProductVariants(data).length || undefined,
 				availability,
+				itemCondition,
+				priceValidUntil,
 				url,
 			}
 		: {
@@ -112,6 +120,8 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 				priceCurrency: CURRENCY,
 				price: range.min || getBasePrice(data),
 				availability,
+				itemCondition,
+				priceValidUntil,
 				url,
 			};
 
@@ -127,6 +137,10 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 	const description = stripToPlainText(data.excerpt ?? data.description);
 	if (description) graph.description = description;
 	if (imageSrc) graph.image = imageSrc;
+
+	const variants = getProductVariants(data);
+	const sku = typeof data.sku === "string" && data.sku ? data.sku : variants.find((v) => v.sku)?.sku;
+	if (sku) graph.sku = sku;
 
 	return graph;
 }

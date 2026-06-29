@@ -18,8 +18,11 @@ const postsWithTags = await Promise.all(
 );
 ---
 
-<Base title="All Posts">
-	<h1>Posts</h1>
+<Base
+	title="Journal | Cueism"
+	description="News, guides and stories from Cueism — Australian-made, 3D-printed billiards and pool accessories."
+>
+	<h1>Journal</h1>
 
 	{
 		postsWithTags.length === 0 ? (
