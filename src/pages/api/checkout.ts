@@ -1,6 +1,11 @@
 import type { APIRoute } from 'astro';
 import { getEmDashCollection } from 'emdash';
 import { getBasePrice, getBaseStock, getTrackStock, getVariantById } from '../../utils/products';
+import {
+	type PersonalizationType,
+	getLogoSurcharge,
+	getPersonalizationSurcharge,
+} from '../../utils/surcharges';
 
 const BASE_SHIPPING_CENTS = 1000;
 const PER_EXTRA_ITEM_CENTS = 200;
@@ -25,10 +30,13 @@ export const POST: APIRoute = async ({ request, url }) => {
 		const items = body.items as {
 			id: string;
 			productId?: string;
+			slug?: string;
 			variantId?: string;
 			color?: string;
 			nogennColor?: string;
 			logoUrl?: string;
+			personalizationType?: PersonalizationType;
+			personalization?: string;
 			quantity: number;
 		}[];
 		const checkoutMeta = body.checkoutMeta as {
@@ -88,7 +96,14 @@ export const POST: APIRoute = async ({ request, url }) => {
 				}
 			}
 
-			const unitAmountCents = Math.round(unitPriceDollars * 100);
+			// Recompute personalization / logo surcharges server-side from the shared
+			// source of truth. Never trust the client-sent price — only the chosen
+			// personalization type, which can only select among allowed surcharges.
+			const productSlug = item.slug || dbProduct.slug || dbProduct.id || productId;
+			const personalizationType: PersonalizationType = item.personalizationType ?? 'none';
+			const personalizationSurcharge = getPersonalizationSurcharge(personalizationType, productSlug);
+			const logoSurcharge = item.logoUrl ? getLogoSurcharge(productSlug, item.variantId) : 0;
+			const unitAmountCents = Math.round((unitPriceDollars + personalizationSurcharge + logoSurcharge) * 100);
 			data.append(`line_items[${index}][price_data][currency]`, 'aud');
 			data.append(`line_items[${index}][price_data][unit_amount]`, unitAmountCents.toString());
 			const lineNameBase = variant ? `${dbProduct.data.title} - ${variant.label}` : dbProduct.data.title;
@@ -102,6 +117,10 @@ export const POST: APIRoute = async ({ request, url }) => {
 			if (item.logoUrl) {
 				const absoluteLogo = item.logoUrl.startsWith('http') ? item.logoUrl : `${url.origin}${item.logoUrl}`;
 				data.append(`metadata[logo_${index}]`, absoluteLogo);
+			}
+
+			if (item.personalization) {
+				data.append(`metadata[personalization_${index}]`, item.personalization);
 			}
 
 			totalItems += item.quantity;

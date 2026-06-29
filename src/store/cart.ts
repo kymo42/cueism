@@ -1,4 +1,5 @@
 import { atom, map } from 'nanostores';
+import type { PersonalizationType } from '../utils/surcharges';
 
 export type CartItem = {
 	id: string;
@@ -13,9 +14,13 @@ export type CartItem = {
 	color?: string;
 	nogennColor?: string;
 	logoUrl?: string;
+	faceUrl?: string;
 	sku?: string;
 	weightGrams?: number;
 	personalization?: string;
+	// Personalization choice, used server-side by /api/checkout to recompute the
+	// surcharge. Never trust the client-sent `price`.
+	personalizationType?: PersonalizationType;
 };
 
 export const cartItems = map<Record<string, CartItem>>({});

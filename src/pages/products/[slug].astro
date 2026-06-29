@@ -13,6 +13,12 @@ import {
 } from "../../utils/products";
 import { buildProduct, stripToPlainText } from "../../utils/structured-data";
 import { resolveMediaUrl } from "../../utils/post-format";
+import {
+	EMBEDDED_NFC_ONLY,
+	INITIALS_OR_ICON_ONLY,
+	LOGO_SURCHARGE,
+	LOGO_SURCHARGE_BY_VARIANT,
+} from "../../utils/surcharges";
 
 const { slug } = Astro.params;
 
@@ -54,7 +60,6 @@ const priceRange = getPriceRange(product.data);
 const basePrice = getBasePrice(product.data);
 const baseStock = getBaseStock(product.data);
 const baseWeightGrams = getBaseWeightGrams(product.data);
-const trackStock = getTrackStock(product.data);
 
 // Products that do NOT offer text/NFC personalization or a body colour
 // (e.g. chalk packs, which only have a quantity/pack option).
@@ -63,15 +68,21 @@ const NO_COLOR = new Set<string>(["safe9"]);
 const COLOUR_REQUEST = new Set(["chalkable"]);
 const LOGO_UPLOAD = new Set(["chalkable"]);
 
-// Products with embedded NFC (always enabled, no surcharge)
-const EMBEDDED_NFC_ONLY = new Set(["safe9"]);
 // Products that display variants as radio buttons instead of a dropdown
 const RADIO_VARIANTS = new Set(["safe9", "chalkable"]);
-// Logo upload processing surcharge (per product)
-const LOGO_SURCHARGE: Record<string, number> = { chalkable: 100 };
-// Products that only offer initials or icon personalization (no cueism, no NFC, no text)
-const INITIALS_OR_ICON_ONLY = new Set(["cheatstick"]);
+// Products that require an explicit variant pick before adding to cart.
+const REQUIRE_VARIANT = new Set(["safe9"]);
+// Products that track stock per-variant and show remaining counts.
+const TRACK_STOCK = new Set(["safe9"]);
+// EMBEDDED_NFC_ONLY, INITIALS_OR_ICON_ONLY, LOGO_SURCHARGE and
+// LOGO_SURCHARGE_BY_VARIANT now live in utils/surcharges.ts so the cart price and
+// the Stripe checkout amount share one source of truth.
 const productKey = product.slug || product.id;
+const requireVariant = REQUIRE_VARIANT.has(productKey);
+
+// First colour variant drives the default gallery image for colour products.
+// For require-variant products the gallery starts on slide 0 (featured image).
+const defaultVariantColor = requireVariant ? "" : (variants[0]?.optionValue || "").toLowerCase();
 const allowsPersonalization = !NO_PERSONALIZATION.has(productKey);
 const hasTextOption = allowsPersonalization;
 const hasNfcOption = allowsPersonalization || EMBEDDED_NFC_ONLY.has(productKey);
@@ -81,8 +92,10 @@ const allowLogoUpload = LOGO_UPLOAD.has(productKey);
 const embeddedNfcOnly = EMBEDDED_NFC_ONLY.has(productKey);
 const useRadioVariants = RADIO_VARIANTS.has(productKey);
 const logoSurcharge = LOGO_SURCHARGE[productKey] || 0;
+const logoSurchargeByVariant = LOGO_SURCHARGE_BY_VARIANT[productKey];
 const initialsOrIconOnly = INITIALS_OR_ICON_ONLY.has(productKey);
 const allowFaceUpload = productKey === "racksafe9";
+const trackStock = getTrackStock(product.data) || TRACK_STOCK.has(productKey);
 
 // Per-product "Nogenn colour" add-on (the rubber grip), mirrored from the
 // legacy WordPress product options. Keyed by slug until colours move into the CMS.
@@ -113,7 +126,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 	<div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-xl); margin-top: var(--spacing-md);">
 		<div>
 			{galleryUnique.length > 0 ? (
-				<div class="product-gallery">
+				<div class="product-gallery" data-default-color={defaultVariantColor}>
 					<div class="product-gallery-main">
 						{galleryUnique.map((image: any, i: number) => {
 							const src = image?.src || image?.meta?.storageKey || "";
@@ -122,6 +135,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 								<div
 									class={`product-gallery-slide${isColorsImage ? " colors-group-image" : ""}`}
 									data-gallery-index={i}
+									data-color={image?.color}
 									style={`background: var(--color-bg-surface); border-radius: var(--radius-md); overflow: hidden;${i === 0 ? "" : " display: none;"}`}
 								>
 									<Image image={image} />
@@ -136,6 +150,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 									type="button"
 									class="product-gallery-thumb"
 									data-gallery-index={i}
+									data-color={image?.color}
 									aria-label={`View image ${i + 1}`}
 									style="border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); overflow: hidden; padding: 0; background: none; cursor: pointer; line-height: 0;"
 								>
@@ -181,8 +196,10 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				embeddedNfcOnly={embeddedNfcOnly}
 				useRadioVariants={useRadioVariants}
 				logoSurcharge={logoSurcharge}
+				logoSurchargeByVariant={logoSurchargeByVariant}
 				initialsOrIconOnly={initialsOrIconOnly}
 				allowFaceUpload={allowFaceUpload}
+				requireVariant={requireVariant}
 			/>
 		</div>
 	</div>
@@ -266,15 +283,41 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 					});
 				};
 
+				// Find the slide tagged with a given colour (a slide may serve several
+				// colours via a comma-separated data-color, e.g. "black,white").
+				const findColorIndex = (color) => {
+					if (!color) return null;
+					const match = Array.from(slides).find((s) =>
+						(s.dataset.color || "").split(",").includes(color)
+					);
+					return match ? match.dataset.galleryIndex || "0" : null;
+				};
+
+				// Let the product form (React island) drive the gallery by colour.
+				gallery._showColor = (color) => {
+					const index = findColorIndex(color);
+					if (index !== null) show(index);
+				};
+
 				thumbs.forEach((thumb) => {
 					thumb.addEventListener("click", () => show(thumb.dataset.galleryIndex || "0"));
 				});
-				show("0");
+
+				// Default to the first colour variant's image when one matches.
+				const defaultIndex = findColorIndex(gallery.dataset.defaultColor);
+				show(defaultIndex !== null ? defaultIndex : "0");
+			});
+		}
+
+		function showGalleryColor(color) {
+			document.querySelectorAll(".product-gallery").forEach((gallery) => {
+				if (typeof gallery._showColor === "function") gallery._showColor(color);
 			});
 		}
 
 		// Run now (covers direct loads) and after each view-transition navigation.
 		initProductGalleries();
 		document.addEventListener("astro:page-load", initProductGalleries);
+		window.addEventListener("cueism:variant-color", (e) => showGalleryColor(e.detail && e.detail.color));
 	</script>
 </Base>

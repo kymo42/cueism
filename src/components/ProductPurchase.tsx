@@ -1,6 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { addCartItem } from '../store/cart';
 import { type ProductVariant } from '../utils/products';
+import {
+	type PersonalizationType,
+	TEXT_SURCHARGE,
+	NFC_SURCHARGE,
+	FACE_SURCHARGE,
+	getLogoSurcharge,
+	getPersonalizationSurcharge,
+} from '../utils/surcharges';
 
 type ProductPurchaseProps = {
 	productId: string;
@@ -21,14 +29,11 @@ type ProductPurchaseProps = {
 	embeddedNfcOnly?: boolean;
 	useRadioVariants?: boolean;
 	logoSurcharge?: number;
+	logoSurchargeByVariant?: Record<string, number>;
 	initialsOrIconOnly?: boolean;
 	allowFaceUpload?: boolean;
+	requireVariant?: boolean;
 };
-
-type PersonalizationType = 'none' | 'text' | 'nfc' | 'initials' | 'face';
-
-const TEXT_SURCHARGE = 5;
-const NFC_SURCHARGE = 7;
 
 const GOOGLE_MATERIAL_ICONS = [
 	'person', 'person_2', 'groups', 'group', 'badge', 'contact_emergency', 'home', 'apartment', 'cottage', 'domain', 'email',
@@ -108,13 +113,15 @@ export default function ProductPurchase({
 	embeddedNfcOnly = false,
 	useRadioVariants = false,
 	logoSurcharge = 0,
+	logoSurchargeByVariant,
 	initialsOrIconOnly = false,
 	allowFaceUpload = false,
+	requireVariant = false,
 }: ProductPurchaseProps) {
 	const hasVariants = variants.length > 0;
 	const hasNogenn = nogennColours.length > 0;
 	const colourOptions = allowColourRequest ? ['white', 'black', 'orange', 'request'] : ['white', 'black', 'orange'];
-	const [selectedVariantId, setSelectedVariantId] = useState(hasVariants ? variants[0]?.id || '' : '');
+	const [selectedVariantId, setSelectedVariantId] = useState(hasVariants && !requireVariant ? variants[0]?.id || '' : '');
 	const [textOption, setTextOption] = useState('');
 	const [nfcIcon, setNfcIcon] = useState('person');
 	const [nfcName, setNfcName] = useState('');
@@ -181,33 +188,26 @@ export default function ProductPurchase({
 
 	const handleColorSelect = (color: string) => {
 		setSelectedColor(color);
-		const colorsSlide = document.querySelector('.colors-group-image');
-		if (colorsSlide) {
-			const index = colorsSlide.getAttribute('data-gallery-index');
-			if (index !== null) {
-				const thumb = document.querySelector(`.product-gallery-thumb[data-gallery-index="${index}"]`);
-				if (thumb) {
-					(thumb as HTMLButtonElement).click();
-				}
-			}
-		}
+		// Dispatch to the gallery so colour-tagged slides switch automatically.
+		window.dispatchEvent(new CustomEvent('cueism:variant-color', { detail: { color } }));
 	};
 
-	const FACE_SURCHARGE = 9;
-
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
-	const personalizationSurcharge = personalizationType === 'face'
-		? FACE_SURCHARGE
-		: embeddedNfcOnly
-			? 0
-			: initialsOrIconOnly
-				? (personalizationType === 'text' ? TEXT_SURCHARGE : personalizationType === 'nfc' ? NFC_SURCHARGE : 0)
-				: personalizationType === 'nfc'
-					? NFC_SURCHARGE
-					: personalizationType === 'text'
-						? TEXT_SURCHARGE
-						: 0;
-	const logoProcessingSurcharge = logoUrl && logoSurcharge > 0 ? logoSurcharge : 0;
+
+	// For colour-variant products (e.g. Safe9), tell the product gallery to show the
+	// image matching the selected colour. The gallery listens for this event and
+	// switches to the slide whose data-color includes the colour.
+	useEffect(() => {
+		const color = selectedVariant?.optionValue?.toLowerCase();
+		if (!color) return;
+		window.dispatchEvent(new CustomEvent('cueism:variant-color', { detail: { color } }));
+	}, [selectedVariant]);
+
+	// Surcharges come from the shared module so the cart price shown here and the
+	// amount charged by /api/checkout can never drift apart.
+	const personalizationSurcharge = getPersonalizationSurcharge(personalizationType, slug);
+	const effectiveLogoSurcharge = getLogoSurcharge(slug, selectedVariant?.id);
+	const logoProcessingSurcharge = logoUrl && effectiveLogoSurcharge > 0 ? effectiveLogoSurcharge : 0;
 	const personalizationSelected = personalizationSurcharge > 0;
 	const personalizationValid =
 		personalizationType === 'none' ||
@@ -218,20 +218,23 @@ export default function ProductPurchase({
 		(initialsOrIconOnly && personalizationType === 'initials' && initials.trim().length > 0) ||
 		(personalizationType === 'face' && faceUrl !== '');
 	const colorValid = !showColor || selectedColor !== '';
+	const variantValid = !requireVariant || selectedVariantId !== '';
 	const baseUnitPrice = selectedVariant?.price ?? basePrice;
 	const unitPrice = baseUnitPrice + personalizationSurcharge + logoProcessingSurcharge;
 	const unitStock = selectedVariant?.stock ?? baseStock;
 	const unitWeightGrams = selectedVariant?.weightGrams ?? baseWeightGrams;
 	const variantLabel = selectedVariant?.label;
 	const outOfStock = trackStock && unitStock <= 0;
-	const disabled = outOfStock || !personalizationValid || !colorValid || faceUploading;
+	const disabled = outOfStock || !variantValid || !personalizationValid || !colorValid || faceUploading;
 	const buttonLabel = outOfStock
 		? 'Out of Stock'
-		: faceUploading
-			? 'Uploading photo...'
-			: !colorValid
-				? 'Select a Color'
-				: !personalizationValid
+		: !variantValid
+			? 'Select a Colour'
+			: faceUploading
+				? 'Uploading photo...'
+				: !colorValid
+					? 'Select a Color'
+					: !personalizationValid
 					? embeddedNfcOnly
 						? 'Enter your digital details'
 						: personalizationType === 'nfc'
@@ -280,6 +283,7 @@ export default function ProductPurchase({
 			sku: selectedVariant?.sku,
 			weightGrams: unitWeightGrams,
 			personalization,
+			personalizationType,
 		});
 	};
 
@@ -296,7 +300,7 @@ export default function ProductPurchase({
 							<label key={variant.id} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', cursor: 'pointer', padding: '0.5rem 0.75rem', border: selectedVariantId === variant.id ? '2px solid var(--color-accent)' : '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: selectedVariantId === variant.id ? 'var(--color-bg-surface)' : 'var(--color-bg-base)' }}>
 								<input type="radio" name={`variant-${baseId}`} value={variant.id} checked={selectedVariantId === variant.id} onChange={() => setSelectedVariantId(variant.id)} style={{ accentColor: 'var(--color-accent)' }} />
 								<span style={{ fontSize: '0.875rem', textTransform: 'capitalize', color: selectedVariantId === variant.id ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: selectedVariantId === variant.id ? 600 : 400 }}>
-									{variant.label} ({variant.stock} left)
+									{variant.label}{trackStock ? ` (${variant.stock} left)` : ''}
 								</span>
 							</label>
 						))}
@@ -379,7 +383,7 @@ export default function ProductPurchase({
 
 			{allowLogoUpload && (
 				<div style={{ display: 'grid', gap: '0.375rem' }}>
-					<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Upload logo (+${logoSurcharge.toFixed(2)} processing)</span>
+					<span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Upload logo {effectiveLogoSurcharge > 0 ? `(+$${effectiveLogoSurcharge.toFixed(2)} processing)` : '(free)'}</span>
 					<input type="file" accept="image/*" onChange={handleLogoChange} style={{ fontSize: '0.8125rem' }} />
 					{logoUploading && <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-tertiary)' }}>Uploading…</span>}
 					{logoUrl && !logoUploading && (
@@ -407,11 +411,11 @@ export default function ProductPurchase({
 
 					{initialsOrIconOnly && (
 						<>
-							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization (initials +$5, icon +$7)</span>
+							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization (initials +$5, icon +$5)</span>
 							<div style={{ display: 'flex', gap: '0.5rem' }}>
 								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>None</span></label>
 								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'initials'} onChange={() => setPersonalizationType('initials')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'initials' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'initials' ? 600 : 400 }}>Initials (+$5)</span></label>
-								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>Icon (+$7)</span></label>
+								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>Icon (+$5)</span></label>
 							</div>
 						</>
 					)}
