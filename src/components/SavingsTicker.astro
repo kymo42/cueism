@@ -1,0 +1,217 @@
+---
+// ── The Cost of a Crease ────────────────────────────────────────────────
+// A $5 Magick Rack is binned the moment it creases. This ticker contrasts the
+// money rotation players waste worldwide against what Rac9safe customers save.
+//
+// Update these as the business grows — every new sale, bump CUSTOMERS.
+const RACK_PRICE = 5;            // dollars per Magick Rack
+const WORLD_PLAYERS = 100_000;   // rotation players worldwide
+const WORLD_RACKS_PER_YEAR = 1;  // racks an average player bins per year
+const CUSTOMERS = 86;            // current Rac9safe customers
+const CUSTOMER_RACKS_PER_YEAR = 3; // racks a serious player would otherwise bin per year
+const CAREER_YEARS = 20;         // a player's lifetime at the table
+
+// Derived figures.
+const globalWastePerYear = WORLD_PLAYERS * WORLD_RACKS_PER_YEAR * RACK_PRICE;        // 500,000
+const customerSavingPerYear = CUSTOMERS * CUSTOMER_RACKS_PER_YEAR * RACK_PRICE;      // 1,290
+const customerLifetimeSaving = customerSavingPerYear * CAREER_YEARS;                 // 25,800
+
+const fmt0 = (n: number) => n.toLocaleString('en-AU', { maximumFractionDigits: 0 });
+---
+
+<section class="savings-ticker">
+	<div class="ticker-inner">
+		<header class="st-head">
+			<p class="st-eyebrow">The Cost of a Crease</p>
+			<p class="st-intro">
+				A Magick Rack costs ${RACK_PRICE} — one small crease and it's useless. So rotation
+				players bin it and buy another, over and over.
+			</p>
+		</header>
+
+		<div class="st-stats">
+			<div class="st-block">
+				<div class="st-amount st-waste">
+					<span class="st-sym">$</span><span id="st-waste-value">0</span>
+				</div>
+				<p class="st-caption">
+					thrown away by the world's ~{fmt0(WORLD_PLAYERS)} rotation players this year —
+					about <strong>${fmt0(globalWastePerYear)} a year</strong>, straight in the bin.
+				</p>
+			</div>
+
+			<div class="st-vdivider" aria-hidden="true"><span>Rac9safe<br />changes that</span></div>
+
+			<div class="st-block">
+				<div class="st-amount st-save">
+					<span class="st-sym">$</span>{fmt0(customerSavingPerYear)}<span class="st-per">/yr</span>
+				</div>
+				<p class="st-caption">
+					saved by our <strong>{CUSTOMERS} customers</strong> — a protected rack keeps
+					<strong>${fmt0(customerLifetimeSaving)}</strong> out of the bin over a career.
+				</p>
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.savings-ticker {
+		background: #080808;
+		padding: 2rem 1.5rem;
+		text-align: center;
+		border: 1px solid #1c1c1c;
+		border-radius: var(--radius-md);
+	}
+	.ticker-inner {
+		max-width: 920px;
+		margin: 0 auto;
+	}
+	.st-head {
+		margin-bottom: 1.5rem;
+	}
+	.st-eyebrow {
+		font-size: 0.75rem;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: #6b7280;
+		margin: 0 0 0.5rem;
+	}
+	.st-intro {
+		font-size: 0.875rem;
+		line-height: 1.5;
+		color: #9ca3af;
+		margin: 0 auto;
+		max-width: 34rem;
+	}
+
+	/* Side-by-side stats (landscape). */
+	.st-stats {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 2rem;
+	}
+	.st-block {
+		flex: 1 1 0;
+		max-width: 24rem;
+	}
+	.st-amount {
+		font-family: 'Courier New', Courier, monospace;
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: -0.02em;
+		display: inline-flex;
+		align-items: baseline;
+		justify-content: center;
+		gap: 0.05em;
+	}
+	.st-sym {
+		font-size: 0.55em;
+		align-self: flex-start;
+		margin-top: 0.18em;
+		opacity: 0.8;
+	}
+	.st-waste {
+		font-size: clamp(2rem, 5.5vw, 3.5rem);
+		color: #f59e0b;
+		text-shadow: 0 0 34px rgba(245, 158, 11, 0.32);
+	}
+	.st-save {
+		font-size: clamp(2rem, 5.5vw, 3.5rem);
+		color: #22c55e;
+		text-shadow: 0 0 32px rgba(34, 197, 94, 0.28);
+	}
+	.st-per {
+		font-size: 0.3em;
+		letter-spacing: 0.06em;
+		opacity: 0.6;
+		align-self: flex-end;
+		padding-bottom: 0.35em;
+		margin-left: 0.1em;
+	}
+	.st-caption {
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: #6b7280;
+		margin: 0.625rem auto 0;
+		max-width: 22rem;
+	}
+	.st-caption strong {
+		color: #d1d5db;
+		font-weight: 600;
+	}
+
+	/* Vertical divider with centred label. */
+	.st-vdivider {
+		align-self: stretch;
+		width: 1px;
+		background: #1f1f1f;
+		position: relative;
+		flex: 0 0 auto;
+	}
+	.st-vdivider span {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: #080808;
+		padding: 0.5rem 0.25rem;
+		font-size: 0.625rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: #4b5563;
+		line-height: 1.4;
+		white-space: nowrap;
+	}
+
+	/* Stack on narrow screens. */
+	@media (max-width: 640px) {
+		.st-stats {
+			flex-direction: column;
+			gap: 1.5rem;
+		}
+		.st-vdivider {
+			width: 60%;
+			height: 1px;
+			align-self: center;
+		}
+		.st-vdivider span {
+			padding: 0 0.75rem;
+		}
+	}
+</style>
+
+<script define:vars={{ globalWastePerYear }}>
+	const el = document.getElementById('st-waste-value');
+	if (el) {
+		const SECONDS_PER_YEAR = 365.25 * 24 * 3600;
+		const ratePerSecond = globalWastePerYear / SECONDS_PER_YEAR;
+
+		// Money wasted worldwide since the start of the current calendar year.
+		const yearStart = new Date(new Date().getFullYear(), 0, 1).getTime();
+		const wasteSince = (nowMs) => ((nowMs - yearStart) / 1000) * ratePerSecond;
+
+		const fmt = (n) => Math.floor(n).toLocaleString('en-AU');
+
+		// Spin-up reveal from 0 → current, then tick live.
+		const ANIM_MS = 2400;
+		let animStart = null;
+		const target = wasteSince(Date.now());
+
+		function frame(ts) {
+			if (animStart === null) animStart = ts;
+			const elapsed = ts - animStart;
+			if (elapsed < ANIM_MS) {
+				const t = elapsed / ANIM_MS;
+				const eased = 1 - Math.pow(1 - t, 4);
+				el.textContent = fmt(target * eased);
+				requestAnimationFrame(frame);
+			} else {
+				el.textContent = fmt(wasteSince(Date.now()));
+				requestAnimationFrame(frame);
+			}
+		}
+		requestAnimationFrame(frame);
+	}
+</script>
