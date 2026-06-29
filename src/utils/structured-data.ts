@@ -124,12 +124,15 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 		.toISOString()
 		.slice(0, 10);
 
-	// Return policy is documented on the About page. Linking it here makes the
-	// offer eligible for merchant return-policy enrichment. Add returnPolicyCategory
-	// / merchantReturnDays / returnFees once the exact terms are finalised.
+	// 30-day return window; item unused and in original packaging. Buyer pays
+	// return shipping (by mail). Full policy is documented on the About page.
 	const hasMerchantReturnPolicy = {
 		"@type": "MerchantReturnPolicy",
 		applicableCountry: "AU",
+		returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+		merchantReturnDays: 30,
+		returnMethod: "https://schema.org/ReturnByMail",
+		returnFees: "https://schema.org/ReturnShippingFees",
 		merchantReturnLink: `${origin}/about`,
 	};
 
