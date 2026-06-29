@@ -28,6 +28,9 @@ const { title, description, image, canonical, content, ogType, jsonLd } = Astro.
 
 const menu = await getMenu("primary");
 
+// Open Graph images must be absolute URLs; absolutize root-relative paths.
+const resolvedImage = image?.startsWith("/") ? new URL(image, Astro.url.origin).href : image;
+
 const pageCtx = createPublicPageContext({
 	Astro,
 	kind: content ? "content" : "custom",
@@ -35,7 +38,7 @@ const pageCtx = createPublicPageContext({
 	title,
 	description,
 	canonical,
-	image,
+	image: resolvedImage,
 	content,
 });
 

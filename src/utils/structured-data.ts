@@ -10,6 +10,7 @@ import { getPostDate, getPostImageSrc, getPostIntro, resolveMediaUrl, type PostL
 const BRAND_NAME = "Cueism";
 const BRAND_EMAIL = "0@cueism.com";
 const CURRENCY = "AUD";
+const LOGO_PATH = "/logo.png";
 
 // Social profile URLs for the Organization's `sameAs`. Add real profiles here
 // (Instagram, Facebook, etc.) to enrich brand attribution in AI/search results.
@@ -78,7 +79,7 @@ export function buildOrganization(origin: string): Record<string, unknown> {
 		"@id": `${origin}/#organization`,
 		name: BRAND_NAME,
 		url: origin,
-		logo: `${origin}/favicon.ico`,
+		logo: `${origin}${LOGO_PATH}`,
 		email: BRAND_EMAIL,
 		areaServed: "AU",
 	};
@@ -191,7 +192,7 @@ export function buildBlogPosting(post: PostLike, origin: string): Record<string,
 		publisher: {
 			"@type": "Organization",
 			name: BRAND_NAME,
-			logo: { "@type": "ImageObject", url: `${origin}/favicon.ico` },
+			logo: { "@type": "ImageObject", url: `${origin}${LOGO_PATH}` },
 		},
 	};
 
