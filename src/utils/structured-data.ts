@@ -13,7 +13,7 @@ const CURRENCY = "AUD";
 
 // Social profile URLs for the Organization's `sameAs`. Add real profiles here
 // (Instagram, Facebook, etc.) to enrich brand attribution in AI/search results.
-const SOCIAL_PROFILES: string[] = [];
+const SOCIAL_PROFILES: string[] = ["https://www.youtube.com/c/cueism"];
 
 /** Strip HTML tags, collapse whitespace, and truncate to a clean plain-text string. */
 export function stripToPlainText(input: unknown, maxLen = 300): string {
@@ -37,6 +37,26 @@ function toAbsoluteUrl(value: string | undefined, origin: string): string | unde
 	if (/^https?:\/\//i.test(value)) return value;
 	if (value.startsWith("//")) return `https:${value}`;
 	return `${origin}${value.startsWith("/") ? "" : "/"}${value}`;
+}
+
+export type Crumb = { label: string; href?: string | null };
+
+/** The BreadcrumbList graph for a page's navigation trail. */
+export function buildBreadcrumbList(items: Crumb[], origin: string): Record<string, unknown> {
+	return {
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: items.map((item, index) => {
+			const element: Record<string, unknown> = {
+				"@type": "ListItem",
+				position: index + 1,
+				name: item.label,
+			};
+			const href = item.href;
+			if (href) element.item = toAbsoluteUrl(href, origin);
+			return element;
+		}),
+	};
 }
 
 /** The WebSite graph — sitewide site identity. */
@@ -103,6 +123,15 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 		.toISOString()
 		.slice(0, 10);
 
+	// Return policy is documented on the About page. Linking it here makes the
+	// offer eligible for merchant return-policy enrichment. Add returnPolicyCategory
+	// / merchantReturnDays / returnFees once the exact terms are finalised.
+	const hasMerchantReturnPolicy = {
+		"@type": "MerchantReturnPolicy",
+		applicableCountry: "AU",
+		merchantReturnLink: `${origin}/about`,
+	};
+
 	const offers: Record<string, unknown> = hasSpread
 		? {
 				"@type": "AggregateOffer",
@@ -113,6 +142,7 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 				availability,
 				itemCondition,
 				priceValidUntil,
+				hasMerchantReturnPolicy,
 				url,
 			}
 		: {
@@ -122,6 +152,7 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 				availability,
 				itemCondition,
 				priceValidUntil,
+				hasMerchantReturnPolicy,
 				url,
 			};
 

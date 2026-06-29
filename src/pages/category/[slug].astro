@@ -2,6 +2,7 @@
 import { getTerm, getEmDashCollection } from "emdash";
 import Base from "../../layouts/Base.astro";
 import PostCardImage from "../../components/PostCardImage";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import { getPostDate, getPostImageSrc, getPostIntro } from "../../utils/post-format";
 
 const { slug } = Astro.params;
@@ -20,6 +21,13 @@ const normalizedPosts = posts;
 ---
 
 <Base title={`${term.label} posts`} description={`Posts in ${term.label}`}>
+	<Breadcrumbs
+		items={[
+			{ label: "Home", href: "/" },
+			{ label: "Journal", href: "/posts" },
+			{ label: term.label },
+		]}
+	/>
 	<h1>{term.label}</h1>
 	<p>{posts.length} {posts.length === 1 ? "post" : "posts"}</p>
 

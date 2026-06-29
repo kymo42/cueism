@@ -1,0 +1,121 @@
+---
+import { safeJsonLdSerialize } from "emdash/page";
+import { buildBreadcrumbList, type Crumb } from "../utils/structured-data";
+
+interface Props {
+	/** Ordered trail, root first. The last item is rendered as the current page. */
+	items: Crumb[];
+}
+
+const { items } = Astro.props;
+const jsonLd = buildBreadcrumbList(items, Astro.url.origin);
+---
+
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+	<ol>
+		{items.map((item, i) => {
+			const isLast = i === items.length - 1;
+			const isHome = i === 0;
+			return (
+				<li>
+					{!isLast && item.href ? (
+						<a class="crumb" href={item.href} data-astro-prefetch>
+							{isHome && (
+								<svg class="crumb-icon" viewBox="0 0 24 24" aria-hidden="true">
+									<path d="M3 11.5 12 4l9 7.5" />
+									<path d="M5.5 10v9.5h13V10" />
+								</svg>
+							)}
+							<span>{item.label}</span>
+						</a>
+					) : (
+						<span class="crumb crumb-current" aria-current="page">{item.label}</span>
+					)}
+					{!isLast && (
+						<svg class="crumb-sep" viewBox="0 0 24 24" aria-hidden="true">
+							<path d="m9 6 6 6-6 6" />
+						</svg>
+					)}
+				</li>
+			);
+		})}
+	</ol>
+</nav>
+<script type="application/ld+json" set:html={safeJsonLdSerialize(jsonLd)} />
+
+<style>
+	.breadcrumbs {
+		margin: var(--spacing-md) 0;
+	}
+	.breadcrumbs ol {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.25rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.breadcrumbs li {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		min-width: 0;
+	}
+	.crumb {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4em;
+		padding: 0.4em 0.85em;
+		border-radius: var(--radius-full);
+		font-size: 0.8125rem;
+		line-height: 1;
+		white-space: nowrap;
+		max-width: 16rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		border: 1px solid var(--color-border-light);
+		background: var(--color-bg-surface);
+		color: var(--color-text-secondary);
+		text-decoration: none;
+		transition: var(--transition-base);
+	}
+	a.crumb:hover {
+		color: var(--color-text-primary);
+		background: var(--color-bg-hover);
+		border-color: var(--color-border);
+		transform: translateY(-1px);
+		box-shadow: 0 2px 8px rgba(32, 33, 36, 0.08);
+	}
+	a.crumb:active {
+		transform: translateY(0);
+	}
+	.crumb-current {
+		color: var(--color-accent);
+		font-weight: 500;
+		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		border-color: color-mix(in srgb, var(--color-accent) 22%, transparent);
+		cursor: default;
+	}
+	.crumb-icon {
+		width: 0.95em;
+		height: 0.95em;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.75;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		flex-shrink: 0;
+	}
+	.crumb-sep {
+		width: 1rem;
+		height: 1rem;
+		fill: none;
+		stroke: var(--color-text-tertiary);
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		flex-shrink: 0;
+		opacity: 0.6;
+	}
+</style>

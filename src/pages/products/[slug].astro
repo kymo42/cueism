@@ -3,6 +3,7 @@ import { getEmDashEntry } from "emdash";
 import { Image, PortableText } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 import ProductPurchase from "../../components/ProductPurchase";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import {
 	getBasePrice,
 	getBaseStock,
@@ -119,9 +120,13 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 	ogType="product"
 	jsonLd={productJsonLd}
 >
-	<div style="padding: var(--spacing-lg) 0;">
-		<a href="/products" style="color: var(--color-text-secondary); font-size: 0.875rem;">&larr; Back to Shop</a>
-	</div>
+	<Breadcrumbs
+		items={[
+			{ label: "Home", href: "/" },
+			{ label: "Shop", href: "/products" },
+			{ label: product.data.title },
+		]}
+	/>
 
 	<div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-xl); margin-top: var(--spacing-md);">
 		<div>

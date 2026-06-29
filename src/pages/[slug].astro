@@ -2,6 +2,7 @@
 import { getEmDashEntry, getSeoMeta } from "emdash";
 import { PortableText } from "emdash/ui";
 import Base from "../layouts/Base.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
 
 const { slug } = Astro.params;
 
@@ -18,7 +19,7 @@ if (!page) {
 Astro.cache.set(cacheHint);
 
 const seo = getSeoMeta(page, {
-	siteTitle: "My Site",
+	siteTitle: "Cueism",
 	siteUrl: Astro.url.origin,
 	path: `/${slug}`,
 });
@@ -30,6 +31,7 @@ const seo = getSeoMeta(page, {
 	canonical={seo.canonical}
 	content={{ collection: "pages", id: page.id, slug }}
 >
+	<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: page.data.title }]} />
 	<article>
 		<h1 {...page.edit.title}>{page.data.title}</h1>
 
