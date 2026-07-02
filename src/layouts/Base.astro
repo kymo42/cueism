@@ -44,11 +44,27 @@ const pageCtx = createPublicPageContext({
 
 const siteJsonLd = [buildOrganization(Astro.url.origin), buildWebSite(Astro.url.origin)];
 const extraJsonLd = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+
+// GA4 measurement ID per host — cueism.com and www.cueism.com are tracked as separate properties.
+const GA_MEASUREMENT_IDS: Record<string, string> = {
+	"cueism.com": "G-Q1R9XBJWEX",
+	"www.cueism.com": "G-CJHZQ7LR51",
+};
+const gaMeasurementId = GA_MEASUREMENT_IDS[Astro.url.hostname] ?? GA_MEASUREMENT_IDS["cueism.com"];
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
+		<script async src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}></script>
+		<script is:inline define:vars={{ gaMeasurementId }}>
+			window.dataLayer = window.dataLayer || [];
+			function gtag() {
+				dataLayer.push(arguments);
+			}
+			gtag("js", new Date());
+			gtag("config", gaMeasurementId);
+		</script>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
