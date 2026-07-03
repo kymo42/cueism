@@ -37,9 +37,13 @@ try {
 	description="Watch Cueism's YouTube Shorts -- rational 3D printed billiards accessories in action."
 	image="/og-image.png"
 >
-	<div class="shorts-header">
+	<section class="hero">
 		<h1>Shorty</h1>
 		<p>Our YouTube Shorts, all in one place.</p>
+		<a href="/products" class="btn btn-primary" data-astro-prefetch>Shop the Collection</a>
+	</section>
+
+	<div class="shorts-searchbar">
 		<input
 			type="search"
 			id="shorts-search"
@@ -73,7 +77,9 @@ try {
 </Base>
 
 <style>
-	.shorts-header {
+	.shorts-searchbar {
+		display: flex;
+		justify-content: center;
 		margin-bottom: var(--spacing-md);
 	}
 

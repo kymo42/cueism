@@ -7,7 +7,9 @@ export function youtubeShortsPlugin(): PluginDescriptor {
 		format: "standard",
 		entrypoint: "@cueism/plugin-youtube-shorts/sandbox",
 		capabilities: ["network:fetch"],
-		allowedHosts: ["www.googleapis.com"],
+		// googleapis for the Data API; www.youtube.com for the /shorts/ URL check
+		// that distinguishes real Shorts from short landscape uploads.
+		allowedHosts: ["www.googleapis.com", "www.youtube.com"],
 		storage: {
 			shorts: {
 				indexes: ["publishedAt"],

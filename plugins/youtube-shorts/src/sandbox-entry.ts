@@ -29,6 +29,27 @@ function parseIsoDuration(iso: string): number {
 	return (Number(h) || 0) * 3600 + (Number(m) || 0) * 60 + (Number(s) || 0);
 }
 
+// A short duration alone doesn't make a video a Short -- the channel also has
+// landscape clips on the main tab that are under 3 minutes. The reliable signal
+// is the canonical /shorts/ URL: real Shorts return 200, everything else
+// 303-redirects to /watch. We use a raw manual-redirect fetch (not ctx.http,
+// which auto-follows redirects and would mask the 303). Trusted in-process
+// plugin, so globalThis.fetch is available. On any error we return false so a
+// non-Short can never slip in; a genuine Short missed by a transient failure is
+// re-evaluated on the next hourly sync.
+async function isYouTubeShort(videoId: string): Promise<boolean> {
+	try {
+		const res = await fetch(`https://www.youtube.com/shorts/${videoId}`, {
+			method: "HEAD",
+			redirect: "manual",
+			headers: { "User-Agent": "Mozilla/5.0" },
+		});
+		return res.status === 200;
+	} catch {
+		return false;
+	}
+}
+
 async function syncShorts(ctx: PluginContext): Promise<{ added: number; checked: number }> {
 	const apiKey = await ctx.kv.get<string>("settings:apiKey");
 	const channelHandle = (await ctx.kv.get<string>("settings:channelHandle")) || "cueism";
@@ -99,7 +120,10 @@ async function syncShorts(ctx: PluginContext): Promise<{ added: number; checked:
 
 			for (const video of detailsData.items ?? []) {
 				const durationSeconds = parseIsoDuration(video.contentDetails?.duration ?? "PT0S");
+				// Cheap pre-filter first (skips the network check for obvious long uploads),
+				// then confirm it's an actual Short via the /shorts/ URL.
 				if (durationSeconds > MAX_SHORT_DURATION_SECONDS) continue;
+				if (!(await isYouTubeShort(video.id))) continue;
 
 				const short: ShortVideo = {
 					videoId: video.id,
