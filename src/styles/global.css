@@ -296,6 +296,29 @@ section {
 	text-decoration: none;
 }
 
+/* Page-accent shop buttons: yellow on /shorts, orange on /posts. */
+.btn-yellow {
+	background: #f9c22e;
+	color: #202124;
+}
+
+.btn-yellow:hover {
+	background: #f0b400;
+	color: #202124;
+	text-decoration: none;
+}
+
+.btn-orange {
+	background: #ef6c00;
+	color: #ffffff;
+}
+
+.btn-orange:hover {
+	background: #e65100;
+	color: #ffffff;
+	text-decoration: none;
+}
+
 .btn-secondary {
 	background: var(--color-bg-base);
 	color: var(--color-accent);
