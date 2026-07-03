@@ -3,6 +3,9 @@
 	"version": "0.0.1",
 	"private": true,
 	"type": "module",
+	"workspaces": [
+		"plugins/*"
+	],
 	"scripts": {
 		"dev": "astro dev",
 		"build": "astro build",
@@ -13,6 +16,7 @@
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.1.6",
 		"@astrojs/react": "^5.0.0",
+		"@cueism/plugin-youtube-shorts": "*",
 		"@emdash-cms/cloudflare": "^0.1.0",
 		"@nanostores/react": "^1.1.0",
 		"astro": "^6.1.2",

@@ -1,0 +1,154 @@
+---
+import Base from "../layouts/Base.astro";
+
+interface ShortVideo {
+	videoId: string;
+	title: string;
+	thumbnailUrl: string;
+	publishedAt: string;
+	durationSeconds: number;
+}
+
+let shorts: ShortVideo[] = [];
+try {
+	const res = await fetch(new URL("/_emdash/api/plugins/youtube-shorts/list?limit=300", Astro.url.origin));
+	if (res.ok) {
+		const data = (await res.json()) as { items: ShortVideo[] };
+		shorts = data.items ?? [];
+	}
+} catch {
+	// Plugin not configured yet or the YouTube sync hasn't run -- render an empty gallery.
+}
+---
+
+<Base
+	title="Shorty | Cueism"
+	description="Watch Cueism's YouTube Shorts -- rational 3D printed billiards accessories in action."
+	image="/og-image.png"
+>
+	<div class="shorts-header">
+		<h1>Shorty</h1>
+		<p>Our YouTube Shorts, all in one place.</p>
+		<input
+			type="search"
+			id="shorts-search"
+			placeholder="Search shorts..."
+			aria-label="Search shorts"
+			class="shorts-search"
+		/>
+	</div>
+
+	{
+		shorts.length === 0 ? (
+			<p>No shorts yet -- check back soon.</p>
+		) : (
+			<div class="grid grid-auto shorts-grid" id="shorts-grid">
+				{shorts.map((short) => (
+					<article class="card short-card" data-title={short.title.toLowerCase()}>
+						<div class="card-image short-thumb" data-video-id={short.videoId}>
+							<img src={short.thumbnailUrl} alt={short.title} loading="lazy" />
+							<span class="short-play" aria-hidden="true">▶</span>
+						</div>
+						<div class="card-content">
+							<h3>{short.title}</h3>
+						</div>
+					</article>
+				))}
+			</div>
+		)
+	}
+
+	<p id="shorts-empty" class="shorts-empty" hidden>No shorts match your search.</p>
+</Base>
+
+<style>
+	.shorts-header {
+		margin-bottom: var(--spacing-md);
+	}
+
+	.shorts-search {
+		width: 100%;
+		max-width: 320px;
+		padding: 0.6rem 0.9rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-full);
+		font-family: var(--font-primary);
+		font-size: 0.9rem;
+		margin-top: var(--spacing-xs);
+	}
+
+	.shorts-grid {
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+	}
+
+	.short-thumb {
+		aspect-ratio: 9 / 16;
+		position: relative;
+		cursor: pointer;
+		background: #000;
+	}
+
+	.short-play {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 2rem;
+		color: #fff;
+		text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+		pointer-events: none;
+	}
+
+	.short-thumb iframe {
+		width: 100%;
+		height: 100%;
+		border: 0;
+	}
+
+	.shorts-empty {
+		display: none;
+	}
+
+	@media (max-width: 900px) {
+		.shorts-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 600px) {
+		.shorts-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+</style>
+
+<script>
+	document.querySelectorAll<HTMLElement>(".short-thumb").forEach((thumb) => {
+		thumb.addEventListener("click", () => {
+			const videoId = thumb.dataset.videoId;
+			if (!videoId) return;
+			thumb.innerHTML = "";
+			const iframe = document.createElement("iframe");
+			iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+			iframe.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture";
+			iframe.allowFullscreen = true;
+			thumb.appendChild(iframe);
+		});
+	});
+
+	const searchInput = document.getElementById("shorts-search") as HTMLInputElement | null;
+	const cards = Array.from(document.querySelectorAll<HTMLElement>(".short-card"));
+	const emptyMessage = document.getElementById("shorts-empty");
+
+	searchInput?.addEventListener("input", () => {
+		const needle = searchInput.value.trim().toLowerCase();
+		let visibleCount = 0;
+		for (const card of cards) {
+			const matches = !needle || (card.dataset.title ?? "").includes(needle);
+			card.style.display = matches ? "" : "none";
+			if (matches) visibleCount++;
+		}
+		if (emptyMessage) emptyMessage.hidden = visibleCount !== 0;
+	});
+</script>
