@@ -2,7 +2,7 @@ diff --git a/node_modules/emdash/src/astro/routes/api/auth/oauth/[provider].ts b
 index 0000000..0000000 100644
 --- a/node_modules/emdash/src/astro/routes/api/auth/oauth/[provider].ts
 +++ b/node_modules/emdash/src/astro/routes/api/auth/oauth/[provider].ts
-@@ -20,6 +20,22 @@ function isValidProvider(provider: string): provider is ProviderName {
+@@ -21,6 +21,22 @@ function isValidProvider(provider: string): provider is ProviderName {
  	return VALID_PROVIDERS.has(provider);
  }
 
@@ -25,15 +25,15 @@ index 0000000..0000000 100644
  /** Safely extract a string value from an env-like record */
  function envString(env: Record<string, unknown>, ...keys: string[]): string | undefined {
  	for (const key of keys) {
-@@ -86,12 +102,10 @@ export const GET: APIRoute = async ({ params, request, locals, redirect }) => {
+@@ -93,12 +109,10 @@ export const GET: APIRoute = async ({ params, request, locals, redirect }) => {
  	try {
  		const url = new URL(request.url);
 
 -		// Get OAuth providers from environment
 -		// Access via locals.runtime for Cloudflare, or import.meta.env for Node
--		// eslint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- locals.runtime is injected by the Cloudflare adapter at runtime; not declared on App.Locals since the adapter is optional
+-		// eslint-disable-next-line typescript/no-unsafe-type-assertion -- locals.runtime is injected by the Cloudflare adapter at runtime; not declared on App.Locals since the adapter is optional
 -		const runtimeLocals = locals as unknown as { runtime?: { env?: Record<string, unknown> } };
--		// eslint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- import.meta.env is typed as ImportMetaEnv but we need Record<string, unknown> for getOAuthConfig
+-		// eslint-disable-next-line typescript/no-unsafe-type-assertion -- import.meta.env is typed as ImportMetaEnv but we need Record<string, unknown> for getOAuthConfig
 -		const env = runtimeLocals.runtime?.env ?? (import.meta.env as Record<string, unknown>);
 +		// Get OAuth providers from environment. Astro v6 removed Astro.locals.runtime.env;
 +		// read Cloudflare Workers bindings via "cloudflare:workers" instead, falling back to
@@ -46,7 +46,7 @@ diff --git a/node_modules/emdash/src/astro/routes/api/auth/oauth/[provider]/call
 index 0000000..0000000 100644
 --- a/node_modules/emdash/src/astro/routes/api/auth/oauth/[provider]/callback.ts
 +++ b/node_modules/emdash/src/astro/routes/api/auth/oauth/[provider]/callback.ts
-@@ -27,6 +27,22 @@ function isValidProvider(provider: string): provider is ProviderName {
+@@ -30,6 +30,22 @@ function isValidProvider(provider: string): provider is ProviderName {
  	return VALID_PROVIDERS.has(provider);
  }
 
@@ -69,14 +69,14 @@ index 0000000..0000000 100644
  /** Safely extract a string value from an env-like record */
  function envString(env: Record<string, unknown>, ...keys: string[]): string | undefined {
  	for (const key of keys) {
-@@ -112,11 +128,10 @@ export const GET: APIRoute = async ({ params, request, locals, session, redirect }) => {
+@@ -115,11 +131,10 @@ export const GET: APIRoute = async ({ params, request, locals, session, redirect }) => {
  	}
 
  	try {
 -		// Get OAuth providers from environment
--		// eslint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- locals.runtime is injected by the Cloudflare adapter at runtime; not declared on App.Locals since the adapter is optional
+-		// eslint-disable-next-line typescript/no-unsafe-type-assertion -- locals.runtime is injected by the Cloudflare adapter at runtime; not declared on App.Locals since the adapter is optional
 -		const runtimeLocals = locals as unknown as { runtime?: { env?: Record<string, unknown> } };
--		// eslint-disable-next-line typescript-eslint(no-unsafe-type-assertion) -- import.meta.env is typed as ImportMetaEnv but we need Record<string, unknown> for getOAuthConfig
+-		// eslint-disable-next-line typescript/no-unsafe-type-assertion -- import.meta.env is typed as ImportMetaEnv but we need Record<string, unknown> for getOAuthConfig
 -		const env = runtimeLocals.runtime?.env ?? (import.meta.env as Record<string, unknown>);
 +		// Get OAuth providers from environment. Astro v6 removed Astro.locals.runtime.env;
 +		// read Cloudflare Workers bindings via "cloudflare:workers" instead, falling back to

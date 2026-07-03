@@ -1,5 +1,5 @@
-import { definePlugin } from "emdash";
 import type { PluginContext } from "emdash";
+import type { SandboxedPlugin } from "emdash/plugin";
 import { z } from "astro/zod";
 
 interface ShortVideo {
@@ -119,23 +119,7 @@ async function syncShorts(ctx: PluginContext): Promise<{ added: number; checked:
 	return { added, checked };
 }
 
-export default definePlugin({
-	admin: {
-		settingsSchema: {
-			apiKey: {
-				type: "secret",
-				label: "YouTube Data API Key",
-				description: "Google Cloud API key with YouTube Data API v3 enabled",
-			},
-			channelHandle: {
-				type: "string",
-				label: "Channel Handle",
-				description: "Without the @ symbol -- e.g. cueism",
-				default: "cueism",
-			},
-		},
-	},
-
+export default {
 	hooks: {
 		"plugin:install": {
 			handler: async (_event: any, ctx: PluginContext) => {
@@ -165,13 +149,19 @@ export default definePlugin({
 		// Public: read-only, consumed server-side by the /shorts gallery page.
 		list: {
 			public: true,
-			input: z.object({
-				q: z.string().optional(),
-				limit: z.coerce.number().min(1).max(300).default(300),
-			}),
-			handler: async (routeCtx: any) => {
+			// GET requests never carry query params into ctx.input for trusted plugins --
+			// emdash only reads a JSON body (request.json()), which is undefined on GET.
+			// Default the whole schema so the public GET call this route actually receives
+			// (from the /shorts page) still validates; q/limit remain usable via POST.
+			input: z
+				.object({
+					q: z.string().optional(),
+					limit: z.coerce.number().min(1).max(300).default(300),
+				})
+				.default({}),
+			handler: async (routeCtx: any, ctx: PluginContext) => {
 				const { q, limit } = routeCtx.input;
-				const result = await routeCtx.storage.shorts!.query({
+				const result = await ctx.storage.shorts!.query({
 					orderBy: { publishedAt: "desc" },
 					limit,
 				});
@@ -188,9 +178,9 @@ export default definePlugin({
 		// Admin-only (not public): manual trigger, useful right after configuring settings
 		// instead of waiting for the next hourly cron tick.
 		sync: {
-			handler: async (routeCtx: any) => {
-				return await syncShorts(routeCtx);
+			handler: async (_routeCtx: any, ctx: PluginContext) => {
+				return await syncShorts(ctx);
 			},
 		},
 	},
-});
+} satisfies SandboxedPlugin;

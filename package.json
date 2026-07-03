@@ -10,7 +10,7 @@
 		"dev": "astro dev",
 		"build": "astro build",
 		"preview": "astro preview",
-		"deploy": "wrangler deploy",
+		"deploy": "astro build && wrangler deploy",
 		"typecheck": "astro check",
 		"postinstall": "patch-package"
 	},
@@ -18,11 +18,11 @@
 		"@astrojs/cloudflare": "^13.1.6",
 		"@astrojs/react": "^5.0.0",
 		"@cueism/plugin-youtube-shorts": "*",
-		"@emdash-cms/cloudflare": "^0.1.0",
+		"@emdash-cms/cloudflare": "^0.27.0",
 		"@nanostores/react": "^1.1.0",
 		"astro": "^6.1.2",
-		"emdash": "^0.1.0",
-		"kysely": "^0.27.6",
+		"emdash": "^0.27.0",
+		"kysely": "^0.29.2",
 		"nanostores": "^1.2.0",
 		"react": "^19.2.4",
 		"react-dom": "^19.2.4"
