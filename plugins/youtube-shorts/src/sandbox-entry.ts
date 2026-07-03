@@ -16,6 +16,12 @@ interface ShortVideo {
 const MAX_SHORT_DURATION_SECONDS = 180;
 const CRON_NAME = "sync-shorts";
 
+// The YouTube Data API key is HTTP-referrer-restricted to cueism.com in Google
+// Cloud Console, so every server-side call must present a matching Referer or
+// Google returns 403 API_KEY_HTTP_REFERRER_BLOCKED. Setting it here lets the
+// Worker use the same locked-down key a browser would.
+const YT_FETCH_INIT: RequestInit = { headers: { Referer: "https://cueism.com/" } };
+
 function parseIsoDuration(iso: string): number {
 	const match = /^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(iso);
 	if (!match) return 0;
@@ -35,7 +41,7 @@ async function syncShorts(ctx: PluginContext): Promise<{ added: number; checked:
 	let uploadsPlaylistId = await ctx.kv.get<string>("state:uploadsPlaylistId");
 	if (!uploadsPlaylistId) {
 		const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&forHandle=${encodeURIComponent(channelHandle)}&key=${apiKey}`;
-		const channelRes = await ctx.http!.fetch(channelUrl);
+		const channelRes = await ctx.http!.fetch(channelUrl, YT_FETCH_INIT);
 		if (!channelRes.ok) {
 			throw new Error(`YouTube channels.list failed: ${channelRes.status} ${await channelRes.text()}`);
 		}
@@ -60,7 +66,7 @@ async function syncShorts(ctx: PluginContext): Promise<{ added: number; checked:
 		playlistUrl.searchParams.set("key", apiKey);
 		if (pageToken) playlistUrl.searchParams.set("pageToken", pageToken);
 
-		const playlistRes = await ctx.http!.fetch(playlistUrl.toString());
+		const playlistRes = await ctx.http!.fetch(playlistUrl.toString(), YT_FETCH_INIT);
 		if (!playlistRes.ok) {
 			throw new Error(`YouTube playlistItems.list failed: ${playlistRes.status}`);
 		}
@@ -85,7 +91,7 @@ async function syncShorts(ctx: PluginContext): Promise<{ added: number; checked:
 			detailsUrl.searchParams.set("id", newVideoIds.join(","));
 			detailsUrl.searchParams.set("key", apiKey);
 
-			const detailsRes = await ctx.http!.fetch(detailsUrl.toString());
+			const detailsRes = await ctx.http!.fetch(detailsUrl.toString(), YT_FETCH_INIT);
 			if (!detailsRes.ok) {
 				throw new Error(`YouTube videos.list failed: ${detailsRes.status}`);
 			}
@@ -124,12 +130,16 @@ export default {
 		"plugin:install": {
 			handler: async (_event: any, ctx: PluginContext) => {
 				await ctx.kv.set("settings:channelHandle", "cueism");
-				await ctx.cron!.schedule(CRON_NAME, { schedule: "0 * * * *" });
+				// ctx.cron is undefined on serverless (Cloudflare) — the cron task is
+				// seeded directly in _emdash_cron_tasks and driven by the Worker's
+				// scheduled() handler. Only self-schedule where cron is wired (Node/dev),
+				// and never let its absence throw and roll back the kv.set above.
+				await ctx.cron?.schedule(CRON_NAME, { schedule: "0 * * * *" });
 			},
 		},
 		"plugin:activate": {
 			handler: async (_event: any, ctx: PluginContext) => {
-				await ctx.cron!.schedule(CRON_NAME, { schedule: "0 * * * *" });
+				await ctx.cron?.schedule(CRON_NAME, { schedule: "0 * * * *" });
 			},
 		},
 		cron: {

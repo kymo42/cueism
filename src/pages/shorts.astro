@@ -11,10 +11,21 @@ interface ShortVideo {
 
 let shorts: ShortVideo[] = [];
 try {
-	const res = await fetch(new URL("/_emdash/api/plugins/youtube-shorts/list?limit=300", Astro.url.origin));
-	if (res.ok) {
-		const data = (await res.json()) as { items: ShortVideo[] };
-		shorts = data.items ?? [];
+	// Call the plugin's public `list` route through the EmDash runtime rather than
+	// an HTTP fetch to our own origin: a Worker fetching its own zone is an
+	// unreliable loopback on Cloudflare. handlePublicPluginApiRoute dispatches
+	// in-process and returns { success, data } where data is the route's payload.
+	const handler = (Astro.locals as any)?.emdash?.handlePublicPluginApiRoute;
+	if (typeof handler === "function") {
+		const result = await handler(
+			"youtube-shorts",
+			"GET",
+			"/list",
+			new Request("https://internal/list"),
+		);
+		if (result?.success) {
+			shorts = (result.data as { items?: ShortVideo[] })?.items ?? [];
+		}
 	}
 } catch {
 	// Plugin not configured yet or the YouTube sync hasn't run -- render an empty gallery.

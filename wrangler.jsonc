@@ -19,6 +19,15 @@
 			"bucket_name": "cueism-media",
 		},
 	],
+	"triggers": {
+		// Drives EmDash's scheduled() handler: plugin cron (youtube-shorts hourly
+		// sync), scheduled content publishing, and system cleanup. Ticks every 15
+		// min; each task's own schedule (stored in _emdash_cron_tasks) decides when
+		// it actually runs.
+		"crons": [
+			"*/15 * * * *"
+		]
+	},
 	"observability": {
 		"enabled": true
 	}
