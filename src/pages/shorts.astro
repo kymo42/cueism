@@ -133,39 +133,153 @@ try {
 		}
 	}
 
+	/* Phone: a full-width vertical feed that plays as you scroll, like the
+	   YouTube Shorts / TikTok apps. Desktop keeps the multi-column grid above. */
 	@media (max-width: 600px) {
 		.shorts-grid {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
+			display: flex;
+			flex-direction: column;
+			gap: 0;
 		}
+
+		.short-card {
+			border: none;
+			border-radius: 0;
+			background: #000;
+			min-height: 92dvh;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			position: relative;
+			scroll-snap-align: center;
+		}
+
+		.short-thumb {
+			width: 100%;
+			aspect-ratio: 9 / 16;
+			max-height: 88dvh;
+			margin: 0 auto;
+		}
+
+		.short-thumb img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.short-play {
+			font-size: 3rem;
+		}
+
+		.card-content {
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			padding: 1rem 1rem 1.5rem;
+			background: linear-gradient(to top, rgba(0, 0, 0, 0.65), transparent);
+		}
+
+		.card-content h3 {
+			color: #fff;
+			margin: 0;
+		}
+
+		/* Once a slide is the active (playing) one, drop the thumbnail + play glyph. */
+		.short-card[data-active="1"] .short-play {
+			display: none;
+		}
+
+		.short-card[data-active="1"] .short-thumb img {
+			visibility: hidden;
+		}
+	}
+
+	/* Gentle snap so each short settles into view; toggled per-page by the script
+	   (added on load, removed before view-transition swap) so it never leaks to
+	   other pages. */
+	:global(html.shorts-snap) {
+		scroll-snap-type: y proximity;
 	}
 </style>
 
 <script>
-	document.querySelectorAll<HTMLElement>(".short-thumb").forEach((thumb) => {
-		thumb.addEventListener("click", () => {
-			const videoId = thumb.dataset.videoId;
-			if (!videoId) return;
-			thumb.innerHTML = "";
-			const iframe = document.createElement("iframe");
-			iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
-			iframe.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture";
-			iframe.allowFullscreen = true;
-			thumb.appendChild(iframe);
-		});
-	});
+	function buildIframe(videoId: string, autoplayFeed: boolean): HTMLIFrameElement {
+		const iframe = document.createElement("iframe");
+		// Feed mode (mobile): muted autoplay + loop so it plays on scroll like TikTok/Shorts;
+		// controls stay on so the viewer can tap to unmute. Click mode (desktop): normal autoplay.
+		const params = autoplayFeed
+			? `autoplay=1&mute=1&playsinline=1&loop=1&playlist=${videoId}&controls=1&rel=0&modestbranding=1`
+			: "autoplay=1&rel=0";
+		iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?${params}`;
+		iframe.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture";
+		iframe.allowFullscreen = true;
+		return iframe;
+	}
 
-	const searchInput = document.getElementById("shorts-search") as HTMLInputElement | null;
-	const cards = Array.from(document.querySelectorAll<HTMLElement>(".short-card"));
-	const emptyMessage = document.getElementById("shorts-empty");
+	function setupShorts(): void {
+		const cards = Array.from(document.querySelectorAll<HTMLElement>(".short-card"));
+		const isMobileFeed = window.matchMedia("(max-width: 600px)").matches;
 
-	searchInput?.addEventListener("input", () => {
-		const needle = searchInput.value.trim().toLowerCase();
-		let visibleCount = 0;
-		for (const card of cards) {
-			const matches = !needle || (card.dataset.title ?? "").includes(needle);
-			card.style.display = matches ? "" : "none";
-			if (matches) visibleCount++;
+		if (isMobileFeed) {
+			// Vertical autoplay feed: the short nearest the centre of the viewport plays;
+			// off-screen ones drop their iframe so at most a couple are ever mounted.
+			document.documentElement.classList.add("shorts-snap");
+			document.addEventListener(
+				"astro:before-swap",
+				() => document.documentElement.classList.remove("shorts-snap"),
+				{ once: true },
+			);
+
+			const activate = (card: HTMLElement) => {
+				if (card.dataset.active === "1") return;
+				card.dataset.active = "1";
+				const thumb = card.querySelector<HTMLElement>(".short-thumb");
+				if (!thumb || thumb.querySelector("iframe")) return;
+				thumb.appendChild(buildIframe(thumb.dataset.videoId ?? "", true));
+			};
+			const deactivate = (card: HTMLElement) => {
+				if (card.dataset.active !== "1") return;
+				card.dataset.active = "0";
+				card.querySelector(".short-thumb iframe")?.remove();
+			};
+
+			const io = new IntersectionObserver(
+				(entries) => {
+					for (const e of entries) {
+						if (e.isIntersecting && e.intersectionRatio >= 0.6) activate(e.target as HTMLElement);
+						else deactivate(e.target as HTMLElement);
+					}
+				},
+				{ threshold: [0, 0.6, 1] },
+			);
+			cards.forEach((c) => io.observe(c));
+		} else {
+			// Desktop grid: tap a thumbnail to play it in place.
+			document.querySelectorAll<HTMLElement>(".short-thumb").forEach((thumb) => {
+				thumb.addEventListener("click", () => {
+					const videoId = thumb.dataset.videoId;
+					if (!videoId || thumb.querySelector("iframe")) return;
+					thumb.innerHTML = "";
+					thumb.appendChild(buildIframe(videoId, false));
+				});
+			});
 		}
-		if (emptyMessage) emptyMessage.hidden = visibleCount !== 0;
-	});
+
+		const searchInput = document.getElementById("shorts-search") as HTMLInputElement | null;
+		const emptyMessage = document.getElementById("shorts-empty");
+		searchInput?.addEventListener("input", () => {
+			const needle = searchInput.value.trim().toLowerCase();
+			let visibleCount = 0;
+			for (const card of cards) {
+				const matches = !needle || (card.dataset.title ?? "").includes(needle);
+				card.style.display = matches ? "" : "none";
+				if (matches) visibleCount++;
+			}
+			if (emptyMessage) emptyMessage.hidden = visibleCount !== 0;
+		});
+	}
+
+	// Runs on first load and after every view-transition navigation.
+	document.addEventListener("astro:page-load", setupShorts);
 </script>
