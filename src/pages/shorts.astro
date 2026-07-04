@@ -117,7 +117,12 @@ try {
 		pointer-events: none;
 	}
 
-	.short-thumb iframe {
+	/* :global(iframe) because the player iframe is created in JS without Astro's
+	   scoped-style attribute -- a plain scoped `.short-thumb iframe` never matches
+	   it, so the iframe stayed at its default 300x150 (the letterbox bug). */
+	.short-thumb :global(iframe) {
+		position: absolute;
+		inset: 0;
 		width: 100%;
 		height: 100%;
 		border: 0;

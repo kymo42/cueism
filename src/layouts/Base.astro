@@ -86,6 +86,10 @@ const gaMeasurementId = GA_MEASUREMENT_IDS[Astro.url.hostname] ?? GA_MEASUREMENT
 		<header>
 			<nav>
 				<a href="/" class="logo" data-astro-prefetch>cueism</a>
+				<input type="checkbox" id="nav-toggle" class="nav-toggle" />
+				<label for="nav-toggle" class="nav-hamburger" aria-label="Toggle menu">
+					<span></span><span></span><span></span>
+				</label>
 				<div class="nav-links">
 					{menu?.items.map((item) => (
 						<a href={item.url} target={item.target} data-astro-prefetch>

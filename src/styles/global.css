@@ -152,6 +152,32 @@ header nav .nav-links a:hover {
 	text-decoration: none;
 }
 
+/* Mobile menu toggle — hidden on desktop; the checkbox is state only. */
+.nav-toggle {
+	display: none;
+}
+
+.nav-hamburger {
+	display: none;
+	flex-direction: column;
+	justify-content: center;
+	gap: 4px;
+	width: 40px;
+	height: 40px;
+	padding: 9px;
+	margin-left: auto;
+	cursor: pointer;
+	border-radius: var(--radius-sm);
+}
+
+.nav-hamburger span {
+	display: block;
+	height: 2px;
+	width: 100%;
+	background: var(--color-text-primary);
+	border-radius: 2px;
+}
+
 /* Main Layout */
 main {
 	flex: 1;
@@ -507,8 +533,32 @@ time {
 		height: 56px;
 	}
 
+	.nav-hamburger {
+		display: inline-flex;
+	}
+
+	/* Collapse the links into a dropdown panel toggled by the hamburger. */
 	header nav .nav-links {
 		display: none;
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0;
+		background: var(--color-bg-base);
+		border-bottom: 1px solid var(--color-border);
+		box-shadow: var(--shadow-md);
+		padding: var(--spacing-xs);
+	}
+
+	#nav-toggle:checked ~ .nav-links {
+		display: flex;
+	}
+
+	header nav .nav-links a {
+		padding: 0.85rem 1rem;
 	}
 
 	main {
