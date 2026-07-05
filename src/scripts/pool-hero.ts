@@ -20,13 +20,15 @@ interface Ball {
 	vx: number;
 	vy: number;
 	r: number;
-	num: number; // 1-8 object balls, 0 = cue
+	num: number; // 1-8 solids, 9+ stripes, 0 = cue
 	m: number;
 	cue: boolean;
 	age: number;
-	p: Patch;
+	p: Patch; // number-patch position on the sphere
+	q: Patch; // stripe polar axis (white caps on 9+), kept perpendicular to p
 }
 
+const BALL_COUNT = 10; // 1-8 solids + 9-10 stripes
 const COLORS: Record<number, string> = {
 	1: "#FDD835",
 	2: "#1565C0",
@@ -37,6 +39,11 @@ const COLORS: Record<number, string> = {
 	7: "#6D3B2A",
 	8: "#1c1c1e",
 };
+
+/** Stripes reuse the solid colour wheel: 9 shares 1 (yellow), 10 shares 2 (blue)... */
+function ballColor(num: number): string {
+	return COLORS[((num - 1) % 8) + 1];
+}
 
 const ALPHA = 0.24;
 const CUE_ALPHA = Math.min(1, ALPHA * 2.4);
@@ -99,6 +106,17 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 			return { x: Math.cos(t) * s, y: Math.sin(t) * s, z };
 		}
 
+		/** Random unit vector perpendicular to v — puts the number patch on the stripe equator. */
+		function randPerp(v: Patch): Patch {
+			const w = randPatch();
+			const dot = w.x * v.x + w.y * v.y + w.z * v.z;
+			const px = w.x - v.x * dot;
+			const py = w.y - v.y * dot;
+			const pz = w.z - v.z * dot;
+			const len = Math.sqrt(px * px + py * py + pz * pz) || 1;
+			return { x: px / len, y: py / len, z: pz / len };
+		}
+
 		function baseRadius(): number {
 			return Math.min(54, Math.max(28, W * 0.07));
 		}
@@ -106,7 +124,7 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 		function makeBalls(): void {
 			balls = [];
 			const base = baseRadius();
-			for (let n = 1; n <= 8; n++) {
+			for (let n = 1; n <= BALL_COUNT; n++) {
 				const r = base * (0.92 + Math.random() * 0.16);
 				let x = 0;
 				let y = 0;
@@ -126,6 +144,7 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 					}
 				}
 				const a = Math.random() * Math.PI * 2;
+				const p = randPatch();
 				balls.push({
 					x,
 					y,
@@ -136,7 +155,8 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 					age: 0,
 					vx: Math.cos(a) * TARGET_SPEED,
 					vy: Math.sin(a) * TARGET_SPEED,
-					p: randPatch(),
+					p,
+					q: randPerp(p),
 				});
 			}
 		}
@@ -178,10 +198,21 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 				vx: (dx / d) * sp,
 				vy: (dy / d) * sp,
 				p: randPatch(),
+				q: randPatch(),
 			});
 		}
 
-		/** Rodrigues rotation of the number patch about the axis perpendicular to velocity. */
+		/** Rodrigues rotation of v about the in-screen axis (ax, ay, 0). */
+		function rotateOnSphere(v: Patch, ax: number, ay: number, c: number, sn: number): Patch {
+			const dot = ax * v.x + ay * v.y;
+			return {
+				x: v.x * c + ay * v.z * sn + ax * dot * (1 - c),
+				y: v.y * c - ax * v.z * sn + ay * dot * (1 - c),
+				z: v.z * c + (ax * v.y - ay * v.x) * sn,
+			};
+		}
+
+		/** Roll the ball's surface orientation about the axis perpendicular to velocity. */
 		function rollPatch(b: Ball, dist: number): void {
 			const s = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
 			if (s < 0.02) return;
@@ -190,13 +221,8 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 			const th = dist / b.r;
 			const c = Math.cos(th);
 			const sn = Math.sin(th);
-			const p = b.p;
-			const dot = ax * p.x + ay * p.y;
-			b.p = {
-				x: p.x * c + ay * p.z * sn + ax * dot * (1 - c),
-				y: p.y * c - ax * p.z * sn + ay * dot * (1 - c),
-				z: p.z * c + (ax * p.y - ay * p.x) * sn,
-			};
+			b.p = rotateOnSphere(b.p, ax, ay, c, sn);
+			b.q = rotateOnSphere(b.q, ax, ay, c, sn);
 		}
 
 		function stepOnce(): void {
@@ -284,8 +310,20 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 			ctx!.beginPath();
 			ctx!.arc(0, 0, b.r, 0, Math.PI * 2);
 			ctx!.clip();
-			ctx!.fillStyle = b.cue ? "#eceff1" : COLORS[b.num];
+			ctx!.fillStyle = b.cue ? "#eceff1" : ballColor(b.num);
 			ctx!.fillRect(-b.r, -b.r, b.r * 2, b.r * 2);
+			if (!b.cue && b.num > 8) {
+				// Stripe: white polar caps at +/-q; the coloured band between them
+				// tumbles with the ball's rolling orientation.
+				const caps: Patch[] = [b.q, { x: -b.q.x, y: -b.q.y, z: -b.q.z }];
+				for (const cap of caps) {
+					if (cap.z <= 0.05) continue;
+					ctx!.beginPath();
+					ctx!.arc(cap.x * b.r * 0.62, cap.y * b.r * 0.62, b.r * 0.66 * cap.z, 0, Math.PI * 2);
+					ctx!.fillStyle = "#f4f4f2";
+					ctx!.fill();
+				}
+			}
 			if (!b.cue) {
 				const patches: Patch[] = [b.p, { x: -b.p.x, y: -b.p.y, z: -b.p.z }];
 				for (const q of patches) {
@@ -299,7 +337,8 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 					ctx!.fill();
 					if (pr > 7) {
 						ctx!.fillStyle = "#1c1c1e";
-						ctx!.font = `500 ${Math.round(pr * 1.15)}px Inter, sans-serif`;
+						const fontScale = b.num >= 10 ? 0.92 : 1.15;
+						ctx!.font = `500 ${Math.round(pr * fontScale)}px Inter, sans-serif`;
 						ctx!.textAlign = "center";
 						ctx!.textBaseline = "middle";
 						ctx!.fillText(String(b.num), px, py + pr * 0.06);
