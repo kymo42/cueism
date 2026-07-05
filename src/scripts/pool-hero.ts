@@ -64,6 +64,12 @@ const BREAK_DELAY_MS = 7000;
 const BREAK_JITTER_MS = 9000;
 const RESUME_BREAK_DELAY_MS = 3000;
 const RESUME_BREAK_JITTER_MS = 5000;
+// Surface markings are discs on the sphere with angular radius asin(SIN);
+// COS places the disc's centre at the right depth (SIN^2 + COS^2 = 1).
+const PATCH_SIN = 0.4; // number patch
+const PATCH_COS = 0.92;
+const CAP_SIN = 0.66; // white polar caps on striped balls
+const CAP_COS = 0.75;
 
 export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 	try {
@@ -296,6 +302,48 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 			}
 		}
 
+		/**
+		 * Draw a disc marking (number patch or stripe cap) that lies ON the
+		 * sphere: projected orthographically it is an ellipse squashed along
+		 * the radial screen direction by the disc normal's z, so markings stay
+		 * "painted on" as the ball rolls and collapse smoothly to a sliver at
+		 * the terminator instead of popping in and out.
+		 */
+		function drawSurfaceDisc(
+			b: Ball,
+			v: Patch,
+			sin: number,
+			cos: number,
+			fill: string,
+			label?: string,
+		): void {
+			if (v.z <= 0.02) return;
+			const major = b.r * sin;
+			const minor = major * v.z;
+			if (minor < 0.5) return;
+			const theta = Math.atan2(v.y, v.x);
+			ctx!.save();
+			ctx!.translate(v.x * b.r * cos, v.y * b.r * cos);
+			// Squash along the radial direction while keeping the drawing frame
+			// upright: R(theta) * S(z, 1) * R(-theta).
+			ctx!.rotate(theta);
+			ctx!.scale(v.z, 1);
+			ctx!.rotate(-theta);
+			ctx!.beginPath();
+			ctx!.arc(0, 0, major, 0, Math.PI * 2);
+			ctx!.fillStyle = fill;
+			ctx!.fill();
+			if (label && major > 7 && minor > 4) {
+				ctx!.fillStyle = "#1c1c1e";
+				const fontScale = label.length > 1 ? 0.92 : 1.15;
+				ctx!.font = `500 ${Math.round(major * fontScale)}px Inter, sans-serif`;
+				ctx!.textAlign = "center";
+				ctx!.textBaseline = "middle";
+				ctx!.fillText(label, 0, major * 0.06);
+			}
+			ctx!.restore();
+		}
+
 		function drawBall(b: Ball): void {
 			if (
 				b.x < -b.r - 20 ||
@@ -315,35 +363,13 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 			if (!b.cue && b.num > 8) {
 				// Stripe: white polar caps at +/-q; the coloured band between them
 				// tumbles with the ball's rolling orientation.
-				const caps: Patch[] = [b.q, { x: -b.q.x, y: -b.q.y, z: -b.q.z }];
-				for (const cap of caps) {
-					if (cap.z <= 0.05) continue;
-					ctx!.beginPath();
-					ctx!.arc(cap.x * b.r * 0.62, cap.y * b.r * 0.62, b.r * 0.66 * cap.z, 0, Math.PI * 2);
-					ctx!.fillStyle = "#f4f4f2";
-					ctx!.fill();
-				}
+				drawSurfaceDisc(b, b.q, CAP_SIN, CAP_COS, "#f4f4f2");
+				drawSurfaceDisc(b, { x: -b.q.x, y: -b.q.y, z: -b.q.z }, CAP_SIN, CAP_COS, "#f4f4f2");
 			}
 			if (!b.cue) {
-				const patches: Patch[] = [b.p, { x: -b.p.x, y: -b.p.y, z: -b.p.z }];
-				for (const q of patches) {
-					if (q.z <= 0.12) continue;
-					const pr = b.r * 0.42 * q.z;
-					const px = q.x * b.r * 0.8;
-					const py = q.y * b.r * 0.8;
-					ctx!.beginPath();
-					ctx!.arc(px, py, pr, 0, Math.PI * 2);
-					ctx!.fillStyle = "#f8f8f6";
-					ctx!.fill();
-					if (pr > 7) {
-						ctx!.fillStyle = "#1c1c1e";
-						const fontScale = b.num >= 10 ? 0.92 : 1.15;
-						ctx!.font = `500 ${Math.round(pr * fontScale)}px Inter, sans-serif`;
-						ctx!.textAlign = "center";
-						ctx!.textBaseline = "middle";
-						ctx!.fillText(String(b.num), px, py + pr * 0.06);
-					}
-				}
+				const label = String(b.num);
+				drawSurfaceDisc(b, b.p, PATCH_SIN, PATCH_COS, "#f8f8f6", label);
+				drawSurfaceDisc(b, { x: -b.p.x, y: -b.p.y, z: -b.p.z }, PATCH_SIN, PATCH_COS, "#f8f8f6", label);
 			}
 			const g = ctx!.createRadialGradient(
 				-b.r * 0.32,
