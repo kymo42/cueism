@@ -3,6 +3,7 @@ import { getEmDashCollection } from "emdash";
 import Base from "../layouts/Base.astro";
 import PostCardImage from "../components/PostCardImage";
 import SavingsTicker from "../components/SavingsTicker.astro";
+import PoolHero from "../components/PoolHero.astro";
 import { getPostDate, getPostImageSrc, getPostIntro } from "../utils/post-format";
 
 const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
@@ -18,11 +19,13 @@ const normalizedPosts = posts;
 	description="Australian-made, 3D-printed billiards and pool accessories — cue holders, chalk holders, racks and more. Printed to order from recycled and biodegradable materials."
 	image="/og-image.png"
 >
-	<section class="hero">
-		<h1>Every Player of any species</h1>
-		<p>Australian-made billiard accessories designed by and for the Pool player.</p>
-		<a href="/products" class="btn btn-primary" data-astro-prefetch>Shop the Collection</a>
-	</section>
+	<PoolHero>
+		<section class="hero">
+			<h1>Every Player of any species</h1>
+			<p>Australian-made billiard accessories designed by and for the Pool player.</p>
+			<a href="/products" class="btn btn-primary" data-astro-prefetch>Shop the Collection</a>
+		</section>
+	</PoolHero>
 
 	<SavingsTicker />
 

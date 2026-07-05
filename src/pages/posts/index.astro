@@ -2,6 +2,7 @@
 import { getEmDashCollection, getEntryTerms } from "emdash";
 import Base from "../../layouts/Base.astro";
 import PostCardImage from "../../components/PostCardImage";
+import PoolHero from "../../components/PoolHero.astro";
 import { getPostDate, getPostImageSrc, getPostIntro } from "../../utils/post-format";
 
 const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
@@ -23,11 +24,13 @@ const postsWithTags = await Promise.all(
 	description="News, guides and stories from Cueism — Australian-made, 3D-printed billiards and pool accessories."
 	image="/og-image.png"
 >
-	<section class="hero">
-		<h1>Journaling</h1>
-		<p>News and stuff from the World.</p>
-		<a href="/products" class="btn btn-orange" data-astro-prefetch>Shop the Collection</a>
-	</section>
+	<PoolHero>
+		<section class="hero">
+			<h1>Journaling</h1>
+			<p>News and stuff from the World.</p>
+			<a href="/products" class="btn btn-orange" data-astro-prefetch>Shop the Collection</a>
+		</section>
+	</PoolHero>
 
 	{
 		postsWithTags.length === 0 ? (
