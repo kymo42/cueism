@@ -3,6 +3,7 @@ import { getEmDashCollection } from "emdash";
 import { Image } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
 import { getPriceRange } from "../../utils/products";
+import PoolHero from "../../components/PoolHero.astro";
 
 const { entries: products = [], cacheHint } = await getEmDashCollection("products", {
 	orderBy: { published_at: "desc" },
@@ -18,8 +19,12 @@ if (cacheHint) {
 	description="Browse Cueism's range of Australian-made, 3D-printed billiards and pool accessories — cue holders, chalk holders, racks and more, printed to order from recycled and biodegradable materials."
 	image="/og-image.png"
 >
+	<PoolHero>
+		<section style="padding: var(--spacing-lg) 0; margin-bottom: 0;">
+			<h1 style="font-size: 2rem; font-weight: 400; margin-bottom: 0;">Shop</h1>
+		</section>
+	</PoolHero>
 	<section class="shop-grid">
-		<h1 style="font-size: 2rem; font-weight: 400; margin-bottom: var(--spacing-md);">Shop</h1>
 		<div class="grid grid-auto">
 			{
 				products.length === 0 ? (
