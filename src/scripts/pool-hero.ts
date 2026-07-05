@@ -48,6 +48,18 @@ const MARGIN = 180; // soft return field beyond viewport
 const GONE = 300; // cue despawn distance
 const STEP_MS = 1000 / 60;
 const MAX_DELTA_MS = 100;
+// Canvas simulation space extends below the hero; must stay in sync with the
+// `height: 150%` and 75% mask stop in PoolHero.astro.
+const HEIGHT_RATIO = 1.5;
+// Cue-ball break cadence: first break lands sooner so new visitors see one,
+// steady-state is 7-16 s, and resuming from a pause waits a beat so a stale
+// (already-due) break doesn't fire the instant the hero scrolls back in.
+const FIRST_BREAK_DELAY_MS = 5000;
+const FIRST_BREAK_JITTER_MS = 6000;
+const BREAK_DELAY_MS = 7000;
+const BREAK_JITTER_MS = 9000;
+const RESUME_BREAK_DELAY_MS = 3000;
+const RESUME_BREAK_JITTER_MS = 5000;
 
 export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 	try {
@@ -66,7 +78,7 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 		let destroyed = false;
 		let lastTime = 0;
 		let acc = 0;
-		let nextBreak = performance.now() + 5000 + Math.random() * 6000;
+		let nextBreak = performance.now() + FIRST_BREAK_DELAY_MS + Math.random() * FIRST_BREAK_JITTER_MS;
 		let gx = 0;
 		let gy = 0;
 		let lastShake = 0;
@@ -74,7 +86,7 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 		function resize(): void {
 			const dpr = Math.min(2, window.devicePixelRatio || 1);
 			W = wrapper!.clientWidth;
-			H = Math.round(wrapper!.clientHeight * 1.5);
+			H = Math.round(wrapper!.clientHeight * HEIGHT_RATIO);
 			canvas.width = Math.max(1, Math.round(W * dpr));
 			canvas.height = Math.max(1, Math.round(H * dpr));
 			ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -334,7 +346,7 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 			}
 			if (now >= nextBreak) {
 				spawnCue();
-				nextBreak = now + 7000 + Math.random() * 9000;
+				nextBreak = now + BREAK_DELAY_MS + Math.random() * BREAK_JITTER_MS;
 			}
 			drawFrame();
 		}
@@ -344,7 +356,8 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 			running = true;
 			lastTime = performance.now();
 			acc = 0;
-			if (nextBreak < lastTime) nextBreak = lastTime + 3000 + Math.random() * 5000;
+			if (nextBreak < lastTime)
+				nextBreak = lastTime + RESUME_BREAK_DELAY_MS + Math.random() * RESUME_BREAK_JITTER_MS;
 			raf = requestAnimationFrame(frame);
 		}
 
