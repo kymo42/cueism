@@ -20,15 +20,18 @@
 
 	.pool-hero-canvas {
 		position: absolute;
-		top: 0;
+		/* Stretch up over main's top padding (--spacing-lg) so balls run flush to
+		   the header; the short top fade dissolves them instead of a hard clip
+		   line. The engine measures this box directly, so CSS alone owns the
+		   canvas geometry. */
+		top: calc(-1 * var(--spacing-lg));
 		left: 0;
 		width: 100%;
-		/* 150% must stay in sync with HEIGHT_RATIO in src/scripts/pool-hero.ts */
-		height: 150%;
+		height: calc(150% + var(--spacing-lg));
 		z-index: -1;
 		pointer-events: none;
-		-webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
-		mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+		-webkit-mask-image: linear-gradient(to bottom, transparent 0, black 2.5rem, black 75%, transparent 100%);
+		mask-image: linear-gradient(to bottom, transparent 0, black 2.5rem, black 75%, transparent 100%);
 	}
 
 	.pool-hero-content {

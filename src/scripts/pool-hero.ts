@@ -48,9 +48,6 @@ const MARGIN = 180; // soft return field beyond viewport
 const GONE = 300; // cue despawn distance
 const STEP_MS = 1000 / 60;
 const MAX_DELTA_MS = 100;
-// Canvas simulation space extends below the hero; must stay in sync with the
-// `height: 150%` and 75% mask stop in PoolHero.astro.
-const HEIGHT_RATIO = 1.5;
 // Cue-ball break cadence: first break lands sooner so new visitors see one,
 // steady-state is 7-16 s, and resuming from a pause waits a beat so a stale
 // (already-due) break doesn't fire the instant the hero scrolls back in.
@@ -63,9 +60,8 @@ const RESUME_BREAK_JITTER_MS = 5000;
 
 export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 	try {
-		const wrapper = canvas.parentElement;
 		const ctx = canvas.getContext("2d");
-		if (!wrapper || !ctx) return null;
+		if (!ctx) return null;
 
 		const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -85,8 +81,11 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 
 		function resize(): void {
 			const dpr = Math.min(2, window.devicePixelRatio || 1);
-			W = wrapper!.clientWidth;
-			H = Math.round(wrapper!.clientHeight * HEIGHT_RATIO);
+			// CSS owns the canvas geometry (see PoolHero.astro); simulate over
+			// whatever box it gives us so backing store and display never desync.
+			const rect = canvas.getBoundingClientRect();
+			W = Math.round(rect.width);
+			H = Math.round(rect.height);
 			canvas.width = Math.max(1, Math.round(W * dpr));
 			canvas.height = Math.max(1, Math.round(H * dpr));
 			ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -398,7 +397,7 @@ export function initPoolHero(canvas: HTMLCanvasElement): PoolHeroHandle | null {
 		}
 
 		const ro = new ResizeObserver(resize);
-		ro.observe(wrapper);
+		ro.observe(canvas);
 		const io = new IntersectionObserver((entries) => {
 			inView = entries[0]?.isIntersecting ?? true;
 			updateRunning();
