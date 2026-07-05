@@ -4,12 +4,15 @@ import Base from "../layouts/Base.astro";
 import PostCardImage from "../components/PostCardImage";
 import SavingsTicker from "../components/SavingsTicker.astro";
 import PoolHero from "../components/PoolHero.astro";
-import { getPostDate, getPostImageSrc, getPostIntro } from "../utils/post-format";
+import { getPostImageSrc, getPostIntro } from "../utils/post-format";
+import { getShorts } from "../utils/shorts";
 
 const { entries: posts, cacheHint } = await getEmDashCollection("posts", {
 	orderBy: { created_at: "desc" },
 });
 Astro.cache.set(cacheHint);
+
+const latestShorts = (await getShorts(Astro.locals)).slice(0, 4);
 
 const normalizedPosts = posts;
 ---
@@ -60,4 +63,97 @@ const normalizedPosts = posts;
 			}
 		</div>
 	</section>
+
+	{
+		latestShorts.length > 0 && (
+			<section>
+				<h2>Latest Shorts</h2>
+				<div class="home-shorts-grid">
+					{latestShorts.map((short) => (
+						<article class="card">
+							<div class="card-image home-short-thumb" data-video-id={short.videoId}>
+								<img src={short.thumbnailUrl} alt={short.title} loading="lazy" />
+								<span class="home-short-play" aria-hidden="true">▶</span>
+							</div>
+							<div class="card-content">
+								<h3>{short.title}</h3>
+							</div>
+						</article>
+					))}
+				</div>
+			</section>
+		)
+	}
 </Base>
+
+<style>
+	.home-shorts-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: var(--spacing-md);
+	}
+
+	.home-short-thumb {
+		aspect-ratio: 9 / 16;
+		position: relative;
+		cursor: pointer;
+		background: #000;
+	}
+
+	.home-short-thumb img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	.home-short-play {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 2rem;
+		color: #fff;
+		text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+		pointer-events: none;
+	}
+
+	/* Same :global() reason as shorts.astro: the player iframe is created in JS
+	   without Astro's scoped-style attribute, so a scoped selector never matches. */
+	.home-short-thumb :global(iframe) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		border: 0;
+	}
+
+	@media (max-width: 900px) {
+		.home-shorts-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+</style>
+
+<script>
+	// Tap a thumbnail to play it in place (same pattern as the desktop grid on
+	// /shorts). Fresh nodes get fresh listeners on every astro:page-load.
+	function setupHomeShorts(): void {
+		document.querySelectorAll<HTMLElement>(".home-short-thumb").forEach((thumb) => {
+			thumb.addEventListener("click", () => {
+				const videoId = thumb.dataset.videoId;
+				if (!videoId || thumb.querySelector("iframe")) return;
+				const iframe = document.createElement("iframe");
+				iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+				iframe.allow = "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture";
+				iframe.allowFullscreen = true;
+				iframe.title = thumb.querySelector("img")?.alt ?? "YouTube Short";
+				thumb.innerHTML = "";
+				thumb.appendChild(iframe);
+			});
+		});
+	}
+
+	document.addEventListener("astro:page-load", setupHomeShorts);
+</script>
