@@ -128,13 +128,126 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 	// return shipping (by mail). Full policy is documented on the About page.
 	const hasMerchantReturnPolicy = {
 		"@type": "MerchantReturnPolicy",
-		applicableCountry: "AU",
+		applicableCountry: ["AU", "US", "GB", "NZ"],
+		returnPolicyCountry: "AU",
 		returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
 		merchantReturnDays: 30,
 		returnMethod: "https://schema.org/ReturnByMail",
 		returnFees: "https://schema.org/ReturnShippingFees",
 		merchantReturnLink: `${origin}/about`,
 	};
+
+	// 1-2 days handling, standard delivery times vary by country. Flat $10 AUD rate.
+	const shippingDetails = [
+		{
+			"@type": "OfferShippingDetails",
+			shippingRate: {
+				"@type": "MonetaryAmount",
+				value: 10.0,
+				currency: CURRENCY,
+			},
+			shippingDestination: {
+				"@type": "DefinedRegion",
+				addressCountry: "AU",
+			},
+			deliveryTime: {
+				"@type": "ShippingDeliveryTime",
+				handlingTime: {
+					"@type": "QuantitativeValue",
+					minValue: 1,
+					maxValue: 2,
+					unitCode: "DAY",
+				},
+				transitTime: {
+					"@type": "QuantitativeValue",
+					minValue: 2,
+					maxValue: 5,
+					unitCode: "DAY",
+				},
+			},
+		},
+		{
+			"@type": "OfferShippingDetails",
+			shippingRate: {
+				"@type": "MonetaryAmount",
+				value: 10.0,
+				currency: CURRENCY,
+			},
+			shippingDestination: {
+				"@type": "DefinedRegion",
+				addressCountry: "US",
+			},
+			deliveryTime: {
+				"@type": "ShippingDeliveryTime",
+				handlingTime: {
+					"@type": "QuantitativeValue",
+					minValue: 1,
+					maxValue: 2,
+					unitCode: "DAY",
+				},
+				transitTime: {
+					"@type": "QuantitativeValue",
+					minValue: 7,
+					maxValue: 12,
+					unitCode: "DAY",
+				},
+			},
+		},
+		{
+			"@type": "OfferShippingDetails",
+			shippingRate: {
+				"@type": "MonetaryAmount",
+				value: 10.0,
+				currency: CURRENCY,
+			},
+			shippingDestination: {
+				"@type": "DefinedRegion",
+				addressCountry: "GB",
+			},
+			deliveryTime: {
+				"@type": "ShippingDeliveryTime",
+				handlingTime: {
+					"@type": "QuantitativeValue",
+					minValue: 1,
+					maxValue: 2,
+					unitCode: "DAY",
+				},
+				transitTime: {
+					"@type": "QuantitativeValue",
+					minValue: 7,
+					maxValue: 12,
+					unitCode: "DAY",
+				},
+			},
+		},
+		{
+			"@type": "OfferShippingDetails",
+			shippingRate: {
+				"@type": "MonetaryAmount",
+				value: 10.0,
+				currency: CURRENCY,
+			},
+			shippingDestination: {
+				"@type": "DefinedRegion",
+				addressCountry: "NZ",
+			},
+			deliveryTime: {
+				"@type": "ShippingDeliveryTime",
+				handlingTime: {
+					"@type": "QuantitativeValue",
+					minValue: 1,
+					maxValue: 2,
+					unitCode: "DAY",
+				},
+				transitTime: {
+					"@type": "QuantitativeValue",
+					minValue: 4,
+					maxValue: 8,
+					unitCode: "DAY",
+				},
+			},
+		},
+	];
 
 	const offers: Record<string, unknown> = hasSpread
 		? {
@@ -147,6 +260,7 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 				itemCondition,
 				priceValidUntil,
 				hasMerchantReturnPolicy,
+				shippingDetails,
 				url,
 			}
 		: {
@@ -157,6 +271,7 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 				itemCondition,
 				priceValidUntil,
 				hasMerchantReturnPolicy,
+				shippingDetails,
 				url,
 			};
 
