@@ -476,6 +476,35 @@ footer a:hover {
 	color: var(--color-accent);
 }
 
+.footer-legal {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: var(--spacing-md);
+	margin-bottom: var(--spacing-sm);
+	font-size: 0.875rem;
+}
+
+/* Tables in CMS page content (e.g. the cookie table on /cookie-policy) */
+article table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: var(--spacing-md) 0;
+	font-size: 0.9375rem;
+}
+
+article th,
+article td {
+	border: 1px solid var(--color-border-light);
+	padding: var(--spacing-xs) var(--spacing-sm);
+	text-align: left;
+	vertical-align: top;
+}
+
+article th {
+	background: var(--color-bg-surface);
+}
+
 /* Forms */
 input[type="text"],
 input[type="search"],
