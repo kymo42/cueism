@@ -177,7 +177,7 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 		.slice(0, 10);
 
 	// 30-day return window; item unused and in original packaging. Buyer pays
-	// return shipping (by mail). Full policy is documented on the About page.
+	// return shipping (by mail). Full policy is documented on /refund_returns.
 	const hasMerchantReturnPolicy = {
 		"@type": "MerchantReturnPolicy",
 		applicableCountry: ["AU", "US", "GB", "NZ"],
@@ -186,7 +186,7 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 		merchantReturnDays: 30,
 		returnMethod: "https://schema.org/ReturnByMail",
 		returnFees: "https://schema.org/ReturnShippingFees",
-		merchantReturnLink: `${origin}/about`,
+		merchantReturnLink: `${origin}/refund_returns`,
 	};
 
 	// 1-2 days handling, standard delivery times vary by country. Flat $10 AUD rate.
