@@ -118,13 +118,21 @@ async function syncShorts(ctx: PluginContext): Promise<{ added: number; checked:
 			}
 			const detailsData = (await detailsRes.json()) as any;
 
-			for (const video of detailsData.items ?? []) {
-				const durationSeconds = parseIsoDuration(video.contentDetails?.duration ?? "PT0S");
-				// Cheap pre-filter first (skips the network check for obvious long uploads),
-				// then confirm it's an actual Short via the /shorts/ URL.
-				if (durationSeconds > MAX_SHORT_DURATION_SECONDS) continue;
-				if (!(await isYouTubeShort(video.id))) continue;
+			// Cheap pre-filter by duration (no network), then confirm each is a real
+			// Short via its /shorts/ URL. That check is a network round-trip per video,
+			// so run them in PARALLEL -- doing them sequentially over a multi-day backlog
+			// blew past the cron hook timeout and the sync could never catch up.
+			const candidates = (detailsData.items ?? []).filter((video: any) => {
+				const d = parseIsoDuration(video.contentDetails?.duration ?? "PT0S");
+				return d > 0 && d <= MAX_SHORT_DURATION_SECONDS;
+			});
+			const isShortFlags = await Promise.all(
+				candidates.map((video: any) => isYouTubeShort(video.id)),
+			);
 
+			for (let i = 0; i < candidates.length; i++) {
+				if (!isShortFlags[i]) continue;
+				const video = candidates[i];
 				const short: ShortVideo = {
 					videoId: video.id,
 					title: video.snippet?.title ?? "",
@@ -134,7 +142,7 @@ async function syncShorts(ctx: PluginContext): Promise<{ added: number; checked:
 						video.snippet?.thumbnails?.medium?.url ??
 						"",
 					publishedAt: video.snippet?.publishedAt ?? new Date().toISOString(),
-					durationSeconds,
+					durationSeconds: parseIsoDuration(video.contentDetails?.duration ?? "PT0S"),
 				};
 				await ctx.storage.shorts!.put(short.videoId, short);
 				added++;
@@ -167,6 +175,10 @@ export default {
 			},
 		},
 		cron: {
+			// Default hook timeout is 5s; a sync that has to catch up on a backlog of
+			// videos (playlist fetch + details + parallel Short checks + storage writes)
+			// needs more headroom than that.
+			timeout: 25000,
 			handler: async (event: any, ctx: PluginContext) => {
 				if (event.name !== CRON_NAME) return;
 				try {
