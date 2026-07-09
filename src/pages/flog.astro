@@ -1,0 +1,413 @@
+---
+import { getEmDashEntry, getSeoMeta } from "emdash";
+import Base from "../layouts/Base.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+
+// The flog CMS entry still holds the content for the admin/editor; this page
+// owns the presentation so the sections can use the original multi-column
+// layout from the old WordPress site.
+const { entry: page, cacheHint } = await getEmDashEntry("pages", "flog");
+if (cacheHint) Astro.cache.set(cacheHint);
+
+const seo = page
+	? getSeoMeta(page, { siteTitle: "Cueism", siteUrl: Astro.url.origin, path: "/flog" })
+	: {
+			title: "Flog | Cueism",
+			description: "FLOG — a golf rangefinder app for Fitbit Versa 3 and Sense.",
+			canonical: new URL("/flog", Astro.url.origin).href,
+		};
+
+const media = (key: string) => `/_emdash/api/media/file/${key}`;
+
+const IMG = {
+	hero: media("01KX29QTWK0PEPK68722B9JG8Z.jpg"),
+	card1: media("01KX29QV29HMAAMW4Y3A0CGPMB.avif"),
+	card2: media("01KX29QV39A98XE4QCRM70NXSW.jpg"),
+	card3: media("01KX29QV39A6V3KZF4TVHYARCD.webp"),
+	av1: media("01KX29QV43A5EBVRZGXTJ54XAQ.jpg"),
+	av2: media("01KX29QV44T8AKVY43TC0NTTCZ.jpg"),
+	av3: media("01KX29QV448JRTYAG68TYBFBS0.jpg"),
+	cover: media("01KX29QV45CQG1WCBSKPZDKWYA.jpg"),
+};
+const MANUAL_PDF = media("01KX29QV46AHEJTKF2CBC8CFRY.pdf");
+const FITBIT_URL = "https://gallery.fitbit.com/details/a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d";
+
+const highlights = [
+	{
+		img: IMG.card1,
+		alt: "FLOG app showing distance to the green",
+		title: "Accurate Distance Tracking",
+		text: "Instantly measure yardage to the middle of the green for smarter club selection.",
+	},
+	{
+		img: IMG.card2,
+		alt: "FLOG running on a Fitbit watch",
+		title: "Seamless Fitbit Integration",
+		text: "Effortlessly sync with your Fitbit device to access distance data on your wrist.",
+	},
+	{
+		img: IMG.card3,
+		alt: "Golfer using the FLOG app mid-round",
+		title: "User-Friendly Interface",
+		text: "Navigate the app with ease, designed for quick use between shots on the course.",
+	},
+];
+
+const steps = [
+	{
+		title: "Step One: Download the App",
+		text: "Start by downloading the flog app from the Fitbit gallery to access precise golf course distances after setup.",
+	},
+	{
+		title: "Step Two: Sync and Set Up",
+		text: "Connect the app with your Fitbit device and plot your Home course greens using your watch to mark the centre.",
+	},
+	{
+		title: "Step Three: Enjoy Your Game",
+		text: "Use the app during your next round to get accurate distance measurements and improve your club selection.",
+	},
+];
+
+const testimonials = [
+	{
+		quote: "The app’s accuracy and ease of use have truly elevated my golfing experience. Highly recommended!",
+		avatar: IMG.av1,
+		name: "Che Guevara",
+		role: "Amateur Golfer",
+	},
+	{
+		quote: "A must-have tool that combines precision and simplicity, helping me make smarter shots every round.",
+		avatar: IMG.av2,
+		name: "Don J Trump",
+		role: "Golf Enthusiast",
+	},
+	{
+		quote: "This app provides reliable distance measurements that have improved my course strategy dramatically.",
+		avatar: IMG.av3,
+		name: "Fidel Castro",
+		role: "Professional Coach",
+	},
+];
+---
+
+<Base
+	title={seo.title}
+	description={seo.description}
+	canonical={seo.canonical}
+	content={page ? { collection: "pages", id: page.id, slug: "flog" } : undefined}
+>
+	<Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Flog" }]} />
+
+	<section class="flog-hero">
+		<div class="flog-hero-text">
+			<h1>Flog</h1>
+			<blockquote class="flog-quote">
+				<p>when you just wanna know how far it is . . . . !</p>
+				<cite>every golfer</cite>
+			</blockquote>
+			<h2>⌚ Device Compatibility</h2>
+			<p><strong>FLOG</strong> is built specifically for the following Fitbit models:</p>
+			<ul class="flog-models">
+				<li>✅ <strong>Fitbit Versa 3</strong></li>
+				<li>✅ <strong>Fitbit Sense</strong></li>
+			</ul>
+			<p class="flog-caution">
+				<strong>Caution — Other Models</strong>: This app will <strong>not</strong> work on older
+				models (Versa 1, 2, or Lite) or the newer Google-era watches (Versa 4 or Sense 2) due to
+				Fitbit software limitations.
+			</p>
+			<a href={FITBIT_URL} class="btn btn-primary" target="_blank" rel="noreferrer noopener">
+				Download App
+			</a>
+		</div>
+		<div class="flog-hero-image">
+			<img src={IMG.hero} alt="Golfer checking the FLOG rangefinder on a Fitbit watch" loading="eager" />
+		</div>
+	</section>
+
+	<section class="flog-band">
+		<div class="flog-section-intro">
+			<h2>Discover Our Golf Rangefinder Highlights</h2>
+			<p>
+				Learn about how our Fitbit app offers precise distance measurements and intuitive controls
+				to elevate your golfing experience.
+			</p>
+		</div>
+		<div class="flog-cols">
+			{
+				highlights.map((h) => (
+					<article class="card">
+						<div class="flog-card-image">
+							<img src={h.img} alt={h.alt} loading="lazy" />
+						</div>
+						<div class="card-content flog-center">
+							<h3>{h.title}</h3>
+							<p>{h.text}</p>
+						</div>
+					</article>
+				))
+			}
+		</div>
+	</section>
+
+	<section>
+		<div class="flog-section-intro flog-intro-left">
+			<h2>How It Works</h2>
+			<p>
+				Follow these simple steps to easily download and use our golf rangefinder app on your
+				Fitbit. 1st time you use the app will be to set the centre of each green, once you do it
+				then it will be there every time you need it.
+			</p>
+		</div>
+		<div class="flog-cols">
+			{
+				steps.map((s, i) => (
+					<article class="flog-step">
+						<span class="flog-step-number" aria-hidden="true">
+							{i + 1}
+						</span>
+						<h3>{s.title}</h3>
+						<p>{s.text}</p>
+					</article>
+				))
+			}
+		</div>
+	</section>
+
+	<section class="flog-band">
+		<div class="flog-section-intro">
+			<h2>Golfers’ Feedback and Insights</h2>
+			<p>
+				Our clients’ testimonials speak volumes about our services and commitment. Get an insight
+				into their experiences.
+			</p>
+		</div>
+		<div class="flog-cols">
+			{
+				testimonials.map((t) => (
+					<figure class="flog-testimonial">
+						<span class="flog-stars" aria-label="5 out of 5 stars">
+							★★★★★
+						</span>
+						<blockquote>{t.quote}</blockquote>
+						<figcaption>
+							<img src={t.avatar} alt="" width="48" height="48" loading="lazy" />
+							<strong>{t.name}</strong>
+							<span>{t.role}</span>
+						</figcaption>
+					</figure>
+				))
+			}
+		</div>
+	</section>
+
+	<section class="flog-cover" style={`background-image: url('${IMG.cover}')`}>
+		<div class="flog-cover-inner">
+			<h2>Enhance Your Golf Game with accurate data</h2>
+			<p>
+				Discover how our app simplifies distance tracking, boosts your accuracy, and improves every
+				shot on the course. Download and read the PDF below to get started quickly and
+				effortlessly.
+			</p>
+			<a href={MANUAL_PDF} class="btn btn-primary" download>⬇ FLOG User Manual (PDF)</a>
+		</div>
+	</section>
+</Base>
+
+<style>
+	/* Hero: text beside a square image, like the original two-column section */
+	.flog-hero {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--spacing-lg);
+		align-items: center;
+	}
+
+	.flog-hero h1 {
+		margin-bottom: var(--spacing-sm);
+	}
+
+	.flog-hero h2 {
+		font-size: 1.25rem;
+		margin-top: var(--spacing-md);
+	}
+
+	.flog-hero-image img {
+		width: 100%;
+		aspect-ratio: 1;
+		object-fit: cover;
+		border-radius: var(--radius-md);
+		display: block;
+	}
+
+	.flog-quote {
+		border-left: 3px solid var(--color-border);
+		padding-left: var(--spacing-sm);
+		color: var(--color-text-secondary);
+		font-style: italic;
+	}
+
+	.flog-quote p {
+		margin-bottom: 0.25rem;
+	}
+
+	.flog-quote cite {
+		font-size: 0.875rem;
+		color: var(--color-text-tertiary);
+	}
+
+	.flog-models {
+		list-style: none;
+		padding-left: 0;
+		margin-bottom: var(--spacing-sm);
+	}
+
+	.flog-caution {
+		font-size: 0.9375rem;
+		color: var(--color-text-secondary);
+	}
+
+	/* Tinted full-width-feeling band, standing in for the WP "tertiary" sections */
+	.flog-band {
+		background: var(--color-bg-surface);
+		border-radius: var(--radius-md);
+		padding: var(--spacing-lg) var(--spacing-md);
+	}
+
+	.flog-section-intro {
+		text-align: center;
+		max-width: 768px;
+		margin: 0 auto var(--spacing-lg);
+	}
+
+	.flog-intro-left {
+		text-align: left;
+		margin-left: 0;
+	}
+
+	.flog-cols {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--spacing-md);
+		align-items: stretch;
+	}
+
+	.flog-card-image {
+		aspect-ratio: 4 / 3;
+		overflow: hidden;
+		background: var(--color-bg-surface);
+	}
+
+	.flog-card-image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	.flog-center {
+		text-align: center;
+	}
+
+	/* How-it-works steps with the numbered circles from the original */
+	.flog-step {
+		padding: var(--spacing-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-bg-base);
+	}
+
+	.flog-step-number {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		border-radius: 50%;
+		border: 2px solid var(--color-text-primary);
+		font-weight: 600;
+		font-size: 1.125rem;
+		margin-bottom: var(--spacing-sm);
+	}
+
+	/* Testimonials: horizontal row, small round avatars like the original */
+	.flog-testimonial {
+		background: var(--color-bg-base);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		padding: var(--spacing-md);
+		text-align: center;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.flog-stars {
+		letter-spacing: 0.2em;
+		color: var(--color-text-primary);
+		margin-bottom: var(--spacing-sm);
+	}
+
+	.flog-testimonial blockquote {
+		font-size: 1.0625rem;
+		margin: 0 0 var(--spacing-md);
+		flex-grow: 1;
+	}
+
+	.flog-testimonial figcaption {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.flog-testimonial figcaption img {
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	.flog-testimonial figcaption span {
+		font-size: 0.875rem;
+		color: var(--color-text-secondary);
+	}
+
+	/* Dark photo cover with the PDF download, like the original closing section */
+	.flog-cover {
+		background-size: cover;
+		background-position: center;
+		border-radius: var(--radius-md);
+		overflow: hidden;
+		position: relative;
+	}
+
+	.flog-cover::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: rgba(1, 1, 1, 0.8);
+	}
+
+	.flog-cover-inner {
+		position: relative;
+		max-width: 768px;
+		padding: var(--spacing-xl) var(--spacing-lg);
+	}
+
+	.flog-cover-inner h2,
+	.flog-cover-inner p {
+		color: #fff;
+	}
+
+	@media (max-width: 900px) {
+		.flog-hero,
+		.flog-cols {
+			grid-template-columns: 1fr;
+		}
+
+		.flog-hero-image {
+			order: -1;
+		}
+	}
+</style>
