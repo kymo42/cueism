@@ -64,8 +64,97 @@ function timingSafeEqual(a: string, b: string): boolean {
 	return mismatch === 0;
 }
 
+async function sendTelegramOrderNotification(
+	botToken: string,
+	chatId: string,
+	session: any,
+) {
+	try {
+		const amountFormatted = session.amount_total
+			? `$${(session.amount_total / 100).toFixed(2)} ${(session.currency || 'aud').toUpperCase()}`
+			: 'N/A';
+
+		const customerName = session.customer_details?.name || session.shipping_details?.name || 'Unknown';
+		const customerEmail = session.customer_details?.email || 'N/A';
+		const customerPhone = session.customer_details?.phone || '';
+
+		const addr = session.shipping_details?.address || session.customer_details?.address;
+		const addressLines = [
+			addr?.line1,
+			addr?.line2,
+			[addr?.city, addr?.state, addr?.postal_code].filter(Boolean).join(' '),
+			addr?.country,
+		]
+			.filter(Boolean)
+			.join('\n');
+
+		const metadata = session.metadata || {};
+		const metadataEntries: string[] = [];
+
+		if (metadata.chalk_type) {
+			metadataEntries.push(`• <b>Chalk Type:</b> ${escapeHtml(metadata.chalk_type)}`);
+		}
+		if (metadata.gift_opt_in) {
+			metadataEntries.push(`• <b>Gift Opt-In:</b> ${escapeHtml(metadata.gift_opt_in)}`);
+		}
+
+		// Collect personalizations and images from metadata
+		Object.keys(metadata).forEach((key) => {
+			if (key.startsWith('personalization_')) {
+				metadataEntries.push(`• <b>Personalization:</b> ${escapeHtml(metadata[key])}`);
+			}
+			if (key.startsWith('face_')) {
+				metadataEntries.push(`🖼 <b>Face Photo:</b> <a href="${metadata[key]}">Download / View Image</a>`);
+			}
+			if (key.startsWith('logo_')) {
+				metadataEntries.push(`🎨 <b>Custom Logo:</b> <a href="${metadata[key]}">Download / View Logo</a>`);
+			}
+		});
+
+		let message = `🎉 <b>New Order Received!</b>\n\n`;
+		message += `💰 <b>Total Paid:</b> ${amountFormatted}\n`;
+		message += `👤 <b>Customer:</b> ${escapeHtml(customerName)} (${escapeHtml(customerEmail)})\n`;
+		if (customerPhone) message += `📞 <b>Phone:</b> ${escapeHtml(customerPhone)}\n`;
+
+		if (addressLines) {
+			message += `\n📍 <b>Shipping Address:</b>\n${escapeHtml(addressLines)}\n`;
+		}
+
+		if (metadataEntries.length > 0) {
+			message += `\n📦 <b>Order Options:</b>\n${metadataEntries.join('\n')}\n`;
+		}
+
+		message += `\n🆔 <b>Session ID:</b> <code>${session.id}</code>`;
+
+		await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				chat_id: chatId,
+				text: message,
+				parse_mode: 'HTML',
+				disable_web_page_preview: false,
+			}),
+		});
+	} catch (err) {
+		console.error('Failed to send Telegram notification:', err);
+	}
+}
+
+function escapeHtml(str: string): string {
+	return str
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;');
+}
+
 export const POST: APIRoute = async ({ request }) => {
-	const workerEnv = env as { STRIPE_WEBHOOK_SECRET?: string; DB?: D1Database };
+	const workerEnv = env as {
+		STRIPE_WEBHOOK_SECRET?: string;
+		DB?: D1Database;
+		TELEGRAM_BOT_TOKEN?: string;
+		TELEGRAM_CHAT_ID?: string;
+	};
 	const webhookSecret = workerEnv.STRIPE_WEBHOOK_SECRET;
 
 	if (!webhookSecret) {
@@ -109,6 +198,15 @@ export const POST: APIRoute = async ({ request }) => {
 						`)
 						.bind(stripeSessionId, customerEmail, customerName, amountTotal)
 						.run();
+
+					// Send Telegram notification if credentials are configured
+					if (workerEnv.TELEGRAM_BOT_TOKEN && workerEnv.TELEGRAM_CHAT_ID) {
+						await sendTelegramOrderNotification(
+							workerEnv.TELEGRAM_BOT_TOKEN,
+							workerEnv.TELEGRAM_CHAT_ID,
+							session,
+						);
+					}
 				}
 				break;
 			}
