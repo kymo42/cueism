@@ -119,6 +119,11 @@ export const POST: APIRoute = async ({ request, url }) => {
 				data.append(`metadata[logo_${index}]`, absoluteLogo);
 			}
 
+			if (item.faceUrl) {
+				const absoluteFace = item.faceUrl.startsWith('http') ? item.faceUrl : `${url.origin}${item.faceUrl}`;
+				data.append(`metadata[face_${index}]`, absoluteFace);
+			}
+
 			if (item.personalization) {
 				data.append(`metadata[personalization_${index}]`, item.personalization);
 			}

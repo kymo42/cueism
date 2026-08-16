@@ -192,6 +192,9 @@ export default function ProductPurchase({
 		window.dispatchEvent(new CustomEvent('cueism:variant-color', { detail: { color } }));
 	};
 
+	const isCheatstick = slug === 'cheatstick';
+	const nfcSurcharge = isCheatstick ? 5 : NFC_SURCHARGE;
+
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
 
 	// For colour-variant products (e.g. Safe9), tell the product gallery to show the
@@ -255,7 +258,7 @@ export default function ProductPurchase({
 		if (personalizationType === 'text' && textOption.trim()) {
 			personalization = `Text (+$${TEXT_SURCHARGE.toFixed(2)}): ${textOption.trim()}`;
 		} else if (personalizationType === 'nfc' && nfcName.trim()) {
-			personalization = `NFC (+$${NFC_SURCHARGE.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
+			personalization = `NFC (+$${nfcSurcharge.toFixed(2)}): ${nfcIcon} - ${nfcName.trim()}`;
 		} else if (embeddedNfcOnly && nfcDigitalInfo.trim()) {
 			personalization = `NFC: ${nfcDigitalInfo.trim()}`;
 		} else if (personalizationType === 'face' && faceUrl) {
