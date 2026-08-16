@@ -1,20 +1,35 @@
 ---
+import { env } from 'cloudflare:workers';
+
 // ── The Cost of a Crease ────────────────────────────────────────────────
 // A $5 Magick Rack is binned the moment it creases. This ticker contrasts the
 // money rotation players waste worldwide against what Rac9safe customers save.
-//
-// Update these as the business grows — every new sale, bump CUSTOMERS.
 const RACK_PRICE = 5;            // dollars per Magick Rack
 const WORLD_PLAYERS = 100_000;   // rotation players worldwide
 const WORLD_RACKS_PER_YEAR = 1;  // racks an average player bins per year
-const CUSTOMERS = 86;            // current Rac9safe customers
+const BASE_CUSTOMERS = 86;       // baseline historical Rac9safe customers
 const CUSTOMER_RACKS_PER_YEAR = 3; // racks a serious player would otherwise bin per year
 const CAREER_YEARS = 20;         // a player's lifetime at the table
 
+let newOrdersCount = 0;
+try {
+	const db = (env as any)?.DB || (Astro.locals as any)?.runtime?.env?.DB;
+	if (db) {
+		const res = await db.prepare("SELECT COUNT(*) as count FROM orders WHERE status = 'paid'").first();
+		if (res && typeof res.count === 'number') {
+			newOrdersCount = res.count;
+		}
+	}
+} catch (e) {
+	// Fallback to baseline in local/build environments
+}
+
+const CUSTOMERS = BASE_CUSTOMERS + newOrdersCount;
+
 // Derived figures.
-const globalWastePerYear = WORLD_PLAYERS * WORLD_RACKS_PER_YEAR * RACK_PRICE;        // 500,000
-const customerSavingPerYear = CUSTOMERS * CUSTOMER_RACKS_PER_YEAR * RACK_PRICE;      // 1,290
-const customerLifetimeSaving = customerSavingPerYear * CAREER_YEARS;                 // 25,800
+const globalWastePerYear = WORLD_PLAYERS * WORLD_RACKS_PER_YEAR * RACK_PRICE;
+const customerSavingPerYear = CUSTOMERS * CUSTOMER_RACKS_PER_YEAR * RACK_PRICE;
+const customerLifetimeSaving = customerSavingPerYear * CAREER_YEARS;
 
 const fmt0 = (n: number) => n.toLocaleString('en-AU', { maximumFractionDigits: 0 });
 ---
