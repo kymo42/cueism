@@ -28,10 +28,6 @@
 			"*/15 * * * *"
 		]
 	},
-	"vars": {
-		"TELEGRAM_BOT_TOKEN": "8929266139:AAE3sCcr3d-bXIo_UZjVkb6a5jSrQPbWrFg",
-		"TELEGRAM_CHAT_ID": "7926278872"
-	},
 	"observability": {
 		"enabled": true
 	}
