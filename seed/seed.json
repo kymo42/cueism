@@ -357,9 +357,10 @@
 					"variants": [],
 					"excerpt": "Sick of the nasty shots against the rail, or the dodgy spread that is looking impossible to navigate. This has the angles covered and will fit on a Rack cue as good as a break cue.",
 					"content": [
-						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Knuckles" }] },
-						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "A lightweight magnetic device designed for pool players. At just 64 grams, it's possibly the lightest mini-butt on the market." }] },
-						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Made from biodegradable thermoplastics, nylons and stainless steel." }] }
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Knuckles Bridge" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Sick of the nasty shots against the rail, or the dodgy spread that is looking impossible to navigate? Knuckles has the angles covered and will fit on a rack cue as good as a break cue." }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Lightweight, portable, and designed to slip smoothly onto your cue to provide multiple bridge heights and angles for hard-to-reach shots." }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Crafted from recycled rPET and biodegradable PLA+ thermoplastics. 100% designed and 3D printed in Sydney, Australia." }] }
 					],
 					"has_text_option": false,
 					"has_nfc_option": false
