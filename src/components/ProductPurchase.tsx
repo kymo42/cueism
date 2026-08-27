@@ -192,8 +192,7 @@ export default function ProductPurchase({
 		window.dispatchEvent(new CustomEvent('cueism:variant-color', { detail: { color } }));
 	};
 
-	const isCheatstick = slug === 'cheatstick';
-	const nfcSurcharge = isCheatstick ? 5 : NFC_SURCHARGE;
+	const nfcSurcharge = NFC_SURCHARGE;
 
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
 

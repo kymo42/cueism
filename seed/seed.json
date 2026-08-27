@@ -308,11 +308,11 @@
 				"taxonomies": { "product_category": ["chalk"] }
 			},
 			{
-				"id": "cheatstick",
-				"slug": "cheatstick",
+				"id": "knuckles",
+				"slug": "knuckles",
 				"status": "published",
 				"data": {
-					"title": "cheatStick",
+					"title": "Knuckles",
 					"sku": "CUE-001",
 					"price": 1400,
 					"compare_at_price": null,
@@ -320,15 +320,49 @@
 					"stock": 25,
 					"weight_grams": 64,
 					"product_status": "active",
+					"featured_image": {
+						"src": "/k2.jpg",
+						"alt": "Knuckles"
+					},
+					"gallery_images": [
+						{
+							"image": {
+								"src": "/k2.jpg",
+								"alt": "Knuckles"
+							},
+							"caption": "Knuckles"
+						},
+						{
+							"image": {
+								"src": "/k3.jpg",
+								"alt": "Knuckles angle view"
+							},
+							"caption": "Knuckles angle view"
+						},
+						{
+							"image": {
+								"src": "/k4.jpg",
+								"alt": "Knuckles profile view"
+							},
+							"caption": "Knuckles profile view"
+						},
+						{
+							"image": {
+								"src": "/k7.jpg",
+								"alt": "Knuckles colors"
+							},
+							"caption": "Knuckles colors"
+						}
+					],
 					"variants": [],
 					"excerpt": "Magnetic device for pool players. Lightweight, portable, and made in Australia.",
 					"content": [
-						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "cheatStick" }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Knuckles" }] },
 						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "A lightweight magnetic device designed for pool players. At just 64 grams, it's possibly the lightest mini-butt on the market." }] },
-						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Made from biodegradable thermoplastics, nylons and stainless steel. Fully customizable with RFID, text, or icon options." }] }
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Made from biodegradable thermoplastics, nylons and stainless steel." }] }
 					],
-					"has_text_option": true,
-					"has_nfc_option": true
+					"has_text_option": false,
+					"has_nfc_option": false
 				},
 				"taxonomies": { "product_category": ["cueing"] }
 			},

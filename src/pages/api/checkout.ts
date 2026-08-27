@@ -35,6 +35,7 @@ export const POST: APIRoute = async ({ request, url }) => {
 			color?: string;
 			nogennColor?: string;
 			logoUrl?: string;
+			faceUrl?: string;
 			personalizationType?: PersonalizationType;
 			personalization?: string;
 			quantity: number;

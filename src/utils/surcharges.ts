@@ -20,7 +20,7 @@ export const FACE_SURCHARGE = 9;
 export const EMBEDDED_NFC_ONLY = new Set<string>(['safe9']);
 
 // Products that only offer initials or icon personalization (no cueism, no NFC, no text).
-export const INITIALS_OR_ICON_ONLY = new Set<string>(['cheatstick']);
+export const INITIALS_OR_ICON_ONLY = new Set<string>([]);
 
 // Flat logo-upload processing surcharge per product (dollars).
 export const LOGO_SURCHARGE: Record<string, number> = {};

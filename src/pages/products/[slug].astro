@@ -27,6 +27,10 @@ if (!slug) {
 	return Astro.redirect("/404");
 }
 
+if (slug === "cheatstick" || slug === "chetastick") {
+	return Astro.redirect("/products/knuckles", 301);
+}
+
 const { entry: product, cacheHint } = await getEmDashEntry("products", slug).catch(() => ({ entry: null, cacheHint: null }));
 
 if (!product) {
@@ -64,7 +68,7 @@ const baseWeightGrams = getBaseWeightGrams(product.data);
 
 // Products that do NOT offer text/NFC personalization or a body colour
 // (e.g. chalk packs, which only have a quantity/pack option).
-const NO_PERSONALIZATION = new Set(["chalkable"]);
+const NO_PERSONALIZATION = new Set(["chalkable", "knuckles"]);
 const NO_COLOR = new Set<string>(["safe9"]);
 const COLOUR_REQUEST = new Set(["chalkable"]);
 const LOGO_UPLOAD = new Set(["chalkable"]);
@@ -101,6 +105,7 @@ const trackStock = getTrackStock(product.data) || TRACK_STOCK.has(productKey);
 // Per-product "Nogenn colour" add-on (the rubber grip), mirrored from the
 // legacy WordPress product options. Keyed by slug until colours move into the CMS.
 const NOGENN_COLOURS_BY_SLUG: Record<string, string[]> = {
+	knuckles: ["white", "black", "yellow", "blue"],
 	cheatstick: ["white", "black", "yellow", "blue"],
 };
 const nogennColours = NOGENN_COLOURS_BY_SLUG[product.slug || product.id] ?? [];
@@ -270,16 +275,16 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 	</style>
 
 	<script>
-		function initProductGalleries() {
-			document.querySelectorAll(".product-gallery").forEach((gallery) => {
+		function initProductGalleries(): void {
+			document.querySelectorAll<HTMLElement>(".product-gallery").forEach((gallery) => {
 				if (gallery.dataset.galleryReady === "1") return; // avoid double-binding
 				gallery.dataset.galleryReady = "1";
 
-				const slides = gallery.querySelectorAll(".product-gallery-slide");
-				const thumbs = gallery.querySelectorAll(".product-gallery-thumb");
+				const slides = gallery.querySelectorAll<HTMLElement>(".product-gallery-slide");
+				const thumbs = gallery.querySelectorAll<HTMLElement>(".product-gallery-thumb");
 				if (!thumbs.length) return;
 
-				const show = (index) => {
+				const show = (index: string) => {
 					slides.forEach((s) => {
 						s.style.display = s.dataset.galleryIndex === index ? "" : "none";
 					});
@@ -290,7 +295,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 
 				// Find the slide tagged with a given colour (a slide may serve several
 				// colours via a comma-separated data-color, e.g. "black,white").
-				const findColorIndex = (color) => {
+				const findColorIndex = (color: string | undefined): string | null => {
 					if (!color) return null;
 					const match = Array.from(slides).find((s) =>
 						(s.dataset.color || "").split(",").includes(color)
@@ -299,7 +304,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				};
 
 				// Let the product form (React island) drive the gallery by colour.
-				gallery._showColor = (color) => {
+				(gallery as any)._showColor = (color: string) => {
 					const index = findColorIndex(color);
 					if (index !== null) show(index);
 				};
@@ -314,15 +319,18 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 			});
 		}
 
-		function showGalleryColor(color) {
-			document.querySelectorAll(".product-gallery").forEach((gallery) => {
-				if (typeof gallery._showColor === "function") gallery._showColor(color);
+		function showGalleryColor(color: string): void {
+			document.querySelectorAll<HTMLElement>(".product-gallery").forEach((gallery) => {
+				if (typeof (gallery as any)._showColor === "function") (gallery as any)._showColor(color);
 			});
 		}
 
 		// Run now (covers direct loads) and after each view-transition navigation.
 		initProductGalleries();
 		document.addEventListener("astro:page-load", initProductGalleries);
-		window.addEventListener("cueism:variant-color", (e) => showGalleryColor(e.detail && e.detail.color));
+		window.addEventListener("cueism:variant-color", (e: Event) => {
+			const customEvent = e as CustomEvent<{ color: string }>;
+			showGalleryColor(customEvent.detail && customEvent.detail.color);
+		});
 	</script>
 </Base>
