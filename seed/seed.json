@@ -308,11 +308,11 @@
 				"taxonomies": { "product_category": ["chalk"] }
 			},
 			{
-				"id": "knuckles",
-				"slug": "knuckles",
+				"id": "amoeba",
+				"slug": "amoeba",
 				"status": "published",
 				"data": {
-					"title": "Knuckles",
+					"title": "Amoeba",
 					"sku": "CUE-001",
 					"price": 1400,
 					"compare_at_price": null,
@@ -322,43 +322,43 @@
 					"product_status": "active",
 					"featured_image": {
 						"src": "/k2.jpg",
-						"alt": "Knuckles"
+						"alt": "Amoeba"
 					},
 					"gallery_images": [
 						{
 							"image": {
 								"src": "/k2.jpg",
-								"alt": "Knuckles"
+								"alt": "Amoeba"
 							},
-							"caption": "Knuckles"
+							"caption": "Amoeba"
 						},
 						{
 							"image": {
 								"src": "/k3.jpg",
-								"alt": "Knuckles angle view"
+								"alt": "Amoeba angle view"
 							},
-							"caption": "Knuckles angle view"
+							"caption": "Amoeba angle view"
 						},
 						{
 							"image": {
 								"src": "/k4.jpg",
-								"alt": "Knuckles profile view"
+								"alt": "Amoeba profile view"
 							},
-							"caption": "Knuckles profile view"
+							"caption": "Amoeba profile view"
 						},
 						{
 							"image": {
 								"src": "/k7.jpg",
-								"alt": "Knuckles colors"
+								"alt": "Amoeba colors"
 							},
-							"caption": "Knuckles colors"
+							"caption": "Amoeba colors"
 						}
 					],
 					"variants": [],
 					"excerpt": "Sick of the nasty shots against the rail, or the dodgy spread that is looking impossible to navigate. This has the angles covered and will fit on a Rack cue as good as a break cue.",
 					"content": [
-						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Knuckles Bridge" }] },
-						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Sick of the nasty shots against the rail, or the dodgy spread that is looking impossible to navigate? Knuckles has the angles covered and will fit on a rack cue as good as a break cue." }] },
+						{ "_type": "block", "style": "h2", "children": [{ "_type": "span", "text": "Amoeba Bridge" }] },
+						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Sick of the nasty shots against the rail, or the dodgy spread that is looking impossible to navigate? Amoeba has the angles covered and will fit on a rack cue as good as a break cue." }] },
 						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Lightweight, portable, and designed to slip smoothly onto your cue to provide multiple bridge heights and angles for hard-to-reach shots." }] },
 						{ "_type": "block", "style": "normal", "children": [{ "_type": "span", "text": "Crafted from recycled rPET and biodegradable PLA+ thermoplastics. 100% designed and 3D printed in Sydney, Australia." }] }
 					],
