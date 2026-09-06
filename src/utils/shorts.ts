@@ -21,12 +21,12 @@ export async function getShorts(locals: unknown): Promise<ShortVideo[]> {
 		const handler = (locals as { emdash?: { handlePublicPluginApiRoute?: unknown } })?.emdash
 			?.handlePublicPluginApiRoute;
 		if (typeof handler !== "function") return [];
-		const result = await handler(
+		const result = await (handler as Function)(
 			"youtube-shorts",
 			"GET",
 			"/list",
 			new Request("https://internal/list"),
-		);
+		).catch(() => null);
 		if (!result?.success) return [];
 		return (result.data as { items?: ShortVideo[] })?.items ?? [];
 	} catch {

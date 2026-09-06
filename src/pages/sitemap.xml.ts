@@ -44,11 +44,9 @@ async function fetchEntries(collection: string): Promise<Entry[]> {
 export const GET: APIRoute = async ({ url }) => {
 	const origin = url.origin.replace(TRAILING_SLASH_RE, "");
 
-	const [products, posts, pages] = await Promise.all([
-		fetchEntries("products"),
-		fetchEntries("posts"),
-		fetchEntries("pages"),
-	]);
+	const products = await fetchEntries("products");
+	const posts = await fetchEntries("posts");
+	const pages = await fetchEntries("pages");
 
 	const now = new Date().toISOString();
 

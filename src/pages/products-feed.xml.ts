@@ -23,43 +23,83 @@ export const GET: APIRoute = async ({ url }) => {
 	];
 
 	for (const product of entries as any[]) {
-		const data = product.data;
-		const slug = product.slug || product.id;
-		const link = `${origin}/products/${slug}`;
-		
-		const featuredImage = data.featured_image 
-			? resolveMediaUrl(data.featured_image) 
-			: Array.isArray(data.gallery_images) && data.gallery_images[0]
-				? resolveMediaUrl(data.gallery_images[0]?.image)
-				: undefined;
-		const imageLink = featuredImage 
-			? (featuredImage.startsWith("http") ? featuredImage : `${origin}${featuredImage}`)
-			: "";
+		try {
+			if (!product) continue;
+			const data = product.data || {};
+			// Skip drafts or discontinued items
+			if (product.status === "draft" || data.product_status === "draft" || data.product_status === "discontinued") {
+				continue;
+			}
 
-		const price = getBasePrice(data);
-		const formattedPrice = `${price.toFixed(2)} AUD`;
+			let slug = product.slug || product.id || "product";
+			if (slug === "knuckles" || slug === "cheatstick" || slug === "chetastick") {
+				slug = "amoeba";
+			}
+			const link = `${origin}/products/${slug}`;
+			
+			const featuredImage = data.featured_image 
+				? resolveMediaUrl(data.featured_image) 
+				: Array.isArray(data.gallery_images) && data.gallery_images[0]
+					? resolveMediaUrl(data.gallery_images[0]?.image)
+					: undefined;
+			const imageLink = featuredImage 
+				? (featuredImage.startsWith("http") ? featuredImage : `${origin}${featuredImage}`)
+				: "";
 
-		const trackStock = getTrackStock(data);
-		const variants = getProductVariants(data);
-		const inStock = !trackStock || (variants.length > 0 ? variants.some((v) => v.stock > 0) : getBaseStock(data) > 0);
-		const availability = inStock ? "in_stock" : "out_of_stock";
+			const price = getBasePrice(data);
+			const formattedPrice = `${(typeof price === "number" ? price : 0).toFixed(2)} AUD`;
 
-		const rawDescription = data.excerpt || data.description || `Buy ${data.title} online at Cueism.`;
-		const cleanDescription = stripToPlainText(rawDescription, 1000);
-		
-		lines.push('    <item>');
-		lines.push(`      <g:id>${product.id}</g:id>`);
-		lines.push(`      <g:title>${escapeXml(data.title)}</g:title>`);
-		lines.push(`      <g:description>${escapeXml(cleanDescription)}</g:description>`);
-		lines.push(`      <g:link>${link}</g:link>`);
-		if (imageLink) {
-			lines.push(`      <g:image_link>${imageLink}</g:image_link>`);
+			const trackStock = getTrackStock(data);
+			const variants = getProductVariants(data);
+			const inStock = !trackStock || (variants.length > 0 ? variants.some((v) => v.stock > 0) : getBaseStock(data) > 0);
+			const availability = inStock ? "in_stock" : "out_of_stock";
+
+			const rawDescription = data.excerpt || data.description || `Buy ${data.title || "product"} online at Cueism.`;
+			const cleanDescription = stripToPlainText(rawDescription, 1000);
+			const weight = data.weight_grams ? `${data.weight_grams} g` : undefined;
+			
+			lines.push('    <item>');
+			lines.push(`      <g:id>${product.id || slug}</g:id>`);
+			lines.push(`      <g:title>${escapeXml(data.title || slug)}</g:title>`);
+			lines.push(`      <g:description>${escapeXml(cleanDescription)}</g:description>`);
+			lines.push(`      <g:link>${link}</g:link>`);
+			if (imageLink) {
+				lines.push(`      <g:image_link>${imageLink}</g:image_link>`);
+			}
+			lines.push(`      <g:price>${formattedPrice}</g:price>`);
+			lines.push(`      <g:availability>${availability}</g:availability>`);
+			lines.push('      <g:condition>new</g:condition>');
+			lines.push(`      <g:brand>${BRAND_NAME}</g:brand>`);
+			lines.push('      <g:identifier_exists>no</g:identifier_exists>');
+			if (weight) {
+				lines.push(`      <g:shipping_weight>${weight}</g:shipping_weight>`);
+			}
+			// Primary Australia shipping
+			lines.push('      <g:shipping>');
+			lines.push('        <g:country>AU</g:country>');
+			lines.push('        <g:service>Standard Shipping</g:service>');
+			lines.push('        <g:price>10.00 AUD</g:price>');
+			lines.push('      </g:shipping>');
+			// International shipping destinations
+			lines.push('      <g:shipping>');
+			lines.push('        <g:country>US</g:country>');
+			lines.push('        <g:service>Standard International</g:service>');
+			lines.push('        <g:price>10.00 AUD</g:price>');
+			lines.push('      </g:shipping>');
+			lines.push('      <g:shipping>');
+			lines.push('        <g:country>GB</g:country>');
+			lines.push('        <g:service>Standard International</g:service>');
+			lines.push('        <g:price>10.00 AUD</g:price>');
+			lines.push('      </g:shipping>');
+			lines.push('      <g:shipping>');
+			lines.push('        <g:country>NZ</g:country>');
+			lines.push('        <g:service>Standard International</g:service>');
+			lines.push('        <g:price>10.00 AUD</g:price>');
+			lines.push('      </g:shipping>');
+			lines.push('    </item>');
+		} catch (e) {
+			console.error(`Error processing product ${product?.id}:`, e);
 		}
-		lines.push(`      <g:price>${formattedPrice}</g:price>`);
-		lines.push(`      <g:availability>${availability}</g:availability>`);
-		lines.push('      <g:condition>new</g:condition>');
-		lines.push(`      <g:brand>${BRAND_NAME}</g:brand>`);
-		lines.push('    </item>');
 	}
 
 	lines.push('  </channel>');
@@ -67,7 +107,7 @@ export const GET: APIRoute = async ({ url }) => {
 
 	return new Response(lines.join("\n"), {
 		headers: {
-			"Content-Type": "application/xml",
+			"Content-Type": "application/xml; charset=utf-8",
 			"Cache-Control": "public, max-age=3600",
 		},
 	});

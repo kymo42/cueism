@@ -1,0 +1,65 @@
+# robots.txt for Cueism (https://cueism.com)
+
+# Default crawler rules
+User-agent: *
+Allow: /
+Disallow: /_emdash/
+Disallow: /api/
+
+# Explicitly permit Googlebot and Google Merchant Center crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: StoreBot-Google
+Allow: /
+
+User-agent: Google-InspectionTool
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+# Instruct AI scrapers and training bots not to scrape
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Cohere-ai
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: Omgili
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+Sitemap: https://cueism.com/sitemap.xml

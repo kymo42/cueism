@@ -206,18 +206,24 @@ export default {
 				})
 				.default({}),
 			handler: async (routeCtx: any, ctx: PluginContext) => {
-				const { q, limit } = routeCtx.input;
-				const result = await ctx.storage.shorts!.query({
-					orderBy: { publishedAt: "desc" },
-					limit,
-				});
+				try {
+					const { q, limit } = routeCtx.input || {};
+					if (!ctx.storage?.shorts) return { items: [] };
+					const result = await ctx.storage.shorts.query({
+						orderBy: { publishedAt: "desc" },
+						limit: limit || 300,
+					});
 
-				const needle: string | undefined = q?.trim().toLowerCase();
-				const items = result.items
-					.map((item: any) => item.data as ShortVideo)
-					.filter((short: ShortVideo) => !needle || short.title.toLowerCase().includes(needle));
+					const needle: string | undefined = q?.trim().toLowerCase();
+					const items = (result?.items || [])
+						.map((item: any) => item.data as ShortVideo)
+						.filter((short: ShortVideo) => short && (!needle || short.title?.toLowerCase().includes(needle)));
 
-				return { items };
+					return { items };
+				} catch (e) {
+					ctx.log.error("youtube-shorts list route error", { error: String(e) });
+					return { items: [] };
+				}
 			},
 		},
 
