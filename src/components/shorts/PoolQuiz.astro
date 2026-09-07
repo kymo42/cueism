@@ -16,10 +16,11 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		hidden
 	>
 		<div class="collapsed-left">
-			<span class="quiz-pill-badge">🎱 Pool IQ Test</span>
+			<span class="quiz-pill-badge">🎱 Pool IQ Challenge</span>
 			<span class="collapsed-title" id="collapsed-title-text">Test your table knowledge & FargoRate</span>
 		</div>
 		<div class="collapsed-right">
+			<span class="collapsed-streak" id="collapsed-streak-pill" hidden>🔥 0</span>
 			<span class="collapsed-fargo" id="collapsed-fargo-pill">Fargo: ~380</span>
 			<span class="collapsed-icon" aria-hidden="true">▼</span>
 		</div>
@@ -30,11 +31,21 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		<!-- Card Top Header -->
 		<header class="quiz-header">
 			<div class="quiz-meta-left">
-				<span class="quiz-tag">🎱 POOL IQ & FARGO TEST</span>
+				<span class="quiz-tag">🎱 POOL IQ &amp; FARGO TEST</span>
 				<span class="quiz-tier-badge" id="quiz-tier-badge">Level 1 • Fargo &lt; 425</span>
+				<span class="quiz-streak-badge" id="quiz-streak-badge" hidden>🔥 Streak: 0</span>
 			</div>
 			<div class="quiz-meta-right">
-				<span class="quiz-progress-text" id="quiz-progress-text">Question 1 of 5</span>
+				<!-- 50/50 Lifeline Button -->
+				<button
+					type="button"
+					class="quiz-lifeline-btn"
+					id="quiz-lifeline-btn"
+					title="Eliminate 2 wrong answers"
+				>
+					💡 50/50 (<span id="lifelines-remaining">2</span>)
+				</button>
+				<span class="quiz-progress-text" id="quiz-progress-text">Shot 1 of 10</span>
 				<button
 					type="button"
 					class="quiz-minimize-btn"
@@ -47,15 +58,22 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			</div>
 		</header>
 
-		<!-- Progress Bar -->
-		<div class="quiz-progress-track">
-			<div class="quiz-progress-fill" id="quiz-progress-fill" style="width: 20%;"></div>
+		<!-- Progress Bar & Live Fargo Meter -->
+		<div class="quiz-progress-section">
+			<div class="quiz-progress-track">
+				<div class="quiz-progress-fill" id="quiz-progress-fill" style="width: 10%;"></div>
+			</div>
+			<div class="quiz-live-meter">
+				<span class="meter-label">Live Rating:</span>
+				<span class="meter-fargo" id="meter-fargo">380</span>
+				<span class="meter-rank" id="meter-rank">Casual Player</span>
+			</div>
 		</div>
 
 		<!-- Question View State -->
 		<div class="quiz-body" id="quiz-question-view">
 			<p class="quiz-scenario" id="quiz-scenario" hidden></p>
-			<h2 class="quiz-question-title" id="quiz-question-text">Loading question...</h2>
+			<h2 class="quiz-question-title" id="quiz-question-text">Loading shot scenario...</h2>
 
 			<!-- Multiple Choice Options -->
 			<div class="quiz-options-grid" id="quiz-options-container" role="radiogroup">
@@ -65,7 +83,10 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			<!-- Feedback & Explanations Panel (Hidden until answered) -->
 			<div class="quiz-feedback-panel" id="quiz-feedback-panel" hidden>
 				<div class="quiz-feedback-header">
-					<span class="feedback-status-badge" id="feedback-status-badge">Correct!</span>
+					<div class="feedback-title-group">
+						<span class="feedback-status-badge" id="feedback-status-badge">Correct!</span>
+						<span class="feedback-punchline" id="feedback-punchline">Pure stroke!</span>
+					</div>
 					<span class="feedback-fargo-impact" id="feedback-fargo-impact">+35 Fargo</span>
 				</div>
 				<p class="quiz-explanation-text" id="quiz-explanation-text"></p>
@@ -77,7 +98,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 						<span id="btn-watch-short-text">Watch Related Short</span>
 					</button>
 					<button type="button" class="btn-quiz-next" id="btn-next-question">
-						<span>Next Question</span>
+						<span>Next Shot</span>
 						<span aria-hidden="true">→</span>
 					</button>
 				</div>
@@ -99,7 +120,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			</div>
 		</div>
 
-		<!-- Results / Level-Up Screen State (Hidden until round finished) -->
+		<!-- Results / Level-Up Screen State (Shown after a rack or round) -->
 		<div class="quiz-results-view" id="quiz-results-view" hidden>
 			<div class="results-badge-wrap">
 				<div class="results-fargo-circle">
@@ -107,9 +128,24 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 					<span class="fargo-score" id="results-fargo-score">515</span>
 				</div>
 				<div class="results-tier-summary">
+					<div class="results-round-stats">
+						<span class="stat-pill" id="stat-accuracy">8/10 Correct</span>
+						<span class="stat-pill streak-pill" id="stat-best-streak">Best Streak: 🔥 4</span>
+					</div>
 					<h3 class="results-rank-title" id="results-rank-title">Intermediate Shotmaker</h3>
 					<p class="results-rank-tagline" id="results-rank-tagline">Table angles & rolling cue ball control</p>
 				</div>
+			</div>
+
+			<!-- Immediate Continue Bar -->
+			<div class="continue-rack-bar">
+				<div class="continue-rack-info">
+					<span class="continue-headline">Ready for the next rack?</span>
+					<span class="continue-sub">Keep your streak going with fresh shots from your NotebookLM bank.</span>
+				</div>
+				<button type="button" class="btn-keep-rolling" id="btn-keep-rolling">
+					🔥 Keep Rolling! Rack Next 5 →
+				</button>
 			</div>
 
 			<div class="level-up-container">
@@ -120,7 +156,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			</div>
 
 			<div class="results-recommended-shorts" id="results-recommended-shorts">
-				<h4 class="recommended-heading">📺 Recommended Shorts for Your Game:</h4>
+				<h4 class="recommended-heading">📺 Recommended Shorts to Boost Your Game:</h4>
 				<div class="recommended-cards-grid" id="recommended-cards-grid">
 					<!-- Injected recommendations -->
 				</div>
@@ -128,7 +164,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 
 			<div class="results-footer">
 				<button type="button" class="btn-quiz-retry" id="btn-quiz-retry">
-					🔄 Retake Quiz / Test Higher
+					🔄 Start Fresh Rack
 				</button>
 			</div>
 		</div>
@@ -142,7 +178,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 <style>
 	.quiz-wrapper {
 		width: 100%;
-		max-width: 820px;
+		max-width: 840px;
 		margin: 0 auto var(--spacing-md);
 		padding: 0 var(--spacing-sm);
 	}
@@ -199,6 +235,16 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		gap: 0.6rem;
 	}
 
+	.collapsed-streak {
+		background: rgba(240, 136, 62, 0.15);
+		border: 1px solid rgba(240, 136, 62, 0.35);
+		color: #f0883e;
+		font-size: 0.75rem;
+		font-weight: 700;
+		padding: 0.15rem 0.45rem;
+		border-radius: var(--radius-full);
+	}
+
 	.collapsed-fargo {
 		background: #1f242c;
 		border: 1px solid #30363d;
@@ -219,7 +265,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
 		border: 1px solid #30363d;
 		border-radius: var(--radius-lg);
-		padding: 1.15rem 1.25rem;
+		padding: 1.15rem 1.35rem;
 		color: #e6edf3;
 		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 		position: relative;
@@ -231,7 +277,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-bottom: 0.65rem;
+		margin-bottom: 0.55rem;
 		font-size: 0.78rem;
 	}
 
@@ -259,16 +305,61 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		font-weight: 600;
 	}
 
+	.quiz-streak-badge {
+		background: rgba(240, 136, 62, 0.2);
+		color: #f0883e;
+		border: 1px solid rgba(240, 136, 62, 0.4);
+		padding: 0.15rem 0.5rem;
+		border-radius: var(--radius-full);
+		font-size: 0.72rem;
+		font-weight: 700;
+		animation: pulseStreak 0.4s ease-out;
+	}
+
+	@keyframes pulseStreak {
+		0% { transform: scale(0.9); }
+		50% { transform: scale(1.1); }
+		100% { transform: scale(1); }
+	}
+
 	.quiz-meta-right {
 		display: flex;
 		align-items: center;
 		gap: 0.65rem;
 	}
 
+	/* 50/50 Lifeline Button */
+	.quiz-lifeline-btn {
+		background: #21262d;
+		border: 1px solid #d29922;
+		color: #e3b341;
+		font-size: 0.72rem;
+		font-weight: 600;
+		padding: 0.2rem 0.55rem;
+		border-radius: var(--radius-full);
+		cursor: pointer;
+		transition: var(--transition-fast);
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.quiz-lifeline-btn:hover:not(:disabled) {
+		background: #d29922;
+		color: #000;
+	}
+
+	.quiz-lifeline-btn:disabled {
+		opacity: 0.35;
+		border-color: #30363d;
+		color: #8b949e;
+		cursor: default;
+	}
+
 	.quiz-progress-text {
 		color: #8b949e;
 		font-size: 0.76rem;
-		font-weight: 500;
+		font-weight: 600;
 	}
 
 	.quiz-minimize-btn {
@@ -292,21 +383,51 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		background: #21262d;
 	}
 
-	/* Progress Track */
+	/* Progress Section with Live Meter */
+	.quiz-progress-section {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 0.85rem;
+	}
+
 	.quiz-progress-track {
-		width: 100%;
+		flex: 1;
 		height: 4px;
 		background: #21262d;
 		border-radius: var(--radius-full);
-		margin-bottom: 0.9rem;
 		overflow: hidden;
 	}
 
 	.quiz-progress-fill {
 		height: 100%;
-		background: linear-gradient(90deg, #238636 0%, #388bfd 100%);
+		background: linear-gradient(90deg, #238636 0%, #388bfd 50%, #f0883e 100%);
 		border-radius: var(--radius-full);
 		transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.quiz-live-meter {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		font-size: 0.74rem;
+		white-space: nowrap;
+	}
+
+	.meter-label {
+		color: #8b949e;
+	}
+
+	.meter-fargo {
+		color: #58a6ff;
+		font-weight: 700;
+		font-size: 0.82rem;
+		transition: transform 0.2s ease;
+	}
+
+	.meter-rank {
+		color: #8b949e;
+		font-size: 0.7rem;
 	}
 
 	/* Question Body */
@@ -337,7 +458,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		background: #21262d;
 		border: 1px solid #30363d;
 		border-radius: var(--radius-md);
-		padding: 0.6rem 0.8rem;
+		padding: 0.65rem 0.85rem;
 		color: #c9d1d9;
 		text-align: left;
 		font-family: var(--font-primary);
@@ -384,6 +505,12 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		color: #ff7b72 !important;
 	}
 
+	:global(.quiz-option-btn.state-eliminated) {
+		opacity: 0.25;
+		text-decoration: line-through;
+		pointer-events: none;
+	}
+
 	:global(.quiz-option-btn.state-dimmed) {
 		opacity: 0.45;
 	}
@@ -416,8 +543,14 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		margin-bottom: 0.4rem;
 	}
 
+	.feedback-title-group {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
 	.feedback-status-badge {
-		font-size: 0.8rem;
+		font-size: 0.82rem;
 		font-weight: 700;
 	}
 
@@ -427,6 +560,12 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 
 	.feedback-status-badge.incorrect {
 		color: #f85149;
+	}
+
+	.feedback-punchline {
+		font-size: 0.78rem;
+		color: #8b949e;
+		font-style: italic;
 	}
 
 	.feedback-fargo-impact {
@@ -493,9 +632,9 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		background: #238636;
 		border: 1px solid #2ea043;
 		color: #ffffff;
-		padding: 0.45rem 1rem;
+		padding: 0.5rem 1.1rem;
 		border-radius: var(--radius-md);
-		font-size: 0.82rem;
+		font-size: 0.84rem;
 		font-weight: 600;
 		display: flex;
 		align-items: center;
@@ -506,7 +645,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 
 	.btn-quiz-next:hover {
 		background: #2ea043;
-		box-shadow: 0 0 10px rgba(46, 160, 67, 0.4);
+		box-shadow: 0 0 12px rgba(46, 160, 67, 0.4);
 	}
 
 	/* Inline Player */
@@ -580,12 +719,12 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		border: 1px solid #30363d;
 		border-radius: var(--radius-md);
 		padding: 1rem 1.25rem;
-		margin-bottom: 1rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.results-fargo-circle {
-		width: 76px;
-		height: 76px;
+		width: 82px;
+		height: 82px;
 		border-radius: 50%;
 		background: radial-gradient(circle, #1f242c 0%, #0d1117 100%);
 		border: 2px solid #388bfd;
@@ -593,7 +732,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		box-shadow: 0 0 16px rgba(56, 139, 253, 0.3);
+		box-shadow: 0 0 18px rgba(56, 139, 253, 0.3);
 		flex-shrink: 0;
 	}
 
@@ -605,23 +744,99 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 	}
 
 	.fargo-score {
-		font-size: 1.4rem;
+		font-size: 1.5rem;
 		font-weight: 800;
 		color: #58a6ff;
 		line-height: 1;
 	}
 
+	.results-tier-summary {
+		flex: 1;
+	}
+
+	.results-round-stats {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.3rem;
+	}
+
+	.stat-pill {
+		font-size: 0.72rem;
+		font-weight: 600;
+		background: #21262d;
+		border: 1px solid #30363d;
+		color: #c9d1d9;
+		padding: 0.15rem 0.5rem;
+		border-radius: var(--radius-full);
+	}
+
+	.stat-pill.streak-pill {
+		background: rgba(240, 136, 62, 0.15);
+		border-color: rgba(240, 136, 62, 0.35);
+		color: #f0883e;
+	}
+
 	.results-rank-title {
-		font-size: 1.15rem;
+		font-size: 1.2rem;
 		font-weight: 700;
 		color: #ffffff;
-		margin: 0 0 0.25rem;
+		margin: 0 0 0.2rem;
 	}
 
 	.results-rank-tagline {
 		font-size: 0.84rem;
 		color: #8b949e;
 		margin: 0;
+	}
+
+	/* Continue Bar */
+	.continue-rack-bar {
+		background: linear-gradient(90deg, rgba(35, 134, 54, 0.18) 0%, rgba(56, 139, 253, 0.18) 100%);
+		border: 1px solid #238636;
+		border-radius: var(--radius-md);
+		padding: 0.85rem 1.15rem;
+		margin-bottom: 1rem;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.continue-rack-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+	}
+
+	.continue-headline {
+		font-weight: 700;
+		font-size: 0.92rem;
+		color: #7ee787;
+	}
+
+	.continue-sub {
+		font-size: 0.78rem;
+		color: #8b949e;
+	}
+
+	.btn-keep-rolling {
+		background: #238636;
+		border: 1px solid #2ea043;
+		color: #ffffff;
+		padding: 0.6rem 1.25rem;
+		border-radius: var(--radius-md);
+		font-size: 0.88rem;
+		font-weight: 700;
+		cursor: pointer;
+		transition: var(--transition-fast);
+		box-shadow: 0 0 14px rgba(35, 134, 54, 0.4);
+	}
+
+	.btn-keep-rolling:hover {
+		background: #2ea043;
+		transform: translateY(-1px);
 	}
 
 	.level-up-container {
@@ -710,17 +925,18 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 	.btn-quiz-retry {
 		background: #21262d;
 		border: 1px solid #30363d;
-		color: #e6edf3;
-		padding: 0.5rem 1rem;
+		color: #8b949e;
+		padding: 0.45rem 0.9rem;
 		border-radius: var(--radius-md);
-		font-size: 0.82rem;
-		font-weight: 600;
+		font-size: 0.78rem;
+		font-weight: 500;
 		cursor: pointer;
 		transition: var(--transition-fast);
 	}
 
 	.btn-quiz-retry:hover {
 		background: #30363d;
+		color: #fff;
 		border-color: #8b949e;
 	}
 
@@ -747,6 +963,15 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 
 		.btn-quiz-short, .btn-quiz-next {
 			justify-content: center;
+		}
+
+		.continue-rack-bar {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.btn-keep-rolling {
+			text-align: center;
 		}
 
 		.results-badge-wrap {
@@ -784,10 +1009,17 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		const collapsedBar = document.getElementById("quiz-collapsed-bar");
 		const minimizeBtn = document.getElementById("quiz-minimize-btn");
 		const collapsedFargoPill = document.getElementById("collapsed-fargo-pill");
+		const collapsedStreakPill = document.getElementById("collapsed-streak-pill");
 
 		const tierBadge = document.getElementById("quiz-tier-badge");
+		const streakBadge = document.getElementById("quiz-streak-badge");
+		const lifelineBtn = document.getElementById("quiz-lifeline-btn") as HTMLButtonElement | null;
+		const lifelinesRemaining = document.getElementById("lifelines-remaining");
 		const progressText = document.getElementById("quiz-progress-text");
 		const progressFill = document.getElementById("quiz-progress-fill");
+
+		const meterFargo = document.getElementById("meter-fargo");
+		const meterRank = document.getElementById("meter-rank");
 
 		const questionView = document.getElementById("quiz-question-view");
 		const questionText = document.getElementById("quiz-question-text");
@@ -796,6 +1028,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 
 		const feedbackPanel = document.getElementById("quiz-feedback-panel");
 		const feedbackBadge = document.getElementById("feedback-status-badge");
+		const feedbackPunchline = document.getElementById("feedback-punchline");
 		const feedbackFargo = document.getElementById("feedback-fargo-impact");
 		const feedbackExplanation = document.getElementById("quiz-explanation-text");
 		const btnWatchShort = document.getElementById("btn-watch-short");
@@ -811,54 +1044,161 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		const resultsFargoScore = document.getElementById("results-fargo-score");
 		const resultsRankTitle = document.getElementById("results-rank-title");
 		const resultsRankTagline = document.getElementById("results-rank-tagline");
+		const statAccuracy = document.getElementById("stat-accuracy");
+		const statBestStreak = document.getElementById("stat-best-streak");
+		const btnKeepRolling = document.getElementById("btn-keep-rolling");
 		const levelUpList = document.getElementById("level-up-list");
 		const recommendedGrid = document.getElementById("recommended-cards-grid");
 		const btnRetry = document.getElementById("btn-quiz-retry");
 
 		// State variables
-		const TOTAL_ROUNDS = 5;
-		let currentRoundIndex = 0;
-		let activeQuestionList: QuizQuestion[] = [];
-		let currentFargo = 360;
-		let roundScore = 0;
+		const RACK_SIZE = 5; // Questions per mini rack
+		let activeQuestionPool: QuizQuestion[] = [];
+		let usedQuestionIds = new Set<string>();
+		let currentQuestionIndex = 0;
+		let totalQuestionsAnswered = 0;
+		let currentFargo = 380;
+		let totalCorrect = 0;
+		let currentStreak = 0;
+		let bestStreak = 0;
+		let lifelinesCount = 2;
 		let missedQuestions: QuizQuestion[] = [];
 		let answeredCurrent = false;
 
-		// LocalStorage key
-		const STORAGE_KEY = "cueism_pool_quiz_state_v1";
+		const punchlinesCorrect = [
+			"Dead center!",
+			"Pure stroke!",
+			"Ice cold!",
+			"Like a seasoned pro!",
+			"Table tactician!",
+			"Rack 'em up!"
+		];
 
-		// Initialize Round: Pick 1 question from each tier (1 to 5)
-		function buildRoundQuestions(): QuizQuestion[] {
-			const selected: QuizQuestion[] = [];
-			for (let tier = 1; tier <= 5; tier++) {
-				const tierQuestions = allQuestions.filter((q) => q.tier === tier);
-				if (tierQuestions.length > 0) {
-					// Randomize within tier
-					const randomIndex = Math.floor(Math.random() * tierQuestions.length);
-					selected.push(tierQuestions[randomIndex]);
-				}
+		const punchlinesIncorrect = [
+			"Scratched on that one!",
+			"Tough rail roll!",
+			"Good learning moment!",
+			"Table took that one!"
+		];
+
+		// LocalStorage key
+		const STORAGE_KEY = "cueism_pool_quiz_state_v2";
+
+		function shuffleArray<T>(arr: T[]): T[] {
+			const copy = [...arr];
+			for (let i = copy.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				[copy[i], copy[j]] = [copy[j], copy[i]];
 			}
-			return selected;
+			return copy;
 		}
 
-		function startNewQuiz(): void {
-			activeQuestionList = buildRoundQuestions();
-			currentRoundIndex = 0;
-			roundScore = 0;
-			missedQuestions = [];
-			currentFargo = 360;
-			answeredCurrent = false;
+		// Pick questions prioritizing unused ones and progressive tiers
+		function prepareNextRack(count: number): void {
+			let available = allQuestions.filter((q) => !usedQuestionIds.has(q.id));
+			if (available.length < count) {
+				// Reset pool if all used
+				usedQuestionIds.clear();
+				available = [...allQuestions];
+			}
 
+			// Group by tier for progressive climb
+			const newRack: QuizQuestion[] = [];
+			for (let tier = 1; tier <= 5; tier++) {
+				const tierAvailable = available.filter((q) => q.tier === tier && !usedQuestionIds.has(q.id));
+				if (tierAvailable.length > 0) {
+					const picked = tierAvailable[Math.floor(Math.random() * tierAvailable.length)];
+					newRack.push(picked);
+					usedQuestionIds.add(picked.id);
+				}
+				if (newRack.length >= count) break;
+			}
+
+			// Fallback if needed
+			while (newRack.length < count) {
+				const leftovers = available.filter((q) => !newRack.includes(q));
+				if (leftovers.length === 0) break;
+				const picked = leftovers[Math.floor(Math.random() * leftovers.length)];
+				newRack.push(picked);
+				usedQuestionIds.add(picked.id);
+			}
+
+			activeQuestionPool = shuffleArray(newRack);
+			currentQuestionIndex = 0;
+		}
+
+		function startNewGame(): void {
+			usedQuestionIds.clear();
+			totalQuestionsAnswered = 0;
+			totalCorrect = 0;
+			currentStreak = 0;
+			bestStreak = 0;
+			currentFargo = 380;
+			lifelinesCount = 2;
+			missedQuestions = [];
+
+			prepareNextRack(RACK_SIZE);
+			showQuestionView();
+			renderCurrentQuestion();
+		}
+
+		function continueNextRack(): void {
+			prepareNextRack(RACK_SIZE);
+			showQuestionView();
+			renderCurrentQuestion();
+		}
+
+		function showQuestionView(): void {
 			if (questionView) questionView.hidden = false;
 			if (resultsView) resultsView.hidden = true;
 			if (inlinePlayer) inlinePlayer.hidden = true;
 			if (inlinePlayerContainer) inlinePlayerContainer.innerHTML = "";
+		}
 
-			renderCurrentQuestion();
+		function getTierInfo(fargo: number): FargoTierInfo {
+			if (fargo >= 650) return fargoTiers[5] || fargoTiers[1];
+			if (fargo >= 575) return fargoTiers[4] || fargoTiers[1];
+			if (fargo >= 500) return fargoTiers[3] || fargoTiers[1];
+			if (fargo >= 425) return fargoTiers[2] || fargoTiers[1];
+			return fargoTiers[1];
+		}
+
+		function updateLiveMeter(): void {
+			const roundedFargo = Math.round(currentFargo);
+			const tierInfo = getTierInfo(roundedFargo);
+
+			if (meterFargo) {
+				meterFargo.textContent = `${roundedFargo}`;
+				meterFargo.style.transform = "scale(1.2)";
+				setTimeout(() => {
+					if (meterFargo) meterFargo.style.transform = "scale(1)";
+				}, 200);
+			}
+			if (meterRank) meterRank.textContent = tierInfo.title.split("(")[0].trim();
+			if (collapsedFargoPill) collapsedFargoPill.textContent = `Fargo: ~${roundedFargo}`;
+
+			// Lifeline status
+			if (lifelinesRemaining) lifelinesRemaining.textContent = `${lifelinesCount}`;
+			if (lifelineBtn) lifelineBtn.disabled = lifelinesCount <= 0 || answeredCurrent;
+
+			// Streak badge
+			if (currentStreak >= 2) {
+				if (streakBadge) {
+					streakBadge.textContent = `🔥 Streak: ${currentStreak}`;
+					streakBadge.hidden = false;
+				}
+				if (collapsedStreakPill) {
+					collapsedStreakPill.textContent = `🔥 ${currentStreak}`;
+					collapsedStreakPill.hidden = false;
+				}
+			} else {
+				if (streakBadge) streakBadge.hidden = true;
+				if (collapsedStreakPill) collapsedStreakPill.hidden = true;
+			}
 		}
 
 		function renderCurrentQuestion(): void {
-			const q = activeQuestionList[currentRoundIndex];
+			const q = activeQuestionPool[currentQuestionIndex];
 			if (!q) {
 				showResults();
 				return;
@@ -869,12 +1209,15 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			if (inlinePlayer) inlinePlayer.hidden = true;
 			if (inlinePlayerContainer) inlinePlayerContainer.innerHTML = "";
 
-			// Update Progress
-			const progressPercent = ((currentRoundIndex + 1) / TOTAL_ROUNDS) * 100;
+			updateLiveMeter();
+
+			// Progress bar inside current rack
+			const progressPercent = ((currentQuestionIndex + 1) / RACK_SIZE) * 100;
 			if (progressFill) progressFill.style.width = `${progressPercent}%`;
-			if (progressText) progressText.textContent = `Question ${currentRoundIndex + 1} of ${TOTAL_ROUNDS}`;
+			if (progressText) {
+				progressText.textContent = `Shot ${totalQuestionsAnswered + 1} • Level ${q.tier}`;
+			}
 			if (tierBadge) tierBadge.textContent = q.tierTitle;
-			if (collapsedFargoPill) collapsedFargoPill.textContent = `Fargo: ~${Math.round(currentFargo)}`;
 
 			// Question & Scenario
 			if (questionText) questionText.textContent = q.question;
@@ -896,6 +1239,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 					btn.type = "button";
 					btn.className = "quiz-option-btn";
 					btn.setAttribute("role", "radio");
+					btn.setAttribute("data-index", `${idx}`);
 					btn.setAttribute("aria-checked", "false");
 					btn.innerHTML = `
 						<span class="quiz-option-letter">${letters[idx]}.</span>
@@ -907,13 +1251,38 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			}
 		}
 
+		function use5050Lifeline(): void {
+			if (lifelinesCount <= 0 || answeredCurrent) return;
+			const q = activeQuestionPool[currentQuestionIndex];
+			if (!q) return;
+
+			lifelinesCount--;
+			if (lifelinesRemaining) lifelinesRemaining.textContent = `${lifelinesCount}`;
+			if (lifelineBtn) lifelineBtn.disabled = true;
+
+			// Pick 2 incorrect options to eliminate
+			const incorrectIndices = [0, 1, 2, 3].filter((idx) => idx !== q.correctIndex);
+			const toEliminate = shuffleArray(incorrectIndices).slice(0, 2);
+
+			const optionBtns = optionsContainer?.querySelectorAll<HTMLButtonElement>(".quiz-option-btn");
+			optionBtns?.forEach((btn, idx) => {
+				if (toEliminate.includes(idx)) {
+					btn.classList.add("state-eliminated");
+					btn.disabled = true;
+				}
+			});
+		}
+
+		lifelineBtn?.addEventListener("click", use5050Lifeline);
+
 		function handleAnswer(selectedIndex: number): void {
 			if (answeredCurrent) return;
 			answeredCurrent = true;
 
-			const q = activeQuestionList[currentRoundIndex];
+			const q = activeQuestionPool[currentQuestionIndex];
 			if (!q) return;
 
+			totalQuestionsAnswered++;
 			const isCorrect = selectedIndex === q.correctIndex;
 			const optionBtns = optionsContainer?.querySelectorAll<HTMLButtonElement>(".quiz-option-btn");
 
@@ -929,24 +1298,39 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 				}
 			});
 
-			// Calculate Fargo impact
+			// Calculate Fargo impact & Streak
 			let fargoDelta = 0;
 			if (isCorrect) {
-				roundScore++;
-				// Points scaled by tier
-				fargoDelta = 35 + q.tier * 15;
-				currentFargo = Math.min(730, currentFargo + fargoDelta);
+				totalCorrect++;
+				currentStreak++;
+				if (currentStreak > bestStreak) bestStreak = currentStreak;
+
+				// Base tier points + streak multiplier bonus
+				const streakBonus = Math.min(25, (currentStreak - 1) * 5);
+				fargoDelta = 30 + q.tier * 12 + streakBonus;
+				currentFargo = Math.min(750, currentFargo + fargoDelta);
 			} else {
 				missedQuestions.push(q);
-				fargoDelta = 0;
+				currentStreak = 0;
+				// Slight penalty to simulate realistic rating swings
+				currentFargo = Math.max(300, currentFargo - 8);
 			}
+
+			updateLiveMeter();
 
 			// Show feedback
 			if (feedbackPanel && feedbackBadge && feedbackFargo && feedbackExplanation) {
 				feedbackBadge.textContent = isCorrect ? "✓ Spot On!" : "✗ Missed It";
 				feedbackBadge.className = `feedback-status-badge ${isCorrect ? "correct" : "incorrect"}`;
 
-				feedbackFargo.textContent = isCorrect ? `+${fargoDelta} Fargo` : "+0 Fargo";
+				if (feedbackPunchline) {
+					const list = isCorrect ? punchlinesCorrect : punchlinesIncorrect;
+					feedbackPunchline.textContent = list[Math.floor(Math.random() * list.length)];
+				}
+
+				feedbackFargo.textContent = isCorrect
+					? `+${fargoDelta} Fargo ${currentStreak > 1 ? `(🔥 Streak x${currentStreak})` : ""}`
+					: "-8 Fargo";
 				feedbackFargo.className = `feedback-fargo-impact ${isCorrect ? "positive" : "neutral"}`;
 
 				feedbackExplanation.textContent = q.explanation;
@@ -963,15 +1347,15 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 
 			// Configure Next button
 			if (btnNext) {
-				const isLast = currentRoundIndex >= TOTAL_ROUNDS - 1;
-				btnNext.innerHTML = isLast
-					? `<span>View Fargo Results</span> <span aria-hidden="true">→</span>`
-					: `<span>Next Question</span> <span aria-hidden="true">→</span>`;
+				const isEndOfRack = currentQuestionIndex >= RACK_SIZE - 1;
+				btnNext.innerHTML = isEndOfRack
+					? `<span>View Rack Score</span> <span aria-hidden="true">→</span>`
+					: `<span>Next Shot</span> <span aria-hidden="true">→</span>`;
 				btnNext.onclick = () => {
-					if (isLast) {
+					if (isEndOfRack) {
 						showResults();
 					} else {
-						currentRoundIndex++;
+						currentQuestionIndex++;
 						renderCurrentQuestion();
 					}
 				};
@@ -1042,21 +1426,20 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			if (inlinePlayer) inlinePlayer.hidden = true;
 			if (inlinePlayerContainer) inlinePlayerContainer.innerHTML = "";
 
-			// Determine calculated tier
 			const finalFargo = Math.round(currentFargo);
-			let achievedTier = 1;
-			if (finalFargo >= 650) achievedTier = 5;
-			else if (finalFargo >= 575) achievedTier = 4;
-			else if (finalFargo >= 500) achievedTier = 3;
-			else if (finalFargo >= 425) achievedTier = 2;
-			else achievedTier = 1;
-
-			const tierData = fargoTiers[achievedTier] || fargoTiers[1];
+			const tierInfo = getTierInfo(finalFargo);
 
 			if (resultsFargoScore) resultsFargoScore.textContent = `${finalFargo}`;
-			if (resultsRankTitle) resultsRankTitle.textContent = tierData.title;
-			if (resultsRankTagline) resultsRankTagline.textContent = tierData.tagline;
+			if (resultsRankTitle) resultsRankTitle.textContent = tierInfo.title;
+			if (resultsRankTagline) resultsRankTagline.textContent = tierInfo.tagline;
 			if (collapsedFargoPill) collapsedFargoPill.textContent = `Fargo: ~${finalFargo}`;
+
+			if (statAccuracy) {
+				statAccuracy.textContent = `${totalCorrect}/${totalQuestionsAnswered} Shots Pocketed (${Math.round((totalCorrect / Math.max(1, totalQuestionsAnswered)) * 100)}%)`;
+			}
+			if (statBestStreak) {
+				statBestStreak.textContent = `Best Streak: 🔥 ${bestStreak}`;
+			}
 
 			// Level-Up Diagnostics
 			if (levelUpList) {
@@ -1064,16 +1447,18 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 				const adviceItems: string[] = [];
 
 				if (missedQuestions.length > 0) {
-					missedQuestions.forEach((q) => adviceItems.push(q.levelUpAdvice));
+					// Take unique advice items
+					const uniqueAdvice = Array.from(new Set(missedQuestions.map((q) => q.levelUpAdvice)));
+					uniqueAdvice.slice(0, 4).forEach((adv) => adviceItems.push(adv));
 				} else {
 					adviceItems.push(
-						"Flawless run! To maintain high Fargo, practice your 2-rail diamond kick systems and pressure-test straight-in shots with the MoFUDAT drill."
+						"🔥 Unstoppable run! To maintain high Fargo, practice your 2-rail diamond kick systems and pressure-test straight-in shots with the MoFUDAT drill."
 					);
 				}
 
 				// Always add a tier-specific growth tip
-				if (achievedTier < 5) {
-					const nextTier = fargoTiers[achievedTier + 1];
+				if (tierInfo.tier < 5) {
+					const nextTier = fargoTiers[tierInfo.tier + 1];
 					if (nextTier) {
 						adviceItems.push(`Target for Fargo ${nextTier.minFargo}+: ${nextTier.overview}`);
 					}
@@ -1090,19 +1475,22 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			// Recommended Shorts
 			if (recommendedGrid) {
 				recommendedGrid.innerHTML = "";
-				// Recommend missed questions first, or top concept shorts
 				const shortsToRec: { videoId: string; title: string }[] = [];
 				if (missedQuestions.length > 0) {
 					missedQuestions.forEach((q) => {
-						shortsToRec.push({ videoId: q.videoId, title: q.videoTitle });
+						if (!shortsToRec.some((s) => s.videoId === q.videoId)) {
+							shortsToRec.push({ videoId: q.videoId, title: q.videoTitle });
+						}
 					});
 				} else {
-					activeQuestionList.slice(2).forEach((q) => {
-						shortsToRec.push({ videoId: q.videoId, title: q.videoTitle });
+					activeQuestionPool.forEach((q) => {
+						if (!shortsToRec.some((s) => s.videoId === q.videoId)) {
+							shortsToRec.push({ videoId: q.videoId, title: q.videoTitle });
+						}
 					});
 				}
 
-				shortsToRec.forEach((s) => {
+				shortsToRec.slice(0, 4).forEach((s) => {
 					const btn = document.createElement("button");
 					btn.type = "button";
 					btn.className = "rec-short-btn";
@@ -1115,12 +1503,16 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 				});
 			}
 
-			// Save to storage
+			// Save best Fargo & streak to storage
 			try {
+				const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+				const newBest = Math.max(existing.bestFargo || 0, finalFargo);
+				const newBestStreak = Math.max(existing.bestStreak || 0, bestStreak);
 				localStorage.setItem(
 					STORAGE_KEY,
 					JSON.stringify({
-						bestFargo: finalFargo,
+						bestFargo: newBest,
+						bestStreak: newBestStreak,
 						timestamp: Date.now(),
 					})
 				);
@@ -1141,7 +1533,8 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 
 		minimizeBtn?.addEventListener("click", () => toggleCollapse(true));
 		collapsedBar?.addEventListener("click", () => toggleCollapse(false));
-		btnRetry?.addEventListener("click", () => startNewQuiz());
+		btnKeepRolling?.addEventListener("click", () => continueNextRack());
+		btnRetry?.addEventListener("click", () => startNewGame());
 
 		// Restore best Fargo if available
 		try {
@@ -1149,13 +1542,13 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			if (saved) {
 				const parsed = JSON.parse(saved);
 				if (parsed?.bestFargo && collapsedFargoPill) {
-					collapsedFargoPill.textContent = `Best Fargo: ~${parsed.bestFargo}`;
+					collapsedFargoPill.textContent = `Best: ~${parsed.bestFargo}`;
 				}
 			}
 		} catch (_) {}
 
-		// Start initial round
-		startNewQuiz();
+		// Start initial rack
+		startNewGame();
 	}
 
 	// Support Astro view transitions and standard load

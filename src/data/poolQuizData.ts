@@ -31,7 +31,7 @@ export const FARGO_TIERS: Record<number, FargoTierInfo> = {
 		title: "Casual & Bar League Player",
 		tagline: "Solid foundations in progress",
 		overview:
-			"You understand how the game works, but loose cue mechanics and overhitting balls often leave you out of position.",
+			"You understand the rules, but loose cue mechanics, gripping too tight, and overhitting balls often leave you stranded.",
 	},
 	2: {
 		tier: 2,
@@ -40,7 +40,7 @@ export const FARGO_TIERS: Record<number, FargoTierInfo> = {
 		title: "Competitive League Shooter (C+ / B-)",
 		tagline: "Table angles & rolling cue ball control",
 		overview:
-			"You can run 3-5 balls reliably and know basic cut angles. Managing rail rebound angles and cue ball scratch lines is your next step.",
+			"You can run 3-5 balls reliably and know basic cut angles. Managing rail rebound speed and cue ball scratch lines is your next step.",
 	},
 	3: {
 		tier: 3,
@@ -49,7 +49,7 @@ export const FARGO_TIERS: Record<number, FargoTierInfo> = {
 		title: "Advanced Shotmaker (B / A-)",
 		tagline: "Physics-driven spin & speed control",
 		overview:
-			"You control the cue ball with English, understand two-way safeties, and play defensive counters when position goes awry.",
+			"You control the cue ball with English, understand two-way safeties, and play smart defensive counters when position goes awry.",
 	},
 	4: {
 		tier: 4,
@@ -58,7 +58,7 @@ export const FARGO_TIERS: Record<number, FargoTierInfo> = {
 		title: "Master Tactician (A / Semi-Pro)",
 		tagline: "Throw compensation & strategic endgame IQ",
 		overview:
-			"You navigate clusters with micro-speed, adjust for friction throw, and use strategic fouls to lock down wins.",
+			"You navigate clusters with micro-speed, adjust for friction throw, and use strategic fouls or lockouts to guarantee match wins.",
 	},
 	5: {
 		tier: 5,
@@ -67,7 +67,7 @@ export const FARGO_TIERS: Record<number, FargoTierInfo> = {
 		title: "Elite / Pro Caliber",
 		tagline: "Flawless pre-shot calm & table mastery",
 		overview:
-			"You operate at the highest competitive level where nervous system stillness, quiet eyes, and deep pattern discipline reign supreme.",
+			"You operate at the highest competitive tier where nervous system stillness, quiet eyes, and deep pattern discipline reign supreme.",
 	},
 };
 
@@ -98,7 +98,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
 	{
 		id: "t1-q2",
 		tier: 1,
-		fargoMin: 340,
+		fargoMin: 330,
 		fargoMax: 425,
 		tierTitle: "Level 1: Bar League Basics (Fargo < 425)",
 		question: "How tight should your grip hand hold the cue during your stroke?",
@@ -118,7 +118,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
 	{
 		id: "t1-q3",
 		tier: 1,
-		fargoMin: 350,
+		fargoMin: 340,
 		fargoMax: 425,
 		tierTitle: "Level 1: Bar League Basics (Fargo < 425)",
 		question: "In 8-ball, why is pocketing all your easy open balls right away often a fatal strategic mistake?",
@@ -134,6 +134,86 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
 		levelUpAdvice: "Play 8-ball backwards from the 8-ball. Never run easy balls without a breakout plan for your problem balls.",
 		videoId: "AlznLgl7do0",
 		videoTitle: "Stop Sinking Your Balls So Fast in 8 Ball"
+	},
+	{
+		id: "t1-q4",
+		tier: 1,
+		fargoMin: 350,
+		fargoMax: 425,
+		tierTitle: "Level 1: Bar League Basics (Fargo < 425)",
+		question: "What does modern sports science say about positioning your cue stick strictly under your 'dominant eye'?",
+		scenario: "You're trying to find your natural sighting line over the cue.",
+		options: [
+			"You must always center the cue exactly under your dominant eye",
+			"The 'dominant eye' rule is largely a myth; your true sight line is your unique binocular vision center",
+			"You should alternate which eye is open on every shot",
+			"Right-handed players must always sight with their right eye"
+		],
+		correctIndex: 1,
+		explanation: "Studies show pool players shoot best with their natural binocular sighting center (where both eyes work together without parallax distortion), which often sits between the eyes or slightly offset.",
+		levelUpAdvice: "Find your sighting center naturally on straight-in shots rather than forcing the cue under one eye.",
+		videoId: "63iNy88BnCg",
+		videoTitle: "Why the Dominant Eye is a Pool Myth"
+	},
+	{
+		id: "t1-q5",
+		tier: 1,
+		fargoMin: 360,
+		fargoMax: 425,
+		tierTitle: "Level 1: Bar League Basics (Fargo < 425)",
+		question: "Why does swinging with 100% maximum power on an 8-ball or 9-ball break often produce worse results than a smooth 75% hit?",
+		scenario: "You want more balls to pocket and a centered cue ball on the break.",
+		options: [
+			"Maximum speed causes the rack to absorb too much heat",
+			"Swinging at 100% causes off-center cue tip contact, cue ball deflection, and poor energy transfer to the head ball",
+			"Balls travel too fast for the pocket openings to accept them",
+			"League rules penalize breaks exceeding 25 mph"
+		],
+		correctIndex: 1,
+		explanation: "The 'Power Break Illusion' is that brute muscle wins. In reality, square center-ball contact at 75-80% transfers far more kinetic energy into the rack than an inaccurate wild 100% swing.",
+		levelUpAdvice: "Focus on hitting the head ball dead square with center ball at 75% power for maximum spread and cue ball control.",
+		videoId: "iPXJuGLoLeU",
+		videoTitle: "The Power Break Illusion"
+	},
+	{
+		id: "t1-q6",
+		tier: 1,
+		fargoMin: 370,
+		fargoMax: 425,
+		tierTitle: "Level 1: Bar League Basics (Fargo < 425)",
+		question: "How does the '$0 Tip Tape' practice test diagnose unintentional cue delivery errors?",
+		scenario: "You're missing straight-in shots and suspect your cue isn't striking where you think it is.",
+		options: [
+			"It sticks the cue tip to the cue ball on impact",
+			"Placing blue tape on your tip or checking chalk smudges on the ball shows the exact off-center strike location",
+			"It increases cue tip friction by 50%",
+			"It makes the cue lighter"
+		],
+		correctIndex: 1,
+		explanation: "Examining chalk smudges or using tip tape exposes that players who think they are hitting center ball are frequently hitting 2-3mm off-center, generating unwanted squirt and spin.",
+		levelUpAdvice: "Check your chalk marks after every miss to verify whether you struck true center ball.",
+		videoId: "IoR_H1JwnZI",
+		videoTitle: "How Tip Tape Exposes Crooked Pool Strokes"
+	},
+	{
+		id: "t1-q7",
+		tier: 1,
+		fargoMin: 380,
+		fargoMax: 425,
+		tierTitle: "Level 1: Bar League Basics (Fargo < 425)",
+		question: "What is 'cue-less pocketing' and why does rolling balls by hand sharpen your aiming instincts?",
+		scenario: "You want to build pure visual confidence without mechanical stroke distractions.",
+		options: [
+			"It is an illegal bar trick used to hustle beginners",
+			"Rolling balls by hand burns the true pocket entry angles directly into your visual memory without stroke errors",
+			"It tests whether the table slate is perfectly level",
+			"It warms up the cloth before tournament matches"
+		],
+		correctIndex: 1,
+		explanation: "Rolling balls by hand removes all physical stroke variables, allowing your brain to isolate and memorize the exact visual lines and pocket acceptance windows.",
+		levelUpAdvice: "Practice rolling object balls into corner pockets by hand to calibrate your sight picture.",
+		videoId: "nqp_78axQqg",
+		videoTitle: "How Cue less Pocketing Maps the Table"
 	},
 
 	// ==========================================
@@ -199,6 +279,86 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
 		videoId: "BVSAVs-rswU",
 		videoTitle: "How Cue Elevation Fixes Rail Cuts"
 	},
+	{
+		id: "t2-q4",
+		tier: 2,
+		fargoMin: 455,
+		fargoMax: 500,
+		tierTitle: "Level 2: Angles & Rail Rebounds (Fargo 425 - 500)",
+		question: "How does the '2-to-1 Diamond System' work for aiming one-rail bank shots?",
+		scenario: "You have an object ball midway down the table and want to bank it across into the opposite side pocket.",
+		options: [
+			"Double the speed of your normal stroke",
+			"Aim at a rail diamond halfway between the ball's position and the target pocket",
+			"Hit 2 tips of sidespin for every 1 diamond of distance",
+			"Aim 2 diamonds past the corner pocket"
+		],
+		correctIndex: 1,
+		explanation: "In standard one-rail diamond banking, aiming at the rail point halfway between the object ball and the pocket creates an equal-angle rebound that guides the ball directly into the target pocket.",
+		levelUpAdvice: "Use diamond halfway marks for quick eyeball calculations on one-rail cross-table banks.",
+		videoId: "7gsc27OYIUA",
+		videoTitle: "How the 2 to 1 Diamond System Works"
+	},
+	{
+		id: "t2-q5",
+		tier: 2,
+		fargoMin: 465,
+		fargoMax: 500,
+		tierTitle: "Level 2: Angles & Rail Rebounds (Fargo 425 - 500)",
+		question: "Why do dead-straight shots get missed more frequently than expected by intermediate players?",
+		scenario: "You have a straight-in 6-foot shot with zero cut angle.",
+		options: [
+			"Straight shots require 5 times more chalk",
+			"Any microscopic lateral head or cue twitch throws the ball completely offline, having zero cut tolerance",
+			"Pockets shrink on straight shots due to cushion angle",
+			"The cue ball always swerves on straight shots"
+		],
+		correctIndex: 1,
+		explanation: "On cut shots, player focus is hyper-alert to the contact point. On straight shots, players relax their alignment, and even a 0.5mm tip steer or early head lift immediately clips the pocket facing.",
+		levelUpAdvice: "Stay down and keep your head motionless for one full beat after striking straight-in shots.",
+		videoId: "0EPMTZvFD5U",
+		videoTitle: "Straight Shots Are the Easiest to Miss Heres Why"
+	},
+	{
+		id: "t2-q6",
+		tier: 2,
+		fargoMin: 475,
+		fargoMax: 500,
+		tierTitle: "Level 2: Angles & Rail Rebounds (Fargo 425 - 500)",
+		question: "How does the '45-Degree Rule' help you navigate the cue ball toward center-table position?",
+		scenario: "You are pocketing a ball in the corner and want the cue ball to rebound comfortably to the middle of the table.",
+		options: [
+			"Striking at a 45-degree cue elevation spins the ball to center",
+			"Sending the cue ball into a corner pocket area at approximately 45 degrees naturally rebounds it toward table center",
+			"Rolling balls at 45 mph creates center spin",
+			"Elevating your bridge 45mm locks position"
+		],
+		correctIndex: 1,
+		explanation: "When the cue ball hits a cushion near the corner at roughly 45°, the two-rail rebound path naturally tracks diagonally across the center of the table, the safest position zone in pool.",
+		levelUpAdvice: "Target center-table 45° paths when playing position; center table offers the most options.",
+		videoId: "3sv26c0ALps",
+		videoTitle: "How the 45 Degree Rule Finds Center Table"
+	},
+	{
+		id: "t2-q7",
+		tier: 2,
+		fargoMin: 485,
+		fargoMax: 500,
+		tierTitle: "Level 2: Angles & Rail Rebounds (Fargo 425 - 500)",
+		question: "How does the 'Stop-and-Hide' safety turn an offensive dry spell into a winning position?",
+		scenario: "You have no makable offensive shot, but one of your balls is near a cluster.",
+		options: [
+			"You hide your cue stick under the table",
+			"You execute a simple stop shot that hides the cue ball directly behind your own ball, blocking your opponent's sight line",
+			"You shoot the cue ball off the table",
+			"You deliberately scratch in the corner"
+		],
+		correctIndex: 1,
+		explanation: "The Stop-and-Hide uses the easiest shot in pool (the stop shot) to bury the cue ball behind a blocker ball, taking away your opponent's offense without risking complex rail speed calculations.",
+		levelUpAdvice: "When out of position, look for a simple stop-and-hide behind your own balls rather than forcing a low-percentage bank.",
+		videoId: "i0qp5VLeRFU",
+		videoTitle: "How the Stop and Hide Wins Games"
+	},
 
 	// ==========================================
 	// TIER 3: Fargo 500 - 575 (Deflection & Control)
@@ -246,7 +406,7 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
 	{
 		id: "t3-q3",
 		tier: 3,
-		fargoMin: 530,
+		fargoMin: 525,
 		fargoMax: 575,
 		tierTitle: "Level 3: Cue Ball Physics & Safeties (Fargo 500 - 575)",
 		question: "What is a 'two-way shot' and why is it a staple of high-level tournament play?",
@@ -262,6 +422,86 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
 		levelUpAdvice: "On any cut with under 80% confidence, choose a speed and cue ball route that leaves a safety if you miss.",
 		videoId: "5zwMQyJ5bAU",
 		videoTitle: "The Shot That Wins Even When You Miss"
+	},
+	{
+		id: "t3-q4",
+		tier: 3,
+		fargoMin: 535,
+		fargoMax: 575,
+		tierTitle: "Level 3: Cue Ball Physics & Safeties (Fargo 500 - 575)",
+		question: "How does the 'Pocket Blocker' strategy lock down a game of 8-ball?",
+		scenario: "Your opponent has multiple balls aiming into a specific corner pocket.",
+		options: [
+			"You place your chalk in the pocket jaw",
+			"You deliberately leave your object ball parked in the mouth of that pocket, closing it off to opponent shots",
+			"You jump the cue ball into the pocket",
+			"You call a pocket blocker time-out"
+		],
+		correctIndex: 1,
+		explanation: "Parking one of your balls directly in the jaws of a key pocket denies your opponent access to it, forcing them into difficult banks or unnatural position routes.",
+		levelUpAdvice: "Identify your opponent's favorite pockets and park blocker balls in their jaws early in the rack.",
+		videoId: "dcsBhOgl6wU",
+		videoTitle: "How the Pocket Blocker Strategy Wins Pool Games"
+	},
+	{
+		id: "t3-q5",
+		tier: 3,
+		fargoMin: 545,
+		fargoMax: 575,
+		tierTitle: "Level 3: Cue Ball Physics & Safeties (Fargo 500 - 575)",
+		question: "In the 'No-Cushion Challenge' practice drill, what skill is intensely tested?",
+		scenario: "You play a drill where the cue ball is never permitted to touch any cushion.",
+		options: [
+			"Max power jumping",
+			"Micro-speed control and soft touch, forcing you to play precision position in the open table",
+			"Diamond kick calculations",
+			"Masse curves"
+		],
+		correctIndex: 1,
+		explanation: "The No-Cushion rule strips away the crutch of relying on rails to catch an over-hit cue ball, demanding surgical speed control within 6-inch target zones.",
+		levelUpAdvice: "Practice running 3-ball patterns without letting the cue ball touch a rail to calibrate soft touch.",
+		videoId: "ii7BxSgL8bo",
+		videoTitle: "The Practice Game With One Weird Rule"
+	},
+	{
+		id: "t3-q6",
+		tier: 3,
+		fargoMin: 555,
+		fargoMax: 575,
+		tierTitle: "Level 3: Cue Ball Physics & Safeties (Fargo 500 - 575)",
+		question: "When you cut an object ball into a rail, how does 'transferred spin' alter the bank rebound?",
+		scenario: "You cut an object ball to the right into the cushion with left English on the cue ball.",
+		options: [
+			"Transferred spin has zero effect on the object ball",
+			"Friction transfers reverse spin to the object ball, causing it to rebound shorter/steeper off the cushion",
+			"The object ball slides instead of rolls",
+			"It causes the rail to jump"
+		],
+		correctIndex: 1,
+		explanation: "When two balls collide with spin or at an angle, friction transfers opposite spin to the object ball. Transferred running or check spin changes the rebound angle off the rail noticeably.",
+		levelUpAdvice: "Account for transferred spin on banks whenever cutting the object ball into the rail.",
+		videoId: "6qpNKPrg8HA",
+		videoTitle: "How Transferred Spin Shortens Bank Shots"
+	},
+	{
+		id: "t3-q7",
+		tier: 3,
+		fargoMin: 565,
+		fargoMax: 575,
+		tierTitle: "Level 3: Cue Ball Physics & Safeties (Fargo 500 - 575)",
+		question: "Why do top players use the '2nd-Ball Break' in 8-ball?",
+		scenario: "Breaking from the side rail rather than hitting the head ball head-on.",
+		options: [
+			"It guarantees a scratch on every break",
+			"It drives the 8-ball toward the opposite side pocket and parks the cue ball near table center",
+			"It is required by World Pool-Billiard Association rules",
+			"It reduces break speed to 10 mph"
+		],
+		correctIndex: 1,
+		explanation: "The second-ball break hits the second row of the rack from the side rail, transferring direct momentum into the 8-ball toward the side pocket while squatting the cue ball in the middle.",
+		levelUpAdvice: "Add the 2nd-ball break to your 8-ball arsenal for higher 8-on-the-break percentages and safe cue ball parking.",
+		videoId: "iXnRycM2SvY",
+		videoTitle: "How the 2nd Ball Break Sinks the 8 Ball"
 	},
 
 	// ==========================================
@@ -327,6 +567,66 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
 		videoId: "a34eiwcuo4E",
 		videoTitle: "How the 4X Rule Prevents Draw Scratches"
 	},
+	{
+		id: "t4-q4",
+		tier: 4,
+		fargoMin: 610,
+		fargoMax: 650,
+		tierTitle: "Level 4: Master Tactical Play (Fargo 575 - 650)",
+		question: "How does the 'Plus System' calculate two-rail kick escapes when hooked behind a cluster?",
+		scenario: "You are snookered and must kick off the short rail, then the long rail, to contact a hidden ball.",
+		options: [
+			"It adds the cue ball diamond number to the origin number to calculate the target rail diamond",
+			"It multiplies the diamond number by 3",
+			"It requires maximum draw on all kicks",
+			"It calculates the difference in cloth friction"
+		],
+		correctIndex: 0,
+		explanation: "The Plus System uses rail diamond indexing where (Origin Diamond + Target Diamond = Destination Diamond) to navigate two-rail kicks out of severe snookers with mathematical certainty.",
+		levelUpAdvice: "Learn the Plus System diamond formula to turn hopeless snookers into reliable escape hits.",
+		videoId: "F9ZldUSxWQ8",
+		videoTitle: "How to Escape a Hook Using Diamonds"
+	},
+	{
+		id: "t4-q5",
+		tier: 4,
+		fargoMin: 620,
+		fargoMax: 650,
+		tierTitle: "Level 4: Master Tactical Play (Fargo 575 - 650)",
+		question: "What makes a jump shot legal under WPA/BCA rules versus an illegal foul?",
+		scenario: "An opponent ball completely obstructs the path to your object ball.",
+		options: [
+			"The jump cue must be heavier than 25oz",
+			"The cue tip must strike downward into the top hemisphere to compress the ball into the slate; scooping underneath is a foul",
+			"Jump shots are only legal in 9-ball, never 8-ball",
+			"Both player feet must be off the floor during the jump"
+		],
+		correctIndex: 1,
+		explanation: "A legal jump strikes downward onto the ball, compressing it against the slate bed which rebounds the ball upward. Scooping underneath is an illegal double-hit and cloth-damaging foul.",
+		levelUpAdvice: "Elevate your jump cue to 45°-60° and strike down cleanly through the cue ball; never scoop from below.",
+		videoId: "vY6iI9up_YA",
+		videoTitle: "Jump Shots How to Actually Aim Them"
+	},
+	{
+		id: "t4-q6",
+		tier: 4,
+		fargoMin: 630,
+		fargoMax: 650,
+		tierTitle: "Level 4: Master Tactical Play (Fargo 575 - 650)",
+		question: "What is the 'Chaos Zone' concept in progressive practice drills?",
+		scenario: "You are running the straight-in or progressive draw drill.",
+		options: [
+			"The area around the pockets where balls rattle",
+			"The exact distance or difficulty threshold where your success rate drops from 80% to 50%, marking your true learning edge",
+			"The noise level inside a crowded pool room",
+			"The random spin imparted by dirty chalk"
+		],
+		correctIndex: 1,
+		explanation: "Your Chaos Zone is the boundary where control begins to break down. Training at this specific threshold produces 3-4x faster skill acquisition than practicing easy shots you can already make.",
+		levelUpAdvice: "Identify your Chaos Zone distance on draw and cut shots, and spend 80% of your solo practice right at that boundary.",
+		videoId: "8r-o5pKRJak",
+		videoTitle: "How Progressive Practice Maps Your Chaos Zone"
+	},
 
 	// ==========================================
 	// TIER 5: Fargo 650+ (Elite / Pro Execution)
@@ -390,5 +690,45 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
 		levelUpAdvice: "Hold your gaze motionless on the contact spot for one full second before starting your final stroke.",
 		videoId: "bIhBDDQMwoA",
 		videoTitle: "How Quiet Eyes Lock Your Aim"
+	},
+	{
+		id: "t5-q4",
+		tier: 5,
+		fargoMin: 680,
+		fargoMax: 750,
+		tierTitle: "Level 5: Elite & Pro Mastery (Fargo 650+)",
+		question: "When applying sidespin with an elevated cue (above 15°), what aerodynamic & friction force causes the cue ball path to curve (swerve)?",
+		scenario: "You're shooting with right English over a cluster of balls with an elevated cue butt.",
+		options: [
+			"Air resistance pushes the ball sideways",
+			"Downward vertical spin bites into the cloth nap, steering the ball in an arc in the direction of the sidespin",
+			"The rail rubber magnetic field attracts the ball",
+			"Cloth humidity creates static electricity"
+		],
+		correctIndex: 1,
+		explanation: "Elevating the cue adds a downward force component to the sidespin. When the ball rolls across the cloth nap, friction grabs the spin axis and causes the cue ball to swerve in an arc, requiring reverse aim compensation.",
+		levelUpAdvice: "Account for swerve curvature whenever elevating your cue stick with sidespin.",
+		videoId: "FJdxD7pUa3A",
+		videoTitle: "Why Your Sidespin Shots Curve"
+	},
+	{
+		id: "t5-q5",
+		tier: 5,
+		fargoMin: 690,
+		fargoMax: 750,
+		tierTitle: "Level 5: Elite & Pro Mastery (Fargo 650+)",
+		question: "How does a rigid pre-shot rhythm silence the 'Inner Critic' (self-doubt) during championship play?",
+		scenario: "A negative internal voice pops into your head right as you are feathering the cue.",
+		options: [
+			"By loudly arguing with the voice in your head",
+			"By maintaining an automatic, unhurried cadence that engages the subconscious motor cortex and starves the analytical brain of processing time",
+			"By taking 2 minutes on every shot",
+			"By closing your eyes during the final stroke"
+		],
+		correctIndex: 1,
+		explanation: "The Inner Game of pool shows that conscious self-doubt operates through hesitations in cadence. A consistent pre-shot rhythm (e.g. 3 warm-up strokes, set, trigger) lets the subconscious motor mind execute without analytical interference.",
+		levelUpAdvice: "Develop an unbroken pre-shot cadence so your body shoots before negative chatter can intervene.",
+		videoId: "xOIQqoUwPpg",
+		videoTitle: "How Rhythm Silences the Inner Critic"
 	}
 ];
