@@ -28,14 +28,14 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 
 	<!-- Main Quiz Card -->
 	<section class="quiz-card" id="quiz-card" aria-label="Interactive Pool Knowledge Quiz">
-		<!-- Card Top Header -->
-		<header class="quiz-header">
-			<div class="quiz-meta-left">
+		<!-- Card Top Row: Brand pill, shot counter, streak & lifeline / minimize -->
+		<div class="quiz-top-bar">
+			<div class="quiz-top-left">
 				<span class="quiz-tag">🎱 POOL IQ &amp; FARGO TEST</span>
-				<span class="quiz-tier-badge" id="quiz-tier-badge">Level 1 • Fargo &lt; 425</span>
+				<span class="quiz-shot-badge" id="quiz-progress-text">Shot 1 of 5</span>
 				<span class="quiz-streak-badge" id="quiz-streak-badge" hidden>🔥 Streak: 0</span>
 			</div>
-			<div class="quiz-meta-right">
+			<div class="quiz-top-right">
 				<!-- 50/50 Lifeline Button -->
 				<button
 					type="button"
@@ -43,9 +43,10 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 					id="quiz-lifeline-btn"
 					title="Eliminate 2 wrong answers"
 				>
-					💡 50/50 (<span id="lifelines-remaining">2</span>)
+					<span class="lifeline-icon" aria-hidden="true">💡</span>
+					<span class="lifeline-title">50/50</span>
+					<span class="lifeline-count-bubble" id="lifelines-remaining">2</span>
 				</button>
-				<span class="quiz-progress-text" id="quiz-progress-text">Shot 1 of 10</span>
 				<button
 					type="button"
 					class="quiz-minimize-btn"
@@ -56,12 +57,13 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 					▲
 				</button>
 			</div>
-		</header>
+		</div>
 
-		<!-- Progress Bar & Live Fargo Meter -->
-		<div class="quiz-progress-section">
-			<div class="quiz-progress-track">
-				<div class="quiz-progress-fill" id="quiz-progress-fill" style="width: 10%;"></div>
+		<!-- Card Sub Header: Dedicated Level & Live Fargo Rating Row -->
+		<div class="quiz-level-row">
+			<div class="level-info-left">
+				<span class="level-status-dot" aria-hidden="true"></span>
+				<span class="quiz-tier-badge" id="quiz-tier-badge">Level 1 • Fundamentals &amp; Stance</span>
 			</div>
 			<div class="quiz-live-meter">
 				<span class="meter-label">Live Rating:</span>
@@ -70,9 +72,19 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			</div>
 		</div>
 
+		<!-- Progress Bar -->
+		<div class="quiz-progress-section">
+			<div class="quiz-progress-track">
+				<div class="quiz-progress-fill" id="quiz-progress-fill" style="width: 20%;"></div>
+			</div>
+		</div>
+
 		<!-- Question View State -->
 		<div class="quiz-body" id="quiz-question-view">
-			<p class="quiz-scenario" id="quiz-scenario" hidden></p>
+			<div class="quiz-scenario-box" id="quiz-scenario-box" hidden>
+				<span class="scenario-icon" aria-hidden="true">🎯</span>
+				<p class="quiz-scenario" id="quiz-scenario"></p>
+			</div>
 			<h2 class="quiz-question-title" id="quiz-question-text">Loading shot scenario...</h2>
 
 			<!-- Multiple Choice Options -->
@@ -265,55 +277,59 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
 		border: 1px solid #30363d;
 		border-radius: var(--radius-lg);
-		padding: 1.15rem 1.35rem;
+		padding: 1.4rem 1.6rem;
 		color: #e6edf3;
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
 		position: relative;
 		overflow: hidden;
 	}
 
-	/* Top Meta Header */
-	.quiz-header {
+	/* Top Meta Row 1 */
+	.quiz-top-bar {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		margin-bottom: 0.55rem;
-		font-size: 0.78rem;
+		gap: 0.75rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid rgba(48, 54, 61, 0.6);
+		margin-bottom: 0.75rem;
 	}
 
-	.quiz-meta-left {
+	.quiz-top-left {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.6rem;
 		flex-wrap: wrap;
 	}
 
 	.quiz-tag {
 		color: #7ee787;
-		font-weight: 700;
-		letter-spacing: 0.05em;
-		font-size: 0.72rem;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		font-size: 0.74rem;
 	}
 
-	.quiz-tier-badge {
-		background: rgba(56, 139, 253, 0.15);
-		color: #58a6ff;
-		border: 1px solid rgba(56, 139, 253, 0.35);
-		padding: 0.15rem 0.5rem;
+	.quiz-shot-badge {
+		background: #21262d;
+		color: #c9d1d9;
+		border: 1px solid #30363d;
+		padding: 0.2rem 0.6rem;
 		border-radius: var(--radius-full);
-		font-size: 0.72rem;
+		font-size: 0.74rem;
 		font-weight: 600;
+		white-space: nowrap;
 	}
 
 	.quiz-streak-badge {
 		background: rgba(240, 136, 62, 0.2);
 		color: #f0883e;
-		border: 1px solid rgba(240, 136, 62, 0.4);
-		padding: 0.15rem 0.5rem;
+		border: 1px solid rgba(240, 136, 62, 0.45);
+		padding: 0.2rem 0.6rem;
 		border-radius: var(--radius-full);
-		font-size: 0.72rem;
+		font-size: 0.74rem;
 		font-weight: 700;
 		animation: pulseStreak 0.4s ease-out;
+		white-space: nowrap;
 	}
 
 	@keyframes pulseStreak {
@@ -322,31 +338,34 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		100% { transform: scale(1); }
 	}
 
-	.quiz-meta-right {
+	.quiz-top-right {
 		display: flex;
 		align-items: center;
 		gap: 0.65rem;
+		flex-shrink: 0;
 	}
 
 	/* 50/50 Lifeline Button */
 	.quiz-lifeline-btn {
 		background: #21262d;
-		border: 1px solid #d29922;
+		border: 1px solid rgba(210, 153, 34, 0.7);
 		color: #e3b341;
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		font-weight: 600;
-		padding: 0.2rem 0.55rem;
+		padding: 0.25rem 0.55rem 0.25rem 0.65rem;
 		border-radius: var(--radius-full);
 		cursor: pointer;
 		transition: var(--transition-fast);
-		display: flex;
+		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.4rem;
+		line-height: 1;
 	}
 
 	.quiz-lifeline-btn:hover:not(:disabled) {
 		background: #d29922;
-		color: #000;
+		color: #0d1117;
+		box-shadow: 0 0 10px rgba(210, 153, 34, 0.4);
 	}
 
 	.quiz-lifeline-btn:disabled {
@@ -356,21 +375,46 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		cursor: default;
 	}
 
-	.quiz-progress-text {
-		color: #8b949e;
-		font-size: 0.76rem;
-		font-weight: 600;
+	.lifeline-icon {
+		font-size: 0.85rem;
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.lifeline-title {
+		font-weight: 700;
+		letter-spacing: 0.02em;
+	}
+
+	.lifeline-count-bubble {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(210, 153, 34, 0.25);
+		color: inherit;
+		min-width: 1.15rem;
+		height: 1.15rem;
+		padding: 0 0.3rem;
+		border-radius: var(--radius-full);
+		font-size: 0.7rem;
+		font-weight: 800;
+		line-height: 1;
+	}
+
+	.quiz-lifeline-btn:hover:not(:disabled) .lifeline-count-bubble {
+		background: #0d1117;
+		color: #e3b341;
 	}
 
 	.quiz-minimize-btn {
-		background: transparent;
+		background: #21262d;
 		border: 1px solid #30363d;
 		color: #8b949e;
-		width: 24px;
-		height: 24px;
+		width: 26px;
+		height: 26px;
 		border-radius: 50%;
 		cursor: pointer;
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		font-size: 0.65rem;
@@ -380,20 +424,83 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 	.quiz-minimize-btn:hover {
 		color: #fff;
 		border-color: #8b949e;
-		background: #21262d;
+		background: #30363d;
 	}
 
-	/* Progress Section with Live Meter */
-	.quiz-progress-section {
+	/* Sub Header Row 2: Level & Live Meter */
+	.quiz-level-row {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
 		gap: 0.75rem;
 		margin-bottom: 0.85rem;
+		flex-wrap: wrap;
+	}
+
+	.level-info-left {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.level-status-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: #388bfd;
+		box-shadow: 0 0 8px #388bfd;
+		flex-shrink: 0;
+	}
+
+	.quiz-tier-badge {
+		background: rgba(56, 139, 253, 0.15);
+		color: #58a6ff;
+		border: 1px solid rgba(56, 139, 253, 0.35);
+		padding: 0.2rem 0.65rem;
+		border-radius: var(--radius-full);
+		font-size: 0.76rem;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+	}
+
+	.quiz-live-meter {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 0.76rem;
+		white-space: nowrap;
+		background: #111418;
+		padding: 0.2rem 0.65rem;
+		border-radius: var(--radius-full);
+		border: 1px solid #21262d;
+	}
+
+	.meter-label {
+		color: #8b949e;
+		font-size: 0.72rem;
+	}
+
+	.meter-fargo {
+		color: #58a6ff;
+		font-weight: 800;
+		font-size: 0.86rem;
+		transition: transform 0.2s ease;
+	}
+
+	.meter-rank {
+		color: #c9d1d9;
+		font-size: 0.72rem;
+		font-weight: 500;
+	}
+
+	/* Progress Bar Track */
+	.quiz-progress-section {
+		margin-bottom: 1.15rem;
 	}
 
 	.quiz-progress-track {
-		flex: 1;
-		height: 4px;
+		width: 100%;
+		height: 5px;
 		background: #21262d;
 		border-radius: var(--radius-full);
 		overflow: hidden;
@@ -403,79 +510,81 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		height: 100%;
 		background: linear-gradient(90deg, #238636 0%, #388bfd 50%, #f0883e 100%);
 		border-radius: var(--radius-full);
-		transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	}
-
-	.quiz-live-meter {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		font-size: 0.74rem;
-		white-space: nowrap;
-	}
-
-	.meter-label {
-		color: #8b949e;
-	}
-
-	.meter-fargo {
-		color: #58a6ff;
-		font-weight: 700;
-		font-size: 0.82rem;
-		transition: transform 0.2s ease;
-	}
-
-	.meter-rank {
-		color: #8b949e;
-		font-size: 0.7rem;
+		transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	/* Question Body */
+	.quiz-body {
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* Scenario Callout Box */
+	.quiz-scenario-box {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+		background: rgba(56, 139, 253, 0.08);
+		border: 1px solid rgba(56, 139, 253, 0.25);
+		border-radius: var(--radius-md);
+		padding: 0.55rem 0.85rem;
+		margin-bottom: 0.85rem;
+	}
+
+	.scenario-icon {
+		font-size: 0.9rem;
+		line-height: 1.35;
+		flex-shrink: 0;
+	}
+
 	.quiz-scenario {
-		color: #8b949e;
-		font-size: 0.8rem;
-		margin-bottom: 0.3rem;
+		color: #90c2ff;
+		font-size: 0.82rem;
+		line-height: 1.4;
+		margin: 0;
 		font-style: italic;
 	}
 
 	.quiz-question-title {
-		font-size: 1.05rem;
+		font-size: 1.12rem;
 		font-weight: 600;
-		line-height: 1.4;
+		line-height: 1.45;
 		color: #ffffff;
-		margin: 0 0 0.85rem;
+		margin: 0 0 1.15rem;
 	}
 
 	/* Options Grid */
 	.quiz-options-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
+		gap: 0.75rem;
+		margin-bottom: 1rem;
 	}
 
 	:global(.quiz-option-btn) {
-		background: #21262d;
+		background: #1c2128;
 		border: 1px solid #30363d;
 		border-radius: var(--radius-md);
-		padding: 0.65rem 0.85rem;
+		padding: 0.85rem 1.05rem;
 		color: #c9d1d9;
 		text-align: left;
 		font-family: var(--font-primary);
-		font-size: 0.84rem;
-		line-height: 1.35;
+		font-size: 0.88rem;
+		line-height: 1.4;
 		cursor: pointer;
 		transition: var(--transition-fast);
 		display: flex;
-		align-items: flex-start;
-		gap: 0.5rem;
+		align-items: center;
+		gap: 0.75rem;
+		min-height: 54px;
 	}
 
 	:global(.quiz-option-btn:hover:not(:disabled)) {
-		background: #2c333d;
+		background: #252d38;
 		border-color: #58a6ff;
 		color: #ffffff;
 		transform: translateY(-1px);
+		box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 	}
 
 	:global(.quiz-option-btn:disabled) {
@@ -485,7 +594,23 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 	:global(.quiz-option-letter) {
 		font-weight: 700;
 		color: #8b949e;
-		min-width: 1.2rem;
+		background: #111418;
+		border: 1px solid #30363d;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.75rem;
+		flex-shrink: 0;
+		transition: var(--transition-fast);
+	}
+
+	:global(.quiz-option-btn:hover:not(:disabled) .quiz-option-letter) {
+		color: #58a6ff;
+		border-color: #58a6ff;
+		background: rgba(56, 139, 253, 0.1);
 	}
 
 	:global(.quiz-option-text) {
@@ -499,10 +624,22 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		color: #7ee787 !important;
 	}
 
+	:global(.quiz-option-btn.state-correct .quiz-option-letter) {
+		background: #238636 !important;
+		border-color: #3fb950 !important;
+		color: #ffffff !important;
+	}
+
 	:global(.quiz-option-btn.state-incorrect) {
 		background: rgba(248, 81, 73, 0.2) !important;
 		border-color: #f85149 !important;
 		color: #ff7b72 !important;
+	}
+
+	:global(.quiz-option-btn.state-incorrect .quiz-option-letter) {
+		background: #da3633 !important;
+		border-color: #f85149 !important;
+		color: #ffffff !important;
 	}
 
 	:global(.quiz-option-btn.state-eliminated) {
@@ -948,12 +1085,29 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		}
 
 		.quiz-card {
-			padding: 0.85rem 0.95rem;
+			padding: 1rem 1.05rem;
 			border-radius: var(--radius-md);
+		}
+
+		.quiz-top-bar {
+			flex-wrap: wrap;
+			gap: 0.5rem;
+		}
+
+		.quiz-level-row {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.5rem;
 		}
 
 		.quiz-options-grid {
 			grid-template-columns: 1fr;
+			gap: 0.6rem;
+		}
+
+		:global(.quiz-option-btn) {
+			padding: 0.75rem 0.9rem;
+			font-size: 0.85rem;
 		}
 
 		.quiz-action-bar {
@@ -1023,6 +1177,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 
 		const questionView = document.getElementById("quiz-question-view");
 		const questionText = document.getElementById("quiz-question-text");
+		const scenarioBox = document.getElementById("quiz-scenario-box");
 		const scenarioText = document.getElementById("quiz-scenario");
 		const optionsContainer = document.getElementById("quiz-options-container");
 
@@ -1222,12 +1377,12 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 
 			// Question & Scenario
 			if (questionText) questionText.textContent = q.question;
-			if (scenarioText) {
+			if (scenarioBox && scenarioText) {
 				if (q.scenario) {
-					scenarioText.textContent = `Scenario: ${q.scenario}`;
-					scenarioText.hidden = false;
+					scenarioText.textContent = q.scenario;
+					scenarioBox.hidden = false;
 				} else {
-					scenarioText.hidden = true;
+					scenarioBox.hidden = true;
 				}
 			}
 
