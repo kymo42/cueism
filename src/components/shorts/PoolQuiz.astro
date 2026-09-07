@@ -1064,6 +1064,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 		let lifelinesCount = 2;
 		let missedQuestions: QuizQuestion[] = [];
 		let answeredCurrent = false;
+		let currentShuffledOptions: { text: string; isCorrect: boolean }[] = [];
 
 		const punchlinesCorrect = [
 			"Dead center!",
@@ -1230,11 +1231,19 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 				}
 			}
 
+			// Shuffle options dynamically so the correct answer is never always B
+			currentShuffledOptions = shuffleArray(
+				q.options.map((optText, idx) => ({
+					text: optText,
+					isCorrect: idx === q.correctIndex,
+				}))
+			);
+
 			// Render Options
 			if (optionsContainer) {
 				optionsContainer.innerHTML = "";
 				const letters = ["A", "B", "C", "D"];
-				q.options.forEach((optText, idx) => {
+				currentShuffledOptions.forEach((item, idx) => {
 					const btn = document.createElement("button");
 					btn.type = "button";
 					btn.className = "quiz-option-btn";
@@ -1243,7 +1252,7 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 					btn.setAttribute("aria-checked", "false");
 					btn.innerHTML = `
 						<span class="quiz-option-letter">${letters[idx]}.</span>
-						<span class="quiz-option-text">${optText}</span>
+						<span class="quiz-option-text">${item.text}</span>
 					`;
 					btn.addEventListener("click", () => handleAnswer(idx));
 					optionsContainer.appendChild(btn);
@@ -1260,8 +1269,12 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			if (lifelinesRemaining) lifelinesRemaining.textContent = `${lifelinesCount}`;
 			if (lifelineBtn) lifelineBtn.disabled = true;
 
-			// Pick 2 incorrect options to eliminate
-			const incorrectIndices = [0, 1, 2, 3].filter((idx) => idx !== q.correctIndex);
+			// Pick 2 incorrect options from the currently rendered shuffled options
+			const incorrectIndices = currentShuffledOptions
+				.map((item, idx) => ({ idx, isCorrect: item.isCorrect }))
+				.filter((o) => !o.isCorrect)
+				.map((o) => o.idx);
+
 			const toEliminate = shuffleArray(incorrectIndices).slice(0, 2);
 
 			const optionBtns = optionsContainer?.querySelectorAll<HTMLButtonElement>(".quiz-option-btn");
@@ -1283,13 +1296,15 @@ const fargoTiersJson = JSON.stringify(FARGO_TIERS);
 			if (!q) return;
 
 			totalQuestionsAnswered++;
-			const isCorrect = selectedIndex === q.correctIndex;
+			const chosen = currentShuffledOptions[selectedIndex];
+			const isCorrect = chosen ? chosen.isCorrect : false;
 			const optionBtns = optionsContainer?.querySelectorAll<HTMLButtonElement>(".quiz-option-btn");
 
 			// Disable buttons and set status classes
 			optionBtns?.forEach((btn, idx) => {
 				btn.disabled = true;
-				if (idx === q.correctIndex) {
+				const isThisCorrect = currentShuffledOptions[idx]?.isCorrect;
+				if (isThisCorrect) {
 					btn.classList.add("state-correct");
 				} else if (idx === selectedIndex && !isCorrect) {
 					btn.classList.add("state-incorrect");
