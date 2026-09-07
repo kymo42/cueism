@@ -1,0 +1,1163 @@
+---
+import { QUIZ_QUESTIONS, FARGO_TIERS } from "../../data/poolQuizData";
+
+// Serialize question bank safely for client-side script
+const quizDataJson = JSON.stringify(QUIZ_QUESTIONS);
+const fargoTiersJson = JSON.stringify(FARGO_TIERS);
+---
+
+<div class="quiz-wrapper" id="pool-quiz-root">
+	<!-- Collapsed Bar (Shown when minimized) -->
+	<button
+		type="button"
+		class="quiz-collapsed-bar"
+		id="quiz-collapsed-bar"
+		aria-label="Expand Pool IQ Quiz"
+		hidden
+	>
+		<div class="collapsed-left">
+			<span class="quiz-pill-badge">🎱 Pool IQ Test</span>
+			<span class="collapsed-title" id="collapsed-title-text">Test your table knowledge & FargoRate</span>
+		</div>
+		<div class="collapsed-right">
+			<span class="collapsed-fargo" id="collapsed-fargo-pill">Fargo: ~380</span>
+			<span class="collapsed-icon" aria-hidden="true">▼</span>
+		</div>
+	</button>
+
+	<!-- Main Quiz Card -->
+	<section class="quiz-card" id="quiz-card" aria-label="Interactive Pool Knowledge Quiz">
+		<!-- Card Top Header -->
+		<header class="quiz-header">
+			<div class="quiz-meta-left">
+				<span class="quiz-tag">🎱 POOL IQ & FARGO TEST</span>
+				<span class="quiz-tier-badge" id="quiz-tier-badge">Level 1 • Fargo &lt; 425</span>
+			</div>
+			<div class="quiz-meta-right">
+				<span class="quiz-progress-text" id="quiz-progress-text">Question 1 of 5</span>
+				<button
+					type="button"
+					class="quiz-minimize-btn"
+					id="quiz-minimize-btn"
+					title="Minimize quiz"
+					aria-label="Minimize quiz"
+				>
+					▲
+				</button>
+			</div>
+		</header>
+
+		<!-- Progress Bar -->
+		<div class="quiz-progress-track">
+			<div class="quiz-progress-fill" id="quiz-progress-fill" style="width: 20%;"></div>
+		</div>
+
+		<!-- Question View State -->
+		<div class="quiz-body" id="quiz-question-view">
+			<p class="quiz-scenario" id="quiz-scenario" hidden></p>
+			<h2 class="quiz-question-title" id="quiz-question-text">Loading question...</h2>
+
+			<!-- Multiple Choice Options -->
+			<div class="quiz-options-grid" id="quiz-options-container" role="radiogroup">
+				<!-- Injected by client script -->
+			</div>
+
+			<!-- Feedback & Explanations Panel (Hidden until answered) -->
+			<div class="quiz-feedback-panel" id="quiz-feedback-panel" hidden>
+				<div class="quiz-feedback-header">
+					<span class="feedback-status-badge" id="feedback-status-badge">Correct!</span>
+					<span class="feedback-fargo-impact" id="feedback-fargo-impact">+35 Fargo</span>
+				</div>
+				<p class="quiz-explanation-text" id="quiz-explanation-text"></p>
+
+				<!-- Action Buttons -->
+				<div class="quiz-action-bar">
+					<button type="button" class="btn-quiz-short" id="btn-watch-short">
+						<span class="play-icon" aria-hidden="true">▶</span>
+						<span id="btn-watch-short-text">Watch Related Short</span>
+					</button>
+					<button type="button" class="btn-quiz-next" id="btn-next-question">
+						<span>Next Question</span>
+						<span aria-hidden="true">→</span>
+					</button>
+				</div>
+
+				<!-- Inline Popover Video Player (Toggleable) -->
+				<div class="quiz-inline-player" id="quiz-inline-player" hidden>
+					<div class="inline-player-container" id="inline-player-container">
+						<!-- YouTube iframe injected on demand -->
+					</div>
+					<div class="inline-player-footer">
+						<button type="button" class="btn-jump-feed" id="btn-jump-feed">
+							View this short in feed below ↓
+						</button>
+						<button type="button" class="btn-close-player" id="btn-close-player">
+							Close Video
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Results / Level-Up Screen State (Hidden until round finished) -->
+		<div class="quiz-results-view" id="quiz-results-view" hidden>
+			<div class="results-badge-wrap">
+				<div class="results-fargo-circle">
+					<span class="fargo-label">EST. FARGO</span>
+					<span class="fargo-score" id="results-fargo-score">515</span>
+				</div>
+				<div class="results-tier-summary">
+					<h3 class="results-rank-title" id="results-rank-title">Intermediate Shotmaker</h3>
+					<p class="results-rank-tagline" id="results-rank-tagline">Table angles & rolling cue ball control</p>
+				</div>
+			</div>
+
+			<div class="level-up-container">
+				<h4 class="level-up-heading">🎯 What You Need to Level Up:</h4>
+				<ul class="level-up-list" id="level-up-list">
+					<!-- Injected by client script -->
+				</ul>
+			</div>
+
+			<div class="results-recommended-shorts" id="results-recommended-shorts">
+				<h4 class="recommended-heading">📺 Recommended Shorts for Your Game:</h4>
+				<div class="recommended-cards-grid" id="recommended-cards-grid">
+					<!-- Injected recommendations -->
+				</div>
+			</div>
+
+			<div class="results-footer">
+				<button type="button" class="btn-quiz-retry" id="btn-quiz-retry">
+					🔄 Retake Quiz / Test Higher
+				</button>
+			</div>
+		</div>
+	</section>
+</div>
+
+<!-- Hidden payload storage for client script -->
+<script is:inline id="pool-quiz-data" type="application/json" set:html={quizDataJson}></script>
+<script is:inline id="fargo-tiers-data" type="application/json" set:html={fargoTiersJson}></script>
+
+<style>
+	.quiz-wrapper {
+		width: 100%;
+		max-width: 820px;
+		margin: 0 auto var(--spacing-md);
+		padding: 0 var(--spacing-sm);
+	}
+
+	/* Collapsed Bar */
+	.quiz-collapsed-bar {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.65rem 1rem;
+		background: #111418;
+		border: 1px solid #2d333b;
+		border-radius: var(--radius-md);
+		color: #e6edf3;
+		cursor: pointer;
+		font-family: var(--font-primary);
+		font-size: 0.88rem;
+		transition: var(--transition-fast);
+		text-align: left;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.quiz-collapsed-bar:hover {
+		background: #161b22;
+		border-color: #388bfd;
+	}
+
+	.collapsed-left {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+	}
+
+	.quiz-pill-badge {
+		background: #238636;
+		color: #fff;
+		font-size: 0.72rem;
+		font-weight: 600;
+		padding: 0.15rem 0.5rem;
+		border-radius: var(--radius-full);
+		letter-spacing: 0.03em;
+		text-transform: uppercase;
+	}
+
+	.collapsed-title {
+		font-weight: 500;
+		color: #c9d1d9;
+	}
+
+	.collapsed-right {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+	}
+
+	.collapsed-fargo {
+		background: #1f242c;
+		border: 1px solid #30363d;
+		color: #58a6ff;
+		font-weight: 600;
+		font-size: 0.78rem;
+		padding: 0.2rem 0.55rem;
+		border-radius: var(--radius-full);
+	}
+
+	.collapsed-icon {
+		color: #8b949e;
+		font-size: 0.8rem;
+	}
+
+	/* Main Quiz Card */
+	.quiz-card {
+		background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+		border: 1px solid #30363d;
+		border-radius: var(--radius-lg);
+		padding: 1.15rem 1.25rem;
+		color: #e6edf3;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+		position: relative;
+		overflow: hidden;
+	}
+
+	/* Top Meta Header */
+	.quiz-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 0.65rem;
+		font-size: 0.78rem;
+	}
+
+	.quiz-meta-left {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.quiz-tag {
+		color: #7ee787;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		font-size: 0.72rem;
+	}
+
+	.quiz-tier-badge {
+		background: rgba(56, 139, 253, 0.15);
+		color: #58a6ff;
+		border: 1px solid rgba(56, 139, 253, 0.35);
+		padding: 0.15rem 0.5rem;
+		border-radius: var(--radius-full);
+		font-size: 0.72rem;
+		font-weight: 600;
+	}
+
+	.quiz-meta-right {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+	}
+
+	.quiz-progress-text {
+		color: #8b949e;
+		font-size: 0.76rem;
+		font-weight: 500;
+	}
+
+	.quiz-minimize-btn {
+		background: transparent;
+		border: 1px solid #30363d;
+		color: #8b949e;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.65rem;
+		transition: var(--transition-fast);
+	}
+
+	.quiz-minimize-btn:hover {
+		color: #fff;
+		border-color: #8b949e;
+		background: #21262d;
+	}
+
+	/* Progress Track */
+	.quiz-progress-track {
+		width: 100%;
+		height: 4px;
+		background: #21262d;
+		border-radius: var(--radius-full);
+		margin-bottom: 0.9rem;
+		overflow: hidden;
+	}
+
+	.quiz-progress-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #238636 0%, #388bfd 100%);
+		border-radius: var(--radius-full);
+		transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	/* Question Body */
+	.quiz-scenario {
+		color: #8b949e;
+		font-size: 0.8rem;
+		margin-bottom: 0.3rem;
+		font-style: italic;
+	}
+
+	.quiz-question-title {
+		font-size: 1.05rem;
+		font-weight: 600;
+		line-height: 1.4;
+		color: #ffffff;
+		margin: 0 0 0.85rem;
+	}
+
+	/* Options Grid */
+	.quiz-options-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.5rem;
+		margin-bottom: 0.75rem;
+	}
+
+	:global(.quiz-option-btn) {
+		background: #21262d;
+		border: 1px solid #30363d;
+		border-radius: var(--radius-md);
+		padding: 0.6rem 0.8rem;
+		color: #c9d1d9;
+		text-align: left;
+		font-family: var(--font-primary);
+		font-size: 0.84rem;
+		line-height: 1.35;
+		cursor: pointer;
+		transition: var(--transition-fast);
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+
+	:global(.quiz-option-btn:hover:not(:disabled)) {
+		background: #2c333d;
+		border-color: #58a6ff;
+		color: #ffffff;
+		transform: translateY(-1px);
+	}
+
+	:global(.quiz-option-btn:disabled) {
+		cursor: default;
+	}
+
+	:global(.quiz-option-letter) {
+		font-weight: 700;
+		color: #8b949e;
+		min-width: 1.2rem;
+	}
+
+	:global(.quiz-option-text) {
+		flex: 1;
+	}
+
+	/* Option States */
+	:global(.quiz-option-btn.state-correct) {
+		background: rgba(35, 134, 54, 0.25) !important;
+		border-color: #3fb950 !important;
+		color: #7ee787 !important;
+	}
+
+	:global(.quiz-option-btn.state-incorrect) {
+		background: rgba(248, 81, 73, 0.2) !important;
+		border-color: #f85149 !important;
+		color: #ff7b72 !important;
+	}
+
+	:global(.quiz-option-btn.state-dimmed) {
+		opacity: 0.45;
+	}
+
+	/* Feedback Panel */
+	.quiz-feedback-panel {
+		background: #111418;
+		border: 1px solid #30363d;
+		border-radius: var(--radius-md);
+		padding: 0.85rem 1rem;
+		margin-top: 0.6rem;
+		animation: fadeIn 0.2s ease-out;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.quiz-feedback-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 0.4rem;
+	}
+
+	.feedback-status-badge {
+		font-size: 0.8rem;
+		font-weight: 700;
+	}
+
+	.feedback-status-badge.correct {
+		color: #3fb950;
+	}
+
+	.feedback-status-badge.incorrect {
+		color: #f85149;
+	}
+
+	.feedback-fargo-impact {
+		font-size: 0.75rem;
+		font-weight: 600;
+		padding: 0.15rem 0.45rem;
+		border-radius: var(--radius-full);
+	}
+
+	.feedback-fargo-impact.positive {
+		background: rgba(35, 134, 54, 0.2);
+		color: #3fb950;
+		border: 1px solid rgba(63, 185, 80, 0.3);
+	}
+
+	.feedback-fargo-impact.neutral {
+		background: rgba(139, 148, 158, 0.15);
+		color: #8b949e;
+		border: 1px solid rgba(139, 148, 158, 0.3);
+	}
+
+	.quiz-explanation-text {
+		font-size: 0.85rem;
+		color: #c9d1d9;
+		line-height: 1.45;
+		margin-bottom: 0.75rem;
+	}
+
+	.quiz-action-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.65rem;
+		flex-wrap: wrap;
+	}
+
+	.btn-quiz-short {
+		background: #21262d;
+		border: 1px solid #30363d;
+		color: #e6edf3;
+		padding: 0.45rem 0.85rem;
+		border-radius: var(--radius-md);
+		font-size: 0.8rem;
+		font-weight: 500;
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		cursor: pointer;
+		transition: var(--transition-fast);
+	}
+
+	.btn-quiz-short:hover {
+		background: #30363d;
+		border-color: #58a6ff;
+		color: #58a6ff;
+	}
+
+	.play-icon {
+		color: #f85149;
+		font-size: 0.85rem;
+	}
+
+	.btn-quiz-next {
+		background: #238636;
+		border: 1px solid #2ea043;
+		color: #ffffff;
+		padding: 0.45rem 1rem;
+		border-radius: var(--radius-md);
+		font-size: 0.82rem;
+		font-weight: 600;
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		cursor: pointer;
+		transition: var(--transition-fast);
+	}
+
+	.btn-quiz-next:hover {
+		background: #2ea043;
+		box-shadow: 0 0 10px rgba(46, 160, 67, 0.4);
+	}
+
+	/* Inline Player */
+	.quiz-inline-player {
+		margin-top: 0.85rem;
+		background: #000;
+		border: 1px solid #30363d;
+		border-radius: var(--radius-md);
+		overflow: hidden;
+		animation: fadeIn 0.25s ease-out;
+	}
+
+	.inline-player-container {
+		width: 100%;
+		max-width: 320px;
+		aspect-ratio: 9 / 16;
+		margin: 0 auto;
+		background: #000;
+		position: relative;
+	}
+
+	.inline-player-container iframe {
+		width: 100%;
+		height: 100%;
+		border: none;
+	}
+
+	.inline-player-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.5rem 0.75rem;
+		background: #161b22;
+		border-top: 1px solid #30363d;
+	}
+
+	.btn-jump-feed {
+		background: transparent;
+		border: none;
+		color: #58a6ff;
+		font-size: 0.78rem;
+		cursor: pointer;
+		text-decoration: underline;
+	}
+
+	.btn-close-player {
+		background: #21262d;
+		border: 1px solid #30363d;
+		color: #8b949e;
+		padding: 0.25rem 0.55rem;
+		border-radius: var(--radius-sm);
+		font-size: 0.75rem;
+		cursor: pointer;
+	}
+
+	.btn-close-player:hover {
+		color: #fff;
+		border-color: #8b949e;
+	}
+
+	/* Results Screen */
+	.quiz-results-view {
+		animation: fadeIn 0.3s ease-out;
+	}
+
+	.results-badge-wrap {
+		display: flex;
+		align-items: center;
+		gap: 1.25rem;
+		background: #111418;
+		border: 1px solid #30363d;
+		border-radius: var(--radius-md);
+		padding: 1rem 1.25rem;
+		margin-bottom: 1rem;
+	}
+
+	.results-fargo-circle {
+		width: 76px;
+		height: 76px;
+		border-radius: 50%;
+		background: radial-gradient(circle, #1f242c 0%, #0d1117 100%);
+		border: 2px solid #388bfd;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		box-shadow: 0 0 16px rgba(56, 139, 253, 0.3);
+		flex-shrink: 0;
+	}
+
+	.fargo-label {
+		font-size: 0.6rem;
+		font-weight: 700;
+		color: #8b949e;
+		letter-spacing: 0.05em;
+	}
+
+	.fargo-score {
+		font-size: 1.4rem;
+		font-weight: 800;
+		color: #58a6ff;
+		line-height: 1;
+	}
+
+	.results-rank-title {
+		font-size: 1.15rem;
+		font-weight: 700;
+		color: #ffffff;
+		margin: 0 0 0.25rem;
+	}
+
+	.results-rank-tagline {
+		font-size: 0.84rem;
+		color: #8b949e;
+		margin: 0;
+	}
+
+	.level-up-container {
+		background: rgba(56, 139, 253, 0.08);
+		border: 1px solid rgba(56, 139, 253, 0.25);
+		border-radius: var(--radius-md);
+		padding: 0.9rem 1.15rem;
+		margin-bottom: 1rem;
+	}
+
+	.level-up-heading {
+		font-size: 0.88rem;
+		font-weight: 700;
+		color: #79c0ff;
+		margin: 0 0 0.5rem;
+	}
+
+	.level-up-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	:global(.level-up-item) {
+		font-size: 0.82rem;
+		color: #c9d1d9;
+		line-height: 1.4;
+		position: relative;
+		padding-left: 1.25rem;
+	}
+
+	:global(.level-up-item::before) {
+		content: "⚡";
+		position: absolute;
+		left: 0;
+		top: 0;
+		font-size: 0.75rem;
+	}
+
+	.results-recommended-shorts {
+		margin-bottom: 1rem;
+	}
+
+	.recommended-heading {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: #8b949e;
+		margin: 0 0 0.5rem;
+	}
+
+	.recommended-cards-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: 0.5rem;
+	}
+
+	:global(.rec-short-btn) {
+		background: #161b22;
+		border: 1px solid #30363d;
+		border-radius: var(--radius-md);
+		padding: 0.55rem 0.75rem;
+		color: #c9d1d9;
+		font-size: 0.78rem;
+		text-align: left;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		transition: var(--transition-fast);
+	}
+
+	:global(.rec-short-btn:hover) {
+		background: #21262d;
+		border-color: #58a6ff;
+		color: #ffffff;
+	}
+
+	.results-footer {
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	.btn-quiz-retry {
+		background: #21262d;
+		border: 1px solid #30363d;
+		color: #e6edf3;
+		padding: 0.5rem 1rem;
+		border-radius: var(--radius-md);
+		font-size: 0.82rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: var(--transition-fast);
+	}
+
+	.btn-quiz-retry:hover {
+		background: #30363d;
+		border-color: #8b949e;
+	}
+
+	/* Mobile Optimization */
+	@media (max-width: 600px) {
+		.quiz-wrapper {
+			padding: 0 0.5rem;
+			margin-bottom: var(--spacing-sm);
+		}
+
+		.quiz-card {
+			padding: 0.85rem 0.95rem;
+			border-radius: var(--radius-md);
+		}
+
+		.quiz-options-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.quiz-action-bar {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.btn-quiz-short, .btn-quiz-next {
+			justify-content: center;
+		}
+
+		.results-badge-wrap {
+			flex-direction: column;
+			text-align: center;
+			padding: 0.9rem;
+		}
+	}
+</style>
+
+<script>
+	import type { QuizQuestion, FargoTierInfo } from "../../data/poolQuizData";
+
+	function initPoolQuiz(): void {
+		const root = document.getElementById("pool-quiz-root");
+		if (!root) return;
+
+		// Load data safely from embedded json
+		const dataEl = document.getElementById("pool-quiz-data");
+		const tiersEl = document.getElementById("fargo-tiers-data");
+		if (!dataEl || !tiersEl) return;
+
+		let allQuestions: QuizQuestion[] = [];
+		let fargoTiers: Record<number, FargoTierInfo> = {};
+		try {
+			allQuestions = JSON.parse(dataEl.textContent || "[]");
+			fargoTiers = JSON.parse(tiersEl.textContent || "{}");
+		} catch (e) {
+			console.error("Failed to parse quiz data", e);
+			return;
+		}
+
+		// Elements
+		const cardEl = document.getElementById("quiz-card");
+		const collapsedBar = document.getElementById("quiz-collapsed-bar");
+		const minimizeBtn = document.getElementById("quiz-minimize-btn");
+		const collapsedFargoPill = document.getElementById("collapsed-fargo-pill");
+
+		const tierBadge = document.getElementById("quiz-tier-badge");
+		const progressText = document.getElementById("quiz-progress-text");
+		const progressFill = document.getElementById("quiz-progress-fill");
+
+		const questionView = document.getElementById("quiz-question-view");
+		const questionText = document.getElementById("quiz-question-text");
+		const scenarioText = document.getElementById("quiz-scenario");
+		const optionsContainer = document.getElementById("quiz-options-container");
+
+		const feedbackPanel = document.getElementById("quiz-feedback-panel");
+		const feedbackBadge = document.getElementById("feedback-status-badge");
+		const feedbackFargo = document.getElementById("feedback-fargo-impact");
+		const feedbackExplanation = document.getElementById("quiz-explanation-text");
+		const btnWatchShort = document.getElementById("btn-watch-short");
+		const btnWatchShortText = document.getElementById("btn-watch-short-text");
+		const btnNext = document.getElementById("btn-next-question");
+
+		const inlinePlayer = document.getElementById("quiz-inline-player");
+		const inlinePlayerContainer = document.getElementById("inline-player-container");
+		const btnJumpFeed = document.getElementById("btn-jump-feed");
+		const btnClosePlayer = document.getElementById("btn-close-player");
+
+		const resultsView = document.getElementById("quiz-results-view");
+		const resultsFargoScore = document.getElementById("results-fargo-score");
+		const resultsRankTitle = document.getElementById("results-rank-title");
+		const resultsRankTagline = document.getElementById("results-rank-tagline");
+		const levelUpList = document.getElementById("level-up-list");
+		const recommendedGrid = document.getElementById("recommended-cards-grid");
+		const btnRetry = document.getElementById("btn-quiz-retry");
+
+		// State variables
+		const TOTAL_ROUNDS = 5;
+		let currentRoundIndex = 0;
+		let activeQuestionList: QuizQuestion[] = [];
+		let currentFargo = 360;
+		let roundScore = 0;
+		let missedQuestions: QuizQuestion[] = [];
+		let answeredCurrent = false;
+
+		// LocalStorage key
+		const STORAGE_KEY = "cueism_pool_quiz_state_v1";
+
+		// Initialize Round: Pick 1 question from each tier (1 to 5)
+		function buildRoundQuestions(): QuizQuestion[] {
+			const selected: QuizQuestion[] = [];
+			for (let tier = 1; tier <= 5; tier++) {
+				const tierQuestions = allQuestions.filter((q) => q.tier === tier);
+				if (tierQuestions.length > 0) {
+					// Randomize within tier
+					const randomIndex = Math.floor(Math.random() * tierQuestions.length);
+					selected.push(tierQuestions[randomIndex]);
+				}
+			}
+			return selected;
+		}
+
+		function startNewQuiz(): void {
+			activeQuestionList = buildRoundQuestions();
+			currentRoundIndex = 0;
+			roundScore = 0;
+			missedQuestions = [];
+			currentFargo = 360;
+			answeredCurrent = false;
+
+			if (questionView) questionView.hidden = false;
+			if (resultsView) resultsView.hidden = true;
+			if (inlinePlayer) inlinePlayer.hidden = true;
+			if (inlinePlayerContainer) inlinePlayerContainer.innerHTML = "";
+
+			renderCurrentQuestion();
+		}
+
+		function renderCurrentQuestion(): void {
+			const q = activeQuestionList[currentRoundIndex];
+			if (!q) {
+				showResults();
+				return;
+			}
+
+			answeredCurrent = false;
+			if (feedbackPanel) feedbackPanel.hidden = true;
+			if (inlinePlayer) inlinePlayer.hidden = true;
+			if (inlinePlayerContainer) inlinePlayerContainer.innerHTML = "";
+
+			// Update Progress
+			const progressPercent = ((currentRoundIndex + 1) / TOTAL_ROUNDS) * 100;
+			if (progressFill) progressFill.style.width = `${progressPercent}%`;
+			if (progressText) progressText.textContent = `Question ${currentRoundIndex + 1} of ${TOTAL_ROUNDS}`;
+			if (tierBadge) tierBadge.textContent = q.tierTitle;
+			if (collapsedFargoPill) collapsedFargoPill.textContent = `Fargo: ~${Math.round(currentFargo)}`;
+
+			// Question & Scenario
+			if (questionText) questionText.textContent = q.question;
+			if (scenarioText) {
+				if (q.scenario) {
+					scenarioText.textContent = `Scenario: ${q.scenario}`;
+					scenarioText.hidden = false;
+				} else {
+					scenarioText.hidden = true;
+				}
+			}
+
+			// Render Options
+			if (optionsContainer) {
+				optionsContainer.innerHTML = "";
+				const letters = ["A", "B", "C", "D"];
+				q.options.forEach((optText, idx) => {
+					const btn = document.createElement("button");
+					btn.type = "button";
+					btn.className = "quiz-option-btn";
+					btn.setAttribute("role", "radio");
+					btn.setAttribute("aria-checked", "false");
+					btn.innerHTML = `
+						<span class="quiz-option-letter">${letters[idx]}.</span>
+						<span class="quiz-option-text">${optText}</span>
+					`;
+					btn.addEventListener("click", () => handleAnswer(idx));
+					optionsContainer.appendChild(btn);
+				});
+			}
+		}
+
+		function handleAnswer(selectedIndex: number): void {
+			if (answeredCurrent) return;
+			answeredCurrent = true;
+
+			const q = activeQuestionList[currentRoundIndex];
+			if (!q) return;
+
+			const isCorrect = selectedIndex === q.correctIndex;
+			const optionBtns = optionsContainer?.querySelectorAll<HTMLButtonElement>(".quiz-option-btn");
+
+			// Disable buttons and set status classes
+			optionBtns?.forEach((btn, idx) => {
+				btn.disabled = true;
+				if (idx === q.correctIndex) {
+					btn.classList.add("state-correct");
+				} else if (idx === selectedIndex && !isCorrect) {
+					btn.classList.add("state-incorrect");
+				} else {
+					btn.classList.add("state-dimmed");
+				}
+			});
+
+			// Calculate Fargo impact
+			let fargoDelta = 0;
+			if (isCorrect) {
+				roundScore++;
+				// Points scaled by tier
+				fargoDelta = 35 + q.tier * 15;
+				currentFargo = Math.min(730, currentFargo + fargoDelta);
+			} else {
+				missedQuestions.push(q);
+				fargoDelta = 0;
+			}
+
+			// Show feedback
+			if (feedbackPanel && feedbackBadge && feedbackFargo && feedbackExplanation) {
+				feedbackBadge.textContent = isCorrect ? "✓ Spot On!" : "✗ Missed It";
+				feedbackBadge.className = `feedback-status-badge ${isCorrect ? "correct" : "incorrect"}`;
+
+				feedbackFargo.textContent = isCorrect ? `+${fargoDelta} Fargo` : "+0 Fargo";
+				feedbackFargo.className = `feedback-fargo-impact ${isCorrect ? "positive" : "neutral"}`;
+
+				feedbackExplanation.textContent = q.explanation;
+				feedbackPanel.hidden = false;
+			}
+
+			// Configure Short Button
+			if (btnWatchShortText) {
+				btnWatchShortText.textContent = `Watch: "${q.videoTitle}"`;
+			}
+			if (btnWatchShort) {
+				btnWatchShort.onclick = () => toggleInlineShort(q.videoId);
+			}
+
+			// Configure Next button
+			if (btnNext) {
+				const isLast = currentRoundIndex >= TOTAL_ROUNDS - 1;
+				btnNext.innerHTML = isLast
+					? `<span>View Fargo Results</span> <span aria-hidden="true">→</span>`
+					: `<span>Next Question</span> <span aria-hidden="true">→</span>`;
+				btnNext.onclick = () => {
+					if (isLast) {
+						showResults();
+					} else {
+						currentRoundIndex++;
+						renderCurrentQuestion();
+					}
+				};
+			}
+		}
+
+		function toggleInlineShort(videoId: string): void {
+			if (!inlinePlayer || !inlinePlayerContainer) return;
+
+			if (!inlinePlayer.hidden && inlinePlayerContainer.querySelector("iframe")) {
+				inlinePlayer.hidden = true;
+				inlinePlayerContainer.innerHTML = "";
+				return;
+			}
+
+			inlinePlayerContainer.innerHTML = `
+				<iframe
+					src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&playsinline=1"
+					title="Cueism Pool Short"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+					allowfullscreen
+				></iframe>
+			`;
+			inlinePlayer.hidden = false;
+
+			// Setup jump to feed button
+			if (btnJumpFeed) {
+				btnJumpFeed.onclick = () => {
+					inlinePlayer.hidden = true;
+					inlinePlayerContainer.innerHTML = "";
+					jumpToShortInFeed(videoId);
+				};
+			}
+
+			if (btnClosePlayer) {
+				btnClosePlayer.onclick = () => {
+					inlinePlayer.hidden = true;
+					inlinePlayerContainer.innerHTML = "";
+				};
+			}
+		}
+
+		function jumpToShortInFeed(videoId: string): void {
+			const targetThumb = document.querySelector<HTMLElement>(`.short-thumb[data-video-id="${videoId}"]`);
+			if (!targetThumb) {
+				window.open(`https://www.youtube.com/shorts/${videoId}`, "_blank");
+				return;
+			}
+
+			const card = targetThumb.closest<HTMLElement>(".short-card");
+			if (card) {
+				card.scrollIntoView({ behavior: "smooth", block: "center" });
+				card.style.outline = "3px solid #f2a900";
+				card.style.transition = "outline 0.3s ease";
+				setTimeout(() => {
+					card.style.outline = "none";
+				}, 2500);
+
+				// Trigger play if desktop click listener
+				targetThumb.click();
+			}
+		}
+
+		function showResults(): void {
+			if (questionView) questionView.hidden = true;
+			if (resultsView) resultsView.hidden = false;
+			if (feedbackPanel) feedbackPanel.hidden = true;
+			if (inlinePlayer) inlinePlayer.hidden = true;
+			if (inlinePlayerContainer) inlinePlayerContainer.innerHTML = "";
+
+			// Determine calculated tier
+			const finalFargo = Math.round(currentFargo);
+			let achievedTier = 1;
+			if (finalFargo >= 650) achievedTier = 5;
+			else if (finalFargo >= 575) achievedTier = 4;
+			else if (finalFargo >= 500) achievedTier = 3;
+			else if (finalFargo >= 425) achievedTier = 2;
+			else achievedTier = 1;
+
+			const tierData = fargoTiers[achievedTier] || fargoTiers[1];
+
+			if (resultsFargoScore) resultsFargoScore.textContent = `${finalFargo}`;
+			if (resultsRankTitle) resultsRankTitle.textContent = tierData.title;
+			if (resultsRankTagline) resultsRankTagline.textContent = tierData.tagline;
+			if (collapsedFargoPill) collapsedFargoPill.textContent = `Fargo: ~${finalFargo}`;
+
+			// Level-Up Diagnostics
+			if (levelUpList) {
+				levelUpList.innerHTML = "";
+				const adviceItems: string[] = [];
+
+				if (missedQuestions.length > 0) {
+					missedQuestions.forEach((q) => adviceItems.push(q.levelUpAdvice));
+				} else {
+					adviceItems.push(
+						"Flawless run! To maintain high Fargo, practice your 2-rail diamond kick systems and pressure-test straight-in shots with the MoFUDAT drill."
+					);
+				}
+
+				// Always add a tier-specific growth tip
+				if (achievedTier < 5) {
+					const nextTier = fargoTiers[achievedTier + 1];
+					if (nextTier) {
+						adviceItems.push(`Target for Fargo ${nextTier.minFargo}+: ${nextTier.overview}`);
+					}
+				}
+
+				adviceItems.forEach((tip) => {
+					const li = document.createElement("li");
+					li.className = "level-up-item";
+					li.textContent = tip;
+					levelUpList.appendChild(li);
+				});
+			}
+
+			// Recommended Shorts
+			if (recommendedGrid) {
+				recommendedGrid.innerHTML = "";
+				// Recommend missed questions first, or top concept shorts
+				const shortsToRec: { videoId: string; title: string }[] = [];
+				if (missedQuestions.length > 0) {
+					missedQuestions.forEach((q) => {
+						shortsToRec.push({ videoId: q.videoId, title: q.videoTitle });
+					});
+				} else {
+					activeQuestionList.slice(2).forEach((q) => {
+						shortsToRec.push({ videoId: q.videoId, title: q.videoTitle });
+					});
+				}
+
+				shortsToRec.forEach((s) => {
+					const btn = document.createElement("button");
+					btn.type = "button";
+					btn.className = "rec-short-btn";
+					btn.innerHTML = `
+						<span class="play-icon" aria-hidden="true">▶</span>
+						<span>${s.title}</span>
+					`;
+					btn.addEventListener("click", () => jumpToShortInFeed(s.videoId));
+					recommendedGrid.appendChild(btn);
+				});
+			}
+
+			// Save to storage
+			try {
+				localStorage.setItem(
+					STORAGE_KEY,
+					JSON.stringify({
+						bestFargo: finalFargo,
+						timestamp: Date.now(),
+					})
+				);
+			} catch (_) {}
+		}
+
+		// Collapsing logic
+		function toggleCollapse(collapsed: boolean): void {
+			if (!cardEl || !collapsedBar) return;
+			if (collapsed) {
+				cardEl.hidden = true;
+				collapsedBar.hidden = false;
+			} else {
+				cardEl.hidden = false;
+				collapsedBar.hidden = true;
+			}
+		}
+
+		minimizeBtn?.addEventListener("click", () => toggleCollapse(true));
+		collapsedBar?.addEventListener("click", () => toggleCollapse(false));
+		btnRetry?.addEventListener("click", () => startNewQuiz());
+
+		// Restore best Fargo if available
+		try {
+			const saved = localStorage.getItem(STORAGE_KEY);
+			if (saved) {
+				const parsed = JSON.parse(saved);
+				if (parsed?.bestFargo && collapsedFargoPill) {
+					collapsedFargoPill.textContent = `Best Fargo: ~${parsed.bestFargo}`;
+				}
+			}
+		} catch (_) {}
+
+		// Start initial round
+		startNewQuiz();
+	}
+
+	// Support Astro view transitions and standard load
+	document.addEventListener("astro:page-load", initPoolQuiz);
+</script>

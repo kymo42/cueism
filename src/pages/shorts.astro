@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import PoolHero from "../components/PoolHero.astro";
+import PoolQuiz from "../components/shorts/PoolQuiz.astro";
 import { getShorts } from "../utils/shorts";
 
 const shorts = await getShorts(Astro.locals);
@@ -18,6 +19,8 @@ const shorts = await getShorts(Astro.locals);
 			<a href="/products" class="btn btn-yellow" data-astro-prefetch>Shop the Collection</a>
 		</section>
 	</PoolHero>
+
+	<PoolQuiz />
 
 	<div class="shorts-searchbar">
 		<input
