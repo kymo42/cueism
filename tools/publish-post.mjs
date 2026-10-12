@@ -715,12 +715,15 @@ async function createTerm(taxonomy, slug, opts) {
 		.split("-")
 		.map((part) => (part ? part[0].toUpperCase() + part.slice(1) : part))
 		.join(" ");
-	const term = await runCli(
-		["taxonomy", "add-term", taxonomy, "--name", label, "--slug", slug],
-		opts,
-		{ label: `create term ${taxonomy}:${slug}` },
-	);
-	return term ?? { id: "<term-id>", slug, label, name: taxonomy };
+	try {
+		await runCli(
+			["taxonomy", "add-term", taxonomy, "--name", label, "--slug", slug],
+			opts,
+			{ label: `create term ${taxonomy}:${slug}`, allowFailure: true },
+		);
+	} catch {
+		// Fall through: the authoritative check is the re-read in resolveTermIds.
+	}
 }
 
 async function resolveTermIds(taxonomy, slugs, opts) {
@@ -747,9 +750,16 @@ async function resolveTermIds(taxonomy, slugs, opts) {
 					`(/_emdash/admin → Taxonomies → ${taxonomy}).`,
 			);
 		}
-		const created = await createTerm(taxonomy, slug, opts);
-		if (typeof created.id !== "string") die(`Could not create ${taxonomy} term "${slug}".`);
-		ids.push(created.id);
+		// Create, then re-read the term list: `taxonomy add-term` returns the API
+		// envelope rather than the term itself, and a concurrent writer may have
+		// created the term first, so the list is the only reliable source of the id.
+		await createTerm(taxonomy, slug, opts);
+		const refreshed = await fetchTerms(taxonomy, opts);
+		const found = refreshed.get(slug);
+		if (!found || typeof found.id !== "string") {
+			die(`Could not create ${taxonomy} term "${slug}".`);
+		}
+		ids.push(found.id);
 	}
 	return ids;
 }
