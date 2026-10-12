@@ -36,3 +36,18 @@ Agent skills are in `.agents/skills/`. Load them when working on specific tasks:
 - `entry.id` is the slug (for URLs). `entry.data.id` is the database ULID (for API calls like `getEntryTerms`).
 - Always call `Astro.cache.set(cacheHint)` on pages that query content.
 - Taxonomy names in queries must match the seed's `"name"` field exactly (e.g., `"category"` not `"categories"`).
+
+## Publishing content
+
+Blog posts are authored in git as markdown and published with a script — do not hand-create
+posts in the admin UI, or the repo and the CMS will diverge.
+
+- Contract: `content/posts/README.md` (frontmatter fields, taxonomies, image rules).
+- Process, verification and rollback: `docs/CONTENT-PIPELINE.md`.
+- Publish command: `node tools/publish-post.mjs content/posts/<slug>.md --url https://cueism.com`
+  (add `--dry-run` to preview, `--draft` to stage, `--update` to revise an existing post).
+- Auth: `$env:EMDASH_TOKEN` or `node tools/emdash-login.mjs --url https://cueism.com`.
+  Do not use `npx emdash login` — it is broken in emdash 0.27.0 (see the pipeline doc).
+- Images live in `content/images/<slug>/` and are committed with the markdown.
+- Never publish to production unless explicitly asked.
+
