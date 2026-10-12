@@ -33,16 +33,19 @@ const SCOPE = "admin";
 const GRANT = "urn:ietf:params:oauth:grant-type:device_code";
 
 function parseArgs(argv) {
-	const opts = { url: DEFAULT_URL, printToken: false };
+	const opts = { url: DEFAULT_URL, printToken: false, out: null };
 	for (let i = 0; i < argv.length; i++) {
 		const arg = argv[i];
 		if (arg === "--url" || arg === "-u") opts.url = argv[++i];
 		else if (arg === "--print-token") opts.printToken = true;
+		else if (arg === "--out") opts.out = argv[++i];
 		else if (arg === "-h" || arg === "--help") {
 			console.log(
-				"Usage: node tools/emdash-login.mjs --url <instance> [--print-token]\n" +
+				"Usage: node tools/emdash-login.mjs --url <instance> [--print-token | --out <file>]\n" +
 					"  --url <instance>  EmDash instance (default http://localhost:4321)\n" +
-					"  --print-token     Print the access token to stdout (for EMDASH_TOKEN) instead of saving it",
+					"  --print-token     Print the access token to stdout (for EMDASH_TOKEN) instead of saving it\n" +
+					"  --out <file>      Save credentials to this file instead of ~/.config/emdash/auth.json\n" +
+					"                    (use when the sandbox blocks writes outside the workspace)",
 			);
 			process.exit(0);
 		} else {
@@ -77,8 +80,8 @@ function credentialPath() {
 	return join(xdg ? join(xdg, "emdash") : join(homedir(), ".config", "emdash"), "auth.json");
 }
 
-function saveCredentials(baseUrl, cred) {
-	const path = credentialPath();
+function saveCredentials(baseUrl, cred, outPath) {
+	const path = outPath ?? credentialPath();
 	let store = {};
 	try {
 		if (existsSync(path)) store = JSON.parse(readFileSync(path, "utf-8"));
@@ -165,15 +168,35 @@ async function main() {
 				console.log(access_token);
 				return;
 			}
-			const path = saveCredentials(base, {
-				accessToken: access_token,
-				refreshToken: refresh_token,
-				expiresAt: new Date(Date.now() + ttl * 1000).toISOString(),
-				user,
-			});
+			let path;
+			try {
+				path = saveCredentials(base, {
+					accessToken: access_token,
+					refreshToken: refresh_token,
+					expiresAt: new Date(Date.now() + ttl * 1000).toISOString(),
+					user,
+				}, opts.out);
+			} catch (err) {
+				// Outside a workspace-write sandbox this is where EPERM shows up: the login
+				// itself succeeded, only the credential file could not be written.
+				console.error(
+					`✗ Authorised as ${user.email}, but could not write credentials to ` +
+						`${opts.out ?? credentialPath()} (${err.code ?? err.message}).\n` +
+						"  Re-run with --out <path inside your workspace>, e.g.\n" +
+						`  node tools/emdash-login.mjs --url ${base} --out .emdash-auth.json`,
+				);
+				process.exit(1);
+			}
 			console.log(`✓ Logged in as ${user.email} (${user.role})`);
 			console.log(`  Token saved to ${path}`);
-			console.log(`  Publish with: node tools/publish-post.mjs content/posts/<slug>.md --url ${base}`);
+			if (!opts.out) {
+				console.log(`  Publish with: node tools/publish-post.mjs content/posts/<slug>.md --url ${base}`);
+			} else {
+				console.log(
+					`  Use it with:  $env:EMDASH_TOKEN = (Get-Content '${path}' -Raw | ConvertFrom-Json).` +
+						`'${new URL(base).origin}'.accessToken`,
+				);
+			}
 			return;
 		}
 		const e = readError(body);
