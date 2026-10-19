@@ -79,8 +79,8 @@ export const POST: APIRoute = async ({ request, url }) => {
 		if (!chalkType) {
 			return new Response(JSON.stringify({ error: 'Please select your chalk type' }), { status: 400 });
 		}
-		if (!cueMaker) {
-			return new Response(JSON.stringify({ error: 'Please select your cue maker' }), { status: 400 });
+		if (!cueMaker || !['Mezz', 'Predator'].includes(cueMaker)) {
+			return new Response(JSON.stringify({ error: 'Please choose either Mezz or Predator' }), { status: 400 });
 		}
 
 		items.forEach((item, index) => {

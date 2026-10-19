@@ -285,35 +285,56 @@ export default function CartFlyout() {
 								</select>
 							</label>
 
-							<label style={{ fontSize: '0.8125rem', color: 'var(--color-text-primary)', fontWeight: 500, display: 'grid', gap: '0.375rem' }}>
-								<span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-									<span>2. Which cue maker do you use?</span>
+							<div style={{ display: 'grid', gap: '0.375rem' }}>
+								<span style={{ fontSize: '0.8125rem', color: 'var(--color-text-primary)', fontWeight: 500, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+									<span>2. Cue Maker (Choose either Mezz or Predator):</span>
 									{!cueMaker && <span style={{ color: '#d93025', fontSize: '0.75rem' }}>* Required</span>}
 								</span>
-								<select
-									ref={cueMakerSelectRef}
-									value={cueMaker}
-									onChange={(event) => {
-										setCueMaker(event.target.value);
-										if (validationError) setValidationError('');
-									}}
-									style={{
-										width: '100%',
-										padding: '0.625rem 0.75rem',
-										border: validationError && !cueMaker ? '1.5px solid #d93025' : '1px solid var(--color-border)',
-										borderRadius: 'var(--radius-sm)',
-										fontFamily: 'var(--font-primary)',
-										fontSize: '0.875rem',
-										backgroundColor: 'var(--color-bg-base)',
-										color: cueMaker ? 'var(--color-text-primary)' : 'var(--color-text-tertiary)',
-									}}
-								>
-									<option value="">Select cue maker</option>
-									<option value="Mezz">Mezz</option>
-									<option value="Predator">Predator</option>
-									<option value="Other / Neither">Other / Neither</option>
-								</select>
-							</label>
+								<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+									<button
+										type="button"
+										onClick={() => {
+											setCueMaker('Mezz');
+											if (validationError) setValidationError('');
+										}}
+										style={{
+											padding: '0.625rem 0.75rem',
+											borderRadius: 'var(--radius-sm)',
+											border: cueMaker === 'Mezz' ? '2px solid var(--color-accent)' : validationError && !cueMaker ? '1.5px solid #d93025' : '1px solid var(--color-border)',
+											backgroundColor: cueMaker === 'Mezz' ? 'rgba(26, 115, 232, 0.08)' : 'var(--color-bg-base)',
+											color: cueMaker === 'Mezz' ? 'var(--color-accent)' : 'var(--color-text-primary)',
+											fontSize: '0.875rem',
+											fontWeight: cueMaker === 'Mezz' ? 600 : 500,
+											cursor: 'pointer',
+											textAlign: 'center',
+											transition: 'all 0.15s ease',
+										}}
+									>
+										{cueMaker === 'Mezz' ? '✓ Mezz' : 'Mezz'}
+									</button>
+									<button
+										type="button"
+										onClick={() => {
+											setCueMaker('Predator');
+											if (validationError) setValidationError('');
+										}}
+										style={{
+											padding: '0.625rem 0.75rem',
+											borderRadius: 'var(--radius-sm)',
+											border: cueMaker === 'Predator' ? '2px solid var(--color-accent)' : validationError && !cueMaker ? '1.5px solid #d93025' : '1px solid var(--color-border)',
+											backgroundColor: cueMaker === 'Predator' ? 'rgba(26, 115, 232, 0.08)' : 'var(--color-bg-base)',
+											color: cueMaker === 'Predator' ? 'var(--color-accent)' : 'var(--color-text-primary)',
+											fontSize: '0.875rem',
+											fontWeight: cueMaker === 'Predator' ? 600 : 500,
+											cursor: 'pointer',
+											textAlign: 'center',
+											transition: 'all 0.15s ease',
+										}}
+									>
+										{cueMaker === 'Predator' ? '✓ Predator' : 'Predator'}
+									</button>
+								</div>
+							</div>
 						</div>
 					)}
 
