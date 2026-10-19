@@ -6,9 +6,12 @@ import {
 	getLogoSurcharge,
 	getPersonalizationSurcharge,
 } from '../../utils/surcharges';
+import { STRIPE_ALLOWED_SHIPPING_COUNTRIES } from '../../utils/countries';
 
 const BASE_SHIPPING_CENTS = 1000;
 const PER_EXTRA_ITEM_CENTS = 200;
+const INT_BASE_SHIPPING_CENTS = 2600; // $26.00 AUD for international standard
+const INT_PER_EXTRA_ITEM_CENTS = 400; // $4.00 AUD per extra item international
 
 export const POST: APIRoute = async ({ request, url }) => {
 	try {
@@ -42,7 +45,9 @@ export const POST: APIRoute = async ({ request, url }) => {
 		}[];
 		const checkoutMeta = body.checkoutMeta as {
 			chalkType?: string;
+			cueMaker?: string;
 			giftOptIn?: boolean;
+			shippingDestination?: 'domestic' | 'international';
 		} | undefined;
 
 		if (!items || items.length === 0) {
@@ -62,17 +67,20 @@ export const POST: APIRoute = async ({ request, url }) => {
 		data.append('mode', 'payment');
 		data.append('success_url', `${url.origin}/products?success=true`);
 		data.append('cancel_url', `${url.origin}/products?canceled=true`);
-		data.append('shipping_address_collection[allowed_countries][0]', 'AU');
-		data.append('shipping_address_collection[allowed_countries][1]', 'US');
-		data.append('shipping_address_collection[allowed_countries][2]', 'GB');
-		data.append('shipping_address_collection[allowed_countries][3]', 'NZ');
+		STRIPE_ALLOWED_SHIPPING_COUNTRIES.forEach((countryCode, index) => {
+			data.append(`shipping_address_collection[allowed_countries][${index}]`, countryCode);
+		});
 
 		let totalItems = 0;
 		const chalkType = (checkoutMeta?.chalkType || '').trim();
+		const cueMaker = (checkoutMeta?.cueMaker || '').trim();
 		const giftOptIn = checkoutMeta?.giftOptIn === true;
 		
 		if (!chalkType) {
 			return new Response(JSON.stringify({ error: 'Please select your chalk type' }), { status: 400 });
+		}
+		if (!cueMaker) {
+			return new Response(JSON.stringify({ error: 'Please select your cue maker' }), { status: 400 });
 		}
 
 		items.forEach((item, index) => {
@@ -132,15 +140,44 @@ export const POST: APIRoute = async ({ request, url }) => {
 			totalItems += item.quantity;
 		});
 
-		const shippingCost = BASE_SHIPPING_CENTS + Math.max(0, totalItems - 1) * PER_EXTRA_ITEM_CENTS;
+		const shippingDestination = checkoutMeta?.shippingDestination || 'domestic';
+		const domesticShippingCost = BASE_SHIPPING_CENTS + Math.max(0, totalItems - 1) * PER_EXTRA_ITEM_CENTS;
+		const intShippingCost = INT_BASE_SHIPPING_CENTS + Math.max(0, totalItems - 1) * INT_PER_EXTRA_ITEM_CENTS;
 
 		data.append('metadata[chalk_type]', chalkType);
+		data.append('metadata[cue_maker]', cueMaker);
 		data.append('metadata[gift_opt_in]', giftOptIn ? 'yes' : 'no');
+		data.append('metadata[shipping_destination]', shippingDestination);
 
-		data.append('shipping_options[0][shipping_rate_data][type]', 'fixed_amount');
-		data.append('shipping_options[0][shipping_rate_data][fixed_amount][amount]', shippingCost.toString());
-		data.append('shipping_options[0][shipping_rate_data][fixed_amount][currency]', 'aud');
-		data.append('shipping_options[0][shipping_rate_data][display_name]', 'AusPost Standard Delivery');
+		const domesticOption = {
+			amount: domesticShippingCost,
+			name: 'AusPost Domestic (Australia)',
+			minDays: '2',
+			maxDays: '5',
+		};
+
+		const intOption = {
+			amount: intShippingCost,
+			name: 'AusPost International Standard (Worldwide)',
+			minDays: '6',
+			maxDays: '15',
+		};
+
+		// If customer selected International in cart, prioritize international option first
+		const orderedShippingOptions = shippingDestination === 'international'
+			? [intOption, domesticOption]
+			: [domesticOption, intOption];
+
+		orderedShippingOptions.forEach((opt, idx) => {
+			data.append(`shipping_options[${idx}][shipping_rate_data][type]`, 'fixed_amount');
+			data.append(`shipping_options[${idx}][shipping_rate_data][fixed_amount][amount]`, opt.amount.toString());
+			data.append(`shipping_options[${idx}][shipping_rate_data][fixed_amount][currency]`, 'aud');
+			data.append(`shipping_options[${idx}][shipping_rate_data][display_name]`, opt.name);
+			data.append(`shipping_options[${idx}][shipping_rate_data][delivery_estimate][minimum][unit]`, 'business_day');
+			data.append(`shipping_options[${idx}][shipping_rate_data][delivery_estimate][minimum][value]`, opt.minDays);
+			data.append(`shipping_options[${idx}][shipping_rate_data][delivery_estimate][maximum][unit]`, 'business_day');
+			data.append(`shipping_options[${idx}][shipping_rate_data][delivery_estimate][maximum][value]`, opt.maxDays);
+		});
 
 		const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
 			method: 'POST',

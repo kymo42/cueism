@@ -94,8 +94,14 @@ async function sendTelegramOrderNotification(
 		if (metadata.chalk_type) {
 			metadataEntries.push(`• <b>Chalk Type:</b> ${escapeHtml(metadata.chalk_type)}`);
 		}
+		if (metadata.cue_maker) {
+			metadataEntries.push(`• <b>Cue Maker:</b> ${escapeHtml(metadata.cue_maker)}`);
+		}
 		if (metadata.gift_opt_in) {
 			metadataEntries.push(`• <b>Gift Opt-In:</b> ${escapeHtml(metadata.gift_opt_in)}`);
+		}
+		if (metadata.shipping_destination) {
+			metadataEntries.push(`• <b>Shipping Type:</b> ${escapeHtml(metadata.shipping_destination)}`);
 		}
 
 		// Collect personalizations and images from metadata
