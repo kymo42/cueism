@@ -192,6 +192,25 @@ export default function ProductPurchase({
 		window.dispatchEvent(new CustomEvent('cueism:variant-color', { detail: { color } }));
 	};
 
+	const handleNogennSelect = (colour: string) => {
+		setSelectedNogenn(colour);
+		window.dispatchEvent(new CustomEvent('cueism:variant-color', { detail: { color: colour } }));
+	};
+
+	const handlePersonalizationSelect = (type: PersonalizationType) => {
+		setPersonalizationType(type);
+		if (type === 'face') {
+			setSelectedColor('white');
+		}
+		if (type === 'none') {
+			if (selectedColor) {
+				window.dispatchEvent(new CustomEvent('cueism:variant-color', { detail: { color: selectedColor } }));
+			}
+		} else {
+			window.dispatchEvent(new CustomEvent('cueism:variant-personalization', { detail: { personalization: type } }));
+		}
+	};
+
 	const nfcSurcharge = NFC_SURCHARGE;
 
 	const selectedVariant = useMemo(() => variants.find((variant) => variant.id === selectedVariantId), [variants, selectedVariantId]);
@@ -364,7 +383,7 @@ export default function ProductPurchase({
 							<button
 								key={colour}
 								type="button"
-								onClick={() => setSelectedNogenn(colour)}
+								onClick={() => handleNogennSelect(colour)}
 								style={{
 									padding: '0.5rem 0.75rem',
 									borderRadius: 'var(--radius-sm)',
@@ -403,10 +422,10 @@ export default function ProductPurchase({
 								Personalization ({allowFaceUpload ? 'text +$5, NFC +$7, Face Print +$9' : 'cueism text +$5, NFC +$7'})
 							</span>
 							<div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-								<label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>cueism</span></label>
-								{hasTextOption && <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'text'} onChange={() => setPersonalizationType('text')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'text' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'text' ? 600 : 400 }}>Text (+$5)</span></label>}
-								{hasNfcOption && <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>NFC (+$7)</span></label>}
-								{allowFaceUpload && <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'face'} onChange={() => { setPersonalizationType('face'); setSelectedColor('white'); }} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'face' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'face' ? 600 : 400 }}>Face Print (+$9)</span></label>}
+								<label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => handlePersonalizationSelect('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>cueism</span></label>
+								{hasTextOption && <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'text'} onChange={() => handlePersonalizationSelect('text')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'text' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'text' ? 600 : 400 }}>Text (+$5)</span></label>}
+								{hasNfcOption && <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => handlePersonalizationSelect('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>NFC (+$7)</span></label>}
+								{allowFaceUpload && <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'face'} onChange={() => handlePersonalizationSelect('face')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'face' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'face' ? 600 : 400 }}>Face Print (+$9)</span></label>}
 							</div>
 						</>
 					)}
@@ -415,9 +434,9 @@ export default function ProductPurchase({
 						<>
 							<span style={{ fontWeight: 500, fontSize: '0.9375rem' }}>Personalization (initials +$5, icon +$5)</span>
 							<div style={{ display: 'flex', gap: '0.5rem' }}>
-								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => setPersonalizationType('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>None</span></label>
-								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'initials'} onChange={() => setPersonalizationType('initials')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'initials' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'initials' ? 600 : 400 }}>Initials (+$5)</span></label>
-								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => setPersonalizationType('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>Icon (+$5)</span></label>
+								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'none'} onChange={() => handlePersonalizationSelect('none')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'none' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'none' ? 600 : 400 }}>None</span></label>
+								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'initials'} onChange={() => handlePersonalizationSelect('initials')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'initials' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'initials' ? 600 : 400 }}>Initials (+$5)</span></label>
+								<label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}><input type="radio" name={`pers-${baseId}`} checked={personalizationType === 'nfc'} onChange={() => handlePersonalizationSelect('nfc')} /><span style={{ fontSize: '0.875rem', color: personalizationType === 'nfc' ? 'var(--color-accent)' : 'var(--color-text-secondary)', fontWeight: personalizationType === 'nfc' ? 600 : 400 }}>Icon (+$5)</span></label>
 							</div>
 						</>
 					)}

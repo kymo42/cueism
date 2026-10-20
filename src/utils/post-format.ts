@@ -51,6 +51,38 @@ const findImageUrlDeep = (input: any): string | undefined => {
 	return undefined;
 };
 
+export const OPTIMIZED_PRODUCT_MEDIA_URLS: Record<string, string> = {
+	// Rac9safe
+	"01KW6KRTSFK2KZK98NDJJPA4RR.jpg": "/products/racksafe9_0_featured.jpg",
+	"01KVZ9J0T04S6TS8D0HGAD77CB.jpg": "/products/racksafe9_1.jpg",
+	"01KVZ9JXEWHTY45XM07S4530M7.jpg": "/products/racksafe9_2.jpg",
+	"01KW6MYF3K8E2K1JPAEDNREFPP.jpg": "/products/racksafe9_3.jpg",
+	"01KVZ9M7MK8A3VTPV3D2YHSKSS.jpg": "/products/racksafe9_4.jpg",
+	"01KW6M5D97FSSCDEP8442AFVGQ.jpg": "/products/racksafe9_5.jpg",
+	"/R1.jpg": "/products/racksafe9_0_featured.jpg",
+	"/r2.jpg": "/products/racksafe9_3.jpg",
+	"/IMG_20260628_174712842.jpg": "/products/racksafe9_5.jpg",
+	"/generated/racksafe9_colors.jpg": "/products/racksafe9_colors.jpg",
+	// Chalkable
+	"01KNS10S5B4S82DDY68KTE8PH7.jpg": "/products/chalkable_0_featured.jpg",
+	"01KW76DE7Z8WA72H5T1XFFQDMB.jpg": "/products/chalkable_1.jpg",
+	"01KW76DE80N60S05F1B8AJDFPA.jpg": "/products/chalkable_2.jpg",
+	"01KW76DE81H0DPRB3Q3M1VP307.jpg": "/products/chalkable_3.jpg",
+	// Safe9
+	"01KW79TA99V2HAAS8JMJ91ZKFA.jpg": "/products/safe9_0_featured.jpg",
+	"01KW78VX7HC9DKW49Z04BSM0PB.jpg": "/products/safe9_1_pink.jpg",
+	"01KW78VX7JQME1FC86RRKJ9AAS.jpg": "/products/safe9_2_blue.jpg",
+	"01KW78VX7KCKDERD9BA32JCQTG.jpg": "/products/safe9_3_grey.jpg",
+	"01KW78VX7M1XEB0NP4HRT4GEG8.jpg": "/products/safe9_4_yellow.jpg",
+	"01KW78VX7NW4RF3WA44N8X11CW.jpg": "/products/safe9_5_green.jpg",
+	"01KW78VX7PCJ74G6ZBAB01894S.jpg": "/products/safe9_6_blackwhite.jpg",
+	// Amoeba
+	"/k2.jpg": "/products/k2.jpg",
+	"/k3.jpg": "/products/k3.jpg",
+	"/k4.jpg": "/products/k4.jpg",
+	"/k7.jpg": "/products/k7.jpg",
+};
+
 /**
  * Resolve an EmDash image field value to a URL.
  * Handles plain strings, `{ src }` / `{ url }` shapes, and managed media
@@ -58,11 +90,31 @@ const findImageUrlDeep = (input: any): string | undefined => {
  */
 export function resolveMediaUrl(image: any): string | undefined {
 	if (!image) return undefined;
-	if (typeof image === "string") return normalizeImageUrl(image);
+	if (typeof image === "string") {
+		const normalized = normalizeImageUrl(image);
+		if (!normalized) return undefined;
+		if (OPTIMIZED_PRODUCT_MEDIA_URLS[normalized]) return OPTIMIZED_PRODUCT_MEDIA_URLS[normalized];
+		const keyFromPath = normalized.startsWith("/_emdash/api/media/file/")
+			? normalized.slice("/_emdash/api/media/file/".length)
+			: undefined;
+		if (keyFromPath && OPTIMIZED_PRODUCT_MEDIA_URLS[keyFromPath]) {
+			return OPTIMIZED_PRODUCT_MEDIA_URLS[keyFromPath];
+		}
+		return normalized;
+	}
+	if (image.meta?.storageKey && OPTIMIZED_PRODUCT_MEDIA_URLS[image.meta.storageKey]) {
+		return OPTIMIZED_PRODUCT_MEDIA_URLS[image.meta.storageKey];
+	}
 	if (image.provider === "local" && image.meta?.storageKey) {
 		return `/_emdash/api/media/file/${image.meta.storageKey}`;
 	}
-	if (typeof image.src === "string") return normalizeImageUrl(image.src);
+	if (typeof image.src === "string") {
+		const normalized = normalizeImageUrl(image.src);
+		if (normalized && OPTIMIZED_PRODUCT_MEDIA_URLS[normalized]) {
+			return OPTIMIZED_PRODUCT_MEDIA_URLS[normalized];
+		}
+		return normalized;
+	}
 	if (typeof image.url === "string") return normalizeImageUrl(image.url);
 	return undefined;
 }

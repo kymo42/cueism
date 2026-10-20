@@ -2,7 +2,7 @@
 import { getEmDashCollection } from "emdash";
 import { Image } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
-import { getPriceRange } from "../../utils/products";
+import { getPriceRange, normalizeProductImage } from "../../utils/products";
 import PoolHero from "../../components/PoolHero.astro";
 
 const { entries: products = [], cacheHint } = await getEmDashCollection("products", {
@@ -40,9 +40,10 @@ if (cacheHint) {
 								? `$${range.min.toFixed(2)}`
 								: `$${range.min.toFixed(2)} - $${range.max.toFixed(2)}`;
 
-						const cardImage =
+						const rawCardImage =
 							product.data.featured_image ||
 							(Array.isArray(product.data.gallery_images) ? product.data.gallery_images[0]?.image : undefined);
+						const cardImage = normalizeProductImage(rawCardImage, product.data.title);
 
 						return (
 							<article class="product-card">

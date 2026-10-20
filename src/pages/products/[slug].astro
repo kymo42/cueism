@@ -8,6 +8,7 @@ import {
 	getBasePrice,
 	getBaseStock,
 	getBaseWeightGrams,
+	getCuratedProductGallery,
 	getPriceRange,
 	getProductVariants,
 	getTrackStock,
@@ -41,24 +42,9 @@ if (cacheHint) {
 	Astro.cache.set(cacheHint);
 }
 
-const featuredImage = product.data.featured_image as { src?: string; alt?: string } | undefined;
-const galleryImages = Array.isArray(product.data.gallery_images)
-	? product.data.gallery_images
-			.map((item: any) => item?.image)
-			.filter(Boolean)
-	: [];
-const displayImage = featuredImage || galleryImages[0];
-
-// All images for the gallery: featured first, then gallery, de-duplicated.
-const galleryAll = [featuredImage, ...galleryImages].filter(Boolean) as any[];
-const seenImg = new Set<string>();
-const galleryUnique = galleryAll.filter((img) => {
-	const key = img?.meta?.storageKey || img?.src || img?.id || JSON.stringify(img);
-	if (seenImg.has(key)) return false;
-	seenImg.add(key);
-	return true;
-});
-const displayImageUrl = resolveMediaUrl(displayImage);
+const productKey = product.slug || product.id;
+const galleryUnique = getCuratedProductGallery(productKey, product.data);
+const displayImageUrl = galleryUnique[0]?.src || resolveMediaUrl(product.data.featured_image);
 
 const variants = getProductVariants(product.data);
 const priceRange = getPriceRange(product.data);
@@ -82,7 +68,6 @@ const TRACK_STOCK = new Set(["safe9"]);
 // EMBEDDED_NFC_ONLY, INITIALS_OR_ICON_ONLY, LOGO_SURCHARGE and
 // LOGO_SURCHARGE_BY_VARIANT now live in utils/surcharges.ts so the cart price and
 // the Stripe checkout amount share one source of truth.
-const productKey = product.slug || product.id;
 const requireVariant = REQUIRE_VARIANT.has(productKey);
 
 // First colour variant drives the default gallery image for colour products.
@@ -123,6 +108,7 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 <Base
 	title={`${product.data.title} | Cueism`}
 	description={metaDescription}
+	image={displayImageUrl}
 	ogType="product"
 	jsonLd={productJsonLd}
 >
@@ -138,31 +124,37 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 		<div>
 			{galleryUnique.length > 0 ? (
 				<div class="product-gallery" data-default-color={defaultVariantColor}>
-					<div class="product-gallery-main">
-						{galleryUnique.map((image: any, i: number) => {
-							const src = image?.src || image?.meta?.storageKey || "";
+					<div class="product-gallery-main" role="button" tabindex="0" aria-label="Click to zoom product image">
+						{galleryUnique.map((image, i) => {
+							const src = image.src || "";
 							const isColorsImage = src.includes("racksafe9_colors.jpg");
 							return (
 								<div
 									class={`product-gallery-slide${isColorsImage ? " colors-group-image" : ""}`}
 									data-gallery-index={i}
-									data-color={image?.color}
+									data-color={image.color}
+									data-personalization={image.personalization}
+									data-src={image.src}
+									data-alt={image.alt}
 									style={`background: var(--color-bg-surface); border-radius: var(--radius-md); overflow: hidden;${i === 0 ? "" : " display: none;"}`}
 								>
 									<Image image={image} />
 								</div>
 							);
 						})}
+						<span class="product-gallery-zoom-hint" aria-hidden="true">Click to zoom</span>
 					</div>
 					{galleryUnique.length > 1 && (
 						<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 0.5rem; margin-top: 0.75rem;">
-							{galleryUnique.map((image: any, i: number) => (
+							{galleryUnique.map((image, i) => (
 								<button
 									type="button"
 									class="product-gallery-thumb"
 									data-gallery-index={i}
-									data-color={image?.color}
-									aria-label={`View image ${i + 1}`}
+									data-color={image.color}
+									data-personalization={image.personalization}
+									aria-label={image.alt || `View image ${i + 1}`}
+									title={image.alt || `Image ${i + 1}`}
 									style="border: 1px solid var(--color-border-light); border-radius: var(--radius-sm); overflow: hidden; padding: 0; background: none; cursor: pointer; line-height: 0;"
 								>
 									<Image image={image} />
@@ -170,6 +162,21 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 							))}
 						</div>
 					)}
+					<dialog class="product-lightbox" aria-label={`${product.data.title} enlarged image`}>
+						<div class="product-lightbox-inner">
+							<button type="button" class="product-lightbox-close" aria-label="Close zoom view">✕</button>
+							{galleryUnique.length > 1 && (
+								<button type="button" class="product-lightbox-nav product-lightbox-prev" aria-label="Previous image">‹</button>
+							)}
+							<figure class="product-lightbox-figure">
+								<img class="product-lightbox-img" src={galleryUnique[0]?.src} alt={galleryUnique[0]?.alt || product.data.title} />
+								<figcaption class="product-lightbox-caption">{galleryUnique[0]?.alt || product.data.title}</figcaption>
+							</figure>
+							{galleryUnique.length > 1 && (
+								<button type="button" class="product-lightbox-nav product-lightbox-next" aria-label="Next image">›</button>
+							)}
+						</div>
+					</dialog>
 				</div>
 			) : (
 				<div style="background: var(--color-bg-surface); border-radius: var(--radius-md); aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;">
@@ -231,11 +238,31 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 			}
 		}
 		.product-gallery-main {
+			position: relative;
 			width: 100%;
 			aspect-ratio: 1/1; /* Square */
 			border-radius: var(--radius-md);
 			overflow: hidden;
 			background: var(--color-bg-surface);
+			cursor: zoom-in;
+		}
+		.product-gallery-zoom-hint {
+			position: absolute;
+			right: 0.75rem;
+			bottom: 0.75rem;
+			padding: 0.25rem 0.6rem;
+			border-radius: 999px;
+			background: rgba(15, 23, 42, 0.68);
+			color: #fff;
+			font-size: 0.75rem;
+			letter-spacing: 0.01em;
+			pointer-events: none;
+			opacity: 0;
+			transition: opacity 0.18s ease;
+		}
+		.product-gallery-main:hover .product-gallery-zoom-hint,
+		.product-gallery-main:focus-visible .product-gallery-zoom-hint {
+			opacity: 1;
 		}
 		.product-gallery-slide {
 			width: 100%;
@@ -249,12 +276,15 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 		}
 		.product-gallery-thumb {
 			width: 100%;
-			aspect-ratio: 3/4; /* Portrait */
+			aspect-ratio: 1/1; /* Square to match 1:1 product photos */
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			background: var(--color-bg-surface);
 			overflow: hidden;
+			transition: outline-color 0.15s ease, transform 0.15s ease;
+			outline: 2px solid transparent;
+			outline-offset: -2px;
 		}
 		.product-gallery-thumb img,
 		.product-gallery-thumb :global(img) {
@@ -262,16 +292,94 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 			height: 100% !important;
 			object-fit: cover !important;
 		}
-		.product-gallery-thumb {
-			transition: outline-color 0.15s ease;
-			outline: 2px solid transparent;
-			outline-offset: -2px;
-		}
 		.product-gallery-thumb[aria-current="true"] {
 			outline-color: var(--color-accent);
 		}
 		.product-gallery-thumb:hover {
 			outline-color: var(--color-border);
+		}
+		.product-lightbox {
+			border: none;
+			border-radius: var(--radius-md);
+			padding: 0;
+			max-width: min(92vw, 860px);
+			max-height: 92vh;
+			background: transparent;
+			color: #fff;
+		}
+		.product-lightbox::backdrop {
+			background: rgba(10, 15, 25, 0.85);
+			backdrop-filter: blur(4px);
+		}
+		.product-lightbox-inner {
+			position: relative;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		.product-lightbox-figure {
+			margin: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 0.625rem;
+		}
+		.product-lightbox-img {
+			max-width: min(88vw, 780px);
+			max-height: 80vh;
+			width: auto;
+			height: auto;
+			border-radius: var(--radius-md);
+			box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+			object-fit: contain;
+			background: var(--color-bg-surface);
+		}
+		.product-lightbox-caption {
+			font-size: 0.875rem;
+			color: rgba(255, 255, 255, 0.9);
+			text-align: center;
+			max-width: 65ch;
+		}
+		.product-lightbox-close {
+			position: absolute;
+			top: 0.625rem;
+			right: 0.625rem;
+			width: 2.25rem;
+			height: 2.25rem;
+			border-radius: 999px;
+			border: none;
+			background: rgba(15, 23, 42, 0.75);
+			color: #fff;
+			font-size: 1rem;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 2;
+		}
+		.product-lightbox-nav {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			width: 2.5rem;
+			height: 2.5rem;
+			border-radius: 999px;
+			border: none;
+			background: rgba(15, 23, 42, 0.75);
+			color: #fff;
+			font-size: 1.5rem;
+			line-height: 1;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 2;
+		}
+		.product-lightbox-prev {
+			left: 0.625rem;
+		}
+		.product-lightbox-next {
+			right: 0.625rem;
 		}
 	</style>
 
@@ -281,38 +389,127 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 				if (gallery.dataset.galleryReady === "1") return; // avoid double-binding
 				gallery.dataset.galleryReady = "1";
 
-				const slides = gallery.querySelectorAll<HTMLElement>(".product-gallery-slide");
-				const thumbs = gallery.querySelectorAll<HTMLElement>(".product-gallery-thumb");
-				if (!thumbs.length) return;
+				const slides = Array.from(gallery.querySelectorAll<HTMLElement>(".product-gallery-slide"));
+				const thumbs = Array.from(gallery.querySelectorAll<HTMLElement>(".product-gallery-thumb"));
+				const mainBox = gallery.querySelector<HTMLElement>(".product-gallery-main");
+				const lightbox = gallery.querySelector<HTMLDialogElement>(".product-lightbox");
+				const lightboxImg = lightbox?.querySelector<HTMLImageElement>(".product-lightbox-img");
+				const lightboxCaption = lightbox?.querySelector<HTMLElement>(".product-lightbox-caption");
+				const closeBtn = lightbox?.querySelector<HTMLButtonElement>(".product-lightbox-close");
+				const prevBtn = lightbox?.querySelector<HTMLButtonElement>(".product-lightbox-prev");
+				const nextBtn = lightbox?.querySelector<HTMLButtonElement>(".product-lightbox-next");
+				if (!slides.length) return;
 
-				const show = (index: string) => {
+				let currentIndex = 0;
+
+				const syncLightbox = (idx: number) => {
+					const activeSlide = slides[idx];
+					if (!activeSlide || !lightboxImg) return;
+					const src = activeSlide.dataset.src || activeSlide.querySelector("img")?.getAttribute("src") || "";
+					const alt = activeSlide.dataset.alt || activeSlide.querySelector("img")?.getAttribute("alt") || "";
+					if (src) lightboxImg.src = src;
+					lightboxImg.alt = alt;
+					if (lightboxCaption) lightboxCaption.textContent = alt;
+				};
+
+				const show = (indexStr: string) => {
+					const parsed = Number.parseInt(indexStr, 10);
+					currentIndex = Number.isFinite(parsed) && parsed >= 0 && parsed < slides.length ? parsed : 0;
+					const target = String(currentIndex);
 					slides.forEach((s) => {
-						s.style.display = s.dataset.galleryIndex === index ? "" : "none";
+						s.style.display = s.dataset.galleryIndex === target ? "" : "none";
 					});
 					thumbs.forEach((t) => {
-						t.setAttribute("aria-current", t.dataset.galleryIndex === index ? "true" : "false");
+						t.setAttribute("aria-current", t.dataset.galleryIndex === target ? "true" : "false");
 					});
+					syncLightbox(currentIndex);
+				};
+
+				const step = (delta: number) => {
+					const next = (currentIndex + delta + slides.length) % slides.length;
+					show(String(next));
 				};
 
 				// Find the slide tagged with a given colour (a slide may serve several
 				// colours via a comma-separated data-color, e.g. "black,white").
 				const findColorIndex = (color: string | undefined): string | null => {
 					if (!color) return null;
-					const match = Array.from(slides).find((s) =>
-						(s.dataset.color || "").split(",").includes(color)
+					const normalized = color.toLowerCase();
+					const exactMatch = slides.find((s) => (s.dataset.color || "").toLowerCase() === normalized);
+					if (exactMatch) return exactMatch.dataset.galleryIndex || "0";
+					const multiMatch = slides.find((s) =>
+						(s.dataset.color || "")
+							.toLowerCase()
+							.split(",")
+							.map((c) => c.trim())
+							.includes(normalized)
+					);
+					return multiMatch ? multiMatch.dataset.galleryIndex || "0" : null;
+				};
+
+				const findPersonalizationIndex = (personalization: string | undefined): string | null => {
+					if (!personalization || personalization === "none") return null;
+					const normalized = personalization.toLowerCase();
+					const match = slides.find((s) =>
+						(s.dataset.personalization || "")
+							.toLowerCase()
+							.split(",")
+							.map((p) => p.trim())
+							.includes(normalized)
 					);
 					return match ? match.dataset.galleryIndex || "0" : null;
 				};
 
-				// Let the product form (React island) drive the gallery by colour.
+				// Let the product form (React island) drive the gallery by colour or personalization.
 				(gallery as any)._showColor = (color: string) => {
 					const index = findColorIndex(color);
+					if (index !== null) show(index);
+				};
+				(gallery as any)._showPersonalization = (personalization: string) => {
+					const index = findPersonalizationIndex(personalization);
 					if (index !== null) show(index);
 				};
 
 				thumbs.forEach((thumb) => {
 					thumb.addEventListener("click", () => show(thumb.dataset.galleryIndex || "0"));
 				});
+
+				if (mainBox && lightbox) {
+					const openLightbox = () => {
+						syncLightbox(currentIndex);
+						if (typeof lightbox.showModal === "function") {
+							lightbox.showModal();
+						}
+					};
+					mainBox.addEventListener("click", openLightbox);
+					mainBox.addEventListener("keydown", (e) => {
+						if (e.key === "Enter" || e.key === " ") {
+							e.preventDefault();
+							openLightbox();
+						}
+					});
+					closeBtn?.addEventListener("click", () => lightbox.close());
+					prevBtn?.addEventListener("click", (e) => {
+						e.stopPropagation();
+						step(-1);
+					});
+					nextBtn?.addEventListener("click", (e) => {
+						e.stopPropagation();
+						step(1);
+					});
+					lightbox.addEventListener("click", (e) => {
+						if (e.target === lightbox) lightbox.close();
+					});
+					lightbox.addEventListener("keydown", (e) => {
+						if (e.key === "ArrowLeft") {
+							e.preventDefault();
+							step(-1);
+						} else if (e.key === "ArrowRight") {
+							e.preventDefault();
+							step(1);
+						}
+					});
+				}
 
 				// Default to the first colour variant's image when one matches.
 				const defaultIndex = findColorIndex(gallery.dataset.defaultColor);
@@ -326,12 +523,24 @@ const productJsonLd = buildProduct(product, Astro.url.origin);
 			});
 		}
 
+		function showGalleryPersonalization(personalization: string): void {
+			document.querySelectorAll<HTMLElement>(".product-gallery").forEach((gallery) => {
+				if (typeof (gallery as any)._showPersonalization === "function") {
+					(gallery as any)._showPersonalization(personalization);
+				}
+			});
+		}
+
 		// Run now (covers direct loads) and after each view-transition navigation.
 		initProductGalleries();
 		document.addEventListener("astro:page-load", initProductGalleries);
 		window.addEventListener("cueism:variant-color", (e: Event) => {
 			const customEvent = e as CustomEvent<{ color: string }>;
 			showGalleryColor(customEvent.detail && customEvent.detail.color);
+		});
+		window.addEventListener("cueism:variant-personalization", (e: Event) => {
+			const customEvent = e as CustomEvent<{ personalization: string }>;
+			showGalleryPersonalization(customEvent.detail && customEvent.detail.personalization);
 		});
 	</script>
 </Base>
