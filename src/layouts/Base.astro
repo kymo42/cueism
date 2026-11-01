@@ -69,9 +69,11 @@ const gaMeasurementId = GA_MEASUREMENT_IDS[Astro.url.hostname] ?? GA_MEASUREMENT
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
 		<title>{title}</title>
-		{description && <meta name="description" content={description} />}
 		{canonical && <link rel="canonical" href={canonical} />}
+		<link rel="alternate" type="application/json" href="/products.json" title="Cueism Product Catalog (JSON)" />
+		<link rel="alternate" type="application/rss+xml" href="/products-feed.xml" title="Cueism Google Merchant Product Feed" />
 		<EmDashHead page={pageCtx} />
+		{ogType === "product" && <meta property="og:type" content="product" />}
 		{siteJsonLd.map((graph) => (
 			<script type="application/ld+json" set:html={safeJsonLdSerialize(graph)} />
 		))}
@@ -118,5 +120,81 @@ const gaMeasurementId = GA_MEASUREMENT_IDS[Astro.url.hostname] ?? GA_MEASUREMENT
 
 		<CartFlyout client:idle />
 		<EmDashBodyEnd page={pageCtx} />
+		<script is:inline>
+			(function registerCueismShoppingAgentTools() {
+				const api = {
+					async listProducts() {
+						const res = await fetch("/products.json");
+						return res.json();
+					},
+					async createCheckoutSession(payload) {
+						const res = await fetch("/api/checkout", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify(payload),
+						});
+						return res.json();
+					},
+				};
+				window.cueismAgent = api;
+
+				const mc = navigator.modelContext;
+				if (mc && typeof mc.registerTool === "function") {
+					try {
+						mc.registerTool({
+							name: "cueism_list_products",
+							description:
+								"Fetch the full Cueism product catalog in AUD, including variants, stock, colours, Nogenn grip colours, and personalization surcharges.",
+							inputSchema: { type: "object", properties: {} },
+							execute: () => api.listProducts(),
+						});
+						mc.registerTool({
+							name: "cueism_create_checkout",
+							description:
+								"Create a Stripe Checkout Session for one or more Cueism products and return `{ url }` for payment completion.",
+							inputSchema: {
+								type: "object",
+								required: ["items"],
+								properties: {
+									items: {
+										type: "array",
+										items: {
+											type: "object",
+											required: ["slug", "quantity"],
+											properties: {
+												slug: { type: "string" },
+												variantId: { type: "string" },
+												color: { type: "string" },
+												nogennColor: { type: "string" },
+												personalizationType: {
+													type: "string",
+													enum: ["none", "text", "nfc", "face"],
+												},
+												personalization: { type: "string" },
+												quantity: { type: "number" },
+											},
+										},
+									},
+									checkoutMeta: {
+										type: "object",
+										properties: {
+											shippingDestination: {
+												type: "string",
+												enum: ["domestic", "international"],
+											},
+											chalkType: { type: "string" },
+											cueMaker: { type: "string", enum: ["Mezz", "Predator"] },
+										},
+									},
+								},
+							},
+							execute: (args) => api.createCheckoutSession(args),
+						});
+					} catch {
+						// Ignore duplicate registration across client router navigations
+					}
+				}
+			})();
+		</script>
 	</body>
 </html>

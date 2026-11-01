@@ -80,21 +80,21 @@ export const GET: APIRoute = async ({ url }) => {
 			lines.push('        <g:service>Standard Shipping</g:service>');
 			lines.push('        <g:price>10.00 AUD</g:price>');
 			lines.push('      </g:shipping>');
-			// International shipping destinations
+			// International shipping destinations ($26.00 AUD standard international)
 			lines.push('      <g:shipping>');
 			lines.push('        <g:country>US</g:country>');
 			lines.push('        <g:service>Standard International</g:service>');
-			lines.push('        <g:price>10.00 AUD</g:price>');
+			lines.push('        <g:price>26.00 AUD</g:price>');
 			lines.push('      </g:shipping>');
 			lines.push('      <g:shipping>');
 			lines.push('        <g:country>GB</g:country>');
 			lines.push('        <g:service>Standard International</g:service>');
-			lines.push('        <g:price>10.00 AUD</g:price>');
+			lines.push('        <g:price>26.00 AUD</g:price>');
 			lines.push('      </g:shipping>');
 			lines.push('      <g:shipping>');
 			lines.push('        <g:country>NZ</g:country>');
 			lines.push('        <g:service>Standard International</g:service>');
-			lines.push('        <g:price>10.00 AUD</g:price>');
+			lines.push('        <g:price>26.00 AUD</g:price>');
 			lines.push('      </g:shipping>');
 			lines.push('    </item>');
 		} catch (e) {

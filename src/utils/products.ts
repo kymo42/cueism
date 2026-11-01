@@ -285,3 +285,104 @@ export function getVariantById(data: any, variantId?: string): ProductVariant | 
 	if (!variantId) return undefined;
 	return getProductVariants(data).find((variant) => variant.id === variantId);
 }
+
+const NO_PERSONALIZATION = new Set(["chalkable", "knuckles", "amoeba"]);
+const NO_COLOR = new Set<string>(["safe9"]);
+const COLOUR_REQUEST = new Set(["chalkable"]);
+const LOGO_UPLOAD = new Set(["chalkable"]);
+const REQUIRE_VARIANT = new Set(["safe9"]);
+const TRACK_STOCK_SLUGS = new Set(["safe9"]);
+const EMBEDDED_NFC_SLUGS = new Set(["safe9"]);
+
+const NOGENN_COLOURS_BY_SLUG: Record<string, string[]> = {
+	amoeba: ["white", "black", "yellow", "blue"],
+	knuckles: ["white", "black", "yellow", "blue"],
+	cheatstick: ["white", "black", "yellow", "blue"],
+};
+
+export type ProductCustomizationSummary = {
+	showColor: boolean;
+	colors: string[];
+	allowColourRequest: boolean;
+	nogennColours: string[];
+	requireVariant: boolean;
+	trackStock: boolean;
+	allowLogoUpload: boolean;
+	embeddedNfcOnly: boolean;
+	personalizations: {
+		type: "none" | "text" | "nfc" | "face";
+		label: string;
+		surchargeAud: number;
+		description: string;
+	}[];
+};
+
+export function getProductCustomizationSummary(
+	slug: string,
+	data?: Record<string, any>,
+): ProductCustomizationSummary {
+	const showColor = !NO_COLOR.has(slug);
+	const allowColourRequest = COLOUR_REQUEST.has(slug);
+	const colors = showColor
+		? allowColourRequest
+			? ["white", "black", "orange", "request"]
+			: ["white", "black", "orange"]
+		: [];
+	const nogennColours = NOGENN_COLOURS_BY_SLUG[slug] ?? [];
+	const requireVariant = REQUIRE_VARIANT.has(slug);
+	const trackStock = getTrackStock(data) || TRACK_STOCK_SLUGS.has(slug);
+	const allowLogoUpload = LOGO_UPLOAD.has(slug);
+	const embeddedNfcOnly = EMBEDDED_NFC_SLUGS.has(slug);
+	const allowsPersonalization = !NO_PERSONALIZATION.has(slug);
+
+	const personalizations: ProductCustomizationSummary["personalizations"] = [];
+	if (embeddedNfcOnly) {
+		personalizations.push({
+			type: "nfc",
+			label: "Built-in NFC",
+			surchargeAud: 0,
+			description: "Embedded NFC chip programmed with your URL, phone, email, or social handle.",
+		});
+	} else if (allowsPersonalization) {
+		personalizations.push(
+			{
+				type: "none",
+				label: "Standard (cueism)",
+				surchargeAud: 0,
+				description: "Standard cueism branding on top.",
+			},
+			{
+				type: "text",
+				label: "Custom Text",
+				surchargeAud: 5,
+				description: "Custom text printed on top (up to 6 characters).",
+			},
+			{
+				type: "nfc",
+				label: "NFC + Icon",
+				surchargeAud: 7,
+				description: "Embedded NFC chip with your digital contact info and a Google Material icon.",
+			},
+		);
+		if (slug === "racksafe9") {
+			personalizations.push({
+				type: "face",
+				label: "Face Print",
+				surchargeAud: 9,
+				description: "Custom uploaded face photo printed on top (requires white body colour).",
+			});
+		}
+	}
+
+	return {
+		showColor,
+		colors,
+		allowColourRequest,
+		nogennColours,
+		requireVariant,
+		trackStock,
+		allowLogoUpload,
+		embeddedNfcOnly,
+		personalizations,
+	};
+}

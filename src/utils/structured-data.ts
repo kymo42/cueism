@@ -2,6 +2,7 @@ import {
 	getBasePrice,
 	getBaseStock,
 	getPriceRange,
+	getProductCustomizationSummary,
 	getProductVariants,
 	getTrackStock,
 } from "./products";
@@ -96,58 +97,6 @@ type ProductEntry = {
 	data: Record<string, any>;
 };
 
-function getMockReviewsAndRating(title: string) {
-	// A simple deterministic hash function from string
-	let hash = 0;
-	for (let i = 0; i < title.length; i++) {
-		hash = title.charCodeAt(i) + ((hash << 5) - hash);
-	}
-	hash = Math.abs(hash);
-
-	// Generate deterministic rating value (4.7 to 4.9)
-	const ratingValue = (4.7 + (hash % 3) * 0.1).toFixed(1);
-	
-	// Generate deterministic review count (10 to 40)
-	const reviewCount = 10 + (hash % 31);
-
-	// Default reviewers list
-	const reviewers = [
-		{ name: "John D.", body: `The ${title} works exactly as described. Great build quality.` },
-		{ name: "Sarah M.", body: `Highly recommend this ${title}. Shipping was fast too.` },
-		{ name: "Alex P.", body: `Excellent value for money. Very satisfied with my ${title}.` },
-		{ name: "David K.", body: `Fantastic product. The ${title} is a game changer!` },
-	];
-
-	// Pick a reviewer deterministically
-	const reviewer = reviewers[hash % reviewers.length];
-
-	return {
-		aggregateRating: {
-			"@type": "AggregateRating",
-			ratingValue,
-			reviewCount,
-			bestRating: "5",
-			worstRating: "1",
-		},
-		review: [
-			{
-				"@type": "Review",
-				reviewRating: {
-					"@type": "Rating",
-					ratingValue: "5",
-					bestRating: "5",
-					worstRating: "1",
-				},
-				author: {
-					"@type": "Person",
-					name: reviewer.name,
-				},
-				reviewBody: reviewer.body,
-			}
-		]
-	};
-}
-
 function isInStock(data: Record<string, any>): boolean {
 	if (!getTrackStock(data)) return true;
 	const variants = getProductVariants(data);
@@ -189,7 +138,7 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 		merchantReturnLink: `${origin}/refund_returns`,
 	};
 
-	// 1-2 days handling, standard delivery times vary by country. Flat $10 AUD rate.
+	// 1-2 days handling; $10 AUD domestic (Australia), $26 AUD standard international.
 	const shippingDetails = [
 		{
 			"@type": "OfferShippingDetails",
@@ -222,7 +171,7 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 			"@type": "OfferShippingDetails",
 			shippingRate: {
 				"@type": "MonetaryAmount",
-				value: 10.0,
+				value: 26.0,
 				currency: CURRENCY,
 			},
 			shippingDestination: {
@@ -249,7 +198,7 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 			"@type": "OfferShippingDetails",
 			shippingRate: {
 				"@type": "MonetaryAmount",
-				value: 10.0,
+				value: 26.0,
 				currency: CURRENCY,
 			},
 			shippingDestination: {
@@ -276,7 +225,7 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 			"@type": "OfferShippingDetails",
 			shippingRate: {
 				"@type": "MonetaryAmount",
-				value: 10.0,
+				value: 26.0,
 				currency: CURRENCY,
 			},
 			shippingDestination: {
@@ -301,51 +250,94 @@ export function buildProduct(product: ProductEntry, origin: string): Record<stri
 		},
 	];
 
-	const offers: Record<string, unknown> = hasSpread
-		? {
-				"@type": "AggregateOffer",
-				priceCurrency: CURRENCY,
-				lowPrice: range.min,
-				highPrice: range.max,
-				offerCount: getProductVariants(data).length || undefined,
-				availability,
-				itemCondition,
-				priceValidUntil,
-				hasMerchantReturnPolicy,
-				shippingDetails,
-				url,
-			}
-		: {
-				"@type": "Offer",
-				priceCurrency: CURRENCY,
-				price: range.min || getBasePrice(data),
-				availability,
-				itemCondition,
-				priceValidUntil,
-				hasMerchantReturnPolicy,
-				shippingDetails,
-				url,
-			};
+	const variants = getProductVariants(data);
+	const customization = getProductCustomizationSummary(slug, data);
+
+	const variantOffers =
+		variants.length > 0
+			? variants.map((v) => ({
+					"@type": "Offer",
+					name: v.label,
+					sku: v.sku || `${slug}:${v.id}`,
+					priceCurrency: CURRENCY,
+					price: v.price,
+					availability: `https://schema.org/${!customization.trackStock || v.stock > 0 ? "InStock" : "OutOfStock"}`,
+					itemCondition,
+					priceValidUntil,
+					url,
+				}))
+			: undefined;
+
+	const offers: Record<string, unknown> =
+		hasSpread || (variantOffers && variantOffers.length > 1)
+			? {
+					"@type": "AggregateOffer",
+					priceCurrency: CURRENCY,
+					lowPrice: range.min,
+					highPrice: range.max,
+					offerCount: variants.length || 1,
+					availability,
+					itemCondition,
+					priceValidUntil,
+					hasMerchantReturnPolicy,
+					shippingDetails,
+					url,
+					...(variantOffers ? { offers: variantOffers } : {}),
+				}
+			: {
+					"@type": "Offer",
+					priceCurrency: CURRENCY,
+					price: range.min || getBasePrice(data),
+					availability,
+					itemCondition,
+					priceValidUntil,
+					hasMerchantReturnPolicy,
+					shippingDetails,
+					url,
+				};
 
 	const productTitle = typeof data.title === "string" ? data.title : "Product";
-	const { aggregateRating, review } = getMockReviewsAndRating(productTitle);
+
+	const additionalProperty: Record<string, unknown>[] = [];
+	if (customization.colors.length > 0) {
+		additionalProperty.push({
+			"@type": "PropertyValue",
+			name: "Body Colour Options",
+			value: customization.colors.join(", "),
+		});
+	}
+	if (customization.nogennColours.length > 0) {
+		additionalProperty.push({
+			"@type": "PropertyValue",
+			name: "Nogenn Grip Colour Options",
+			value: customization.nogennColours.join(", "),
+		});
+	}
+	if (customization.personalizations.length > 0) {
+		additionalProperty.push({
+			"@type": "PropertyValue",
+			name: "Personalization Options",
+			value: customization.personalizations
+				.map((p) => (p.surchargeAud > 0 ? `${p.label} (+$${p.surchargeAud} AUD)` : p.label))
+				.join(", "),
+		});
+	}
 
 	const graph: Record<string, unknown> = {
 		"@context": "https://schema.org",
 		"@type": "Product",
+		productID: product.id || slug,
 		name: productTitle,
 		url,
 		brand: { "@type": "Brand", name: BRAND_NAME },
 		offers,
-		aggregateRating,
-		review,
+		...(additionalProperty.length > 0 ? { additionalProperty } : {}),
 	};
 
 	const description = stripToPlainText(data.excerpt ?? data.description);
 	if (description) graph.description = description;
 	if (imageSrc) graph.image = imageSrc;
 
-	const variants = getProductVariants(data);
 	const sku = typeof data.sku === "string" && data.sku ? data.sku : variants.find((v) => v.sku)?.sku;
 	if (sku) graph.sku = sku;
 

@@ -3,8 +3,13 @@
 # Default crawler rules
 User-agent: *
 Allow: /
+Allow: /api/products
+Allow: /api/checkout
+Allow: /products.json
+Allow: /llms.txt
+Allow: /products-feed.xml
 Disallow: /_emdash/
-Disallow: /api/
+Disallow: /api/webhook
 
 # Explicitly permit Googlebot and Google Merchant Center crawlers
 User-agent: Googlebot
@@ -19,38 +24,46 @@ Allow: /
 User-agent: Googlebot-Image
 Allow: /
 
-# Instruct AI scrapers and training bots not to scrape
-User-agent: GPTBot
-Disallow: /
+User-agent: Google-Extended
+Allow: /
 
+# Explicitly permit AI search, retrieval, and shopping agents
 User-agent: ChatGPT-User
-Disallow: /
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Diffbot
+Allow: /
+
+# Instruct bulk foundation-model training scrapers not to scrape
+User-agent: GPTBot
+Disallow: /_emdash/
+Disallow: /api/webhook
 
 User-agent: CCBot
 Disallow: /
 
-User-agent: anthropic-ai
-Disallow: /
-
-User-agent: ClaudeBot
-Disallow: /
-
-User-agent: Claude-Web
-Disallow: /
-
 User-agent: Bytespider
-Disallow: /
-
-User-agent: Diffbot
-Disallow: /
-
-User-agent: FacebookBot
-Disallow: /
-
-User-agent: PerplexityBot
-Disallow: /
-
-User-agent: Cohere-ai
 Disallow: /
 
 User-agent: Omgilibot
@@ -63,3 +76,4 @@ User-agent: ImagesiftBot
 Disallow: /
 
 Sitemap: https://cueism.com/sitemap.xml
+Sitemap: https://cueism.com/products-feed.xml

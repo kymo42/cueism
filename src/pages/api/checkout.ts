@@ -13,6 +13,59 @@ const PER_EXTRA_ITEM_CENTS = 200;
 const INT_BASE_SHIPPING_CENTS = 2600; // $26.00 AUD for international standard
 const INT_PER_EXTRA_ITEM_CENTS = 400; // $4.00 AUD per extra item international
 
+export const GET: APIRoute = async ({ url }) => {
+	const origin = url.origin.replace(/\/$/, '');
+	return new Response(
+		JSON.stringify(
+			{
+				endpoint: `${origin}/api/checkout`,
+				method: 'POST',
+				content_type: 'application/json',
+				description:
+					'Creates a Stripe Checkout Session in AUD and returns `{ url }` where the customer completes payment.',
+				catalog_url: `${origin}/products.json`,
+				request_schema: {
+					items: [
+						{
+							id: 'string (product slug or id, e.g. "racksafe9", "chalkable", "safe9", "amoeba")',
+							productId: 'string (optional if id or slug is provided)',
+							slug: 'string (optional if id or productId is provided)',
+							variantId: 'string (optional, required for variant products like safe9 or chalkable)',
+							color: 'string (optional, e.g. "black", "white", "orange")',
+							nogennColor: 'string (optional, for amoeba: "white", "black", "yellow", "blue")',
+							personalizationType:
+								'"none" | "text" | "nfc" | "face" (optional, defaults to "none")',
+							personalization:
+								'string (optional, custom text, NFC icon/contact info, or personalization note)',
+							quantity: 'number (positive integer, e.g. 1)',
+						},
+					],
+					checkoutMeta: {
+						shippingDestination: '"domestic" | "international" (optional, defaults to "domestic")',
+						giftOptIn:
+							'boolean (optional; when true, chalkType and cueMaker are used for the complimentary gift)',
+						chalkType:
+							'string (optional for API/agent checkouts; e.g. "Master/tweet", "Roku Hex", "Predator Hex", "Taom round", "Other")',
+						cueMaker: 'string (optional for API/agent checkouts; "Mezz" | "Predator")',
+					},
+				},
+				response_schema: {
+					url: 'string (Stripe Checkout Session URL)',
+				},
+			},
+			null,
+			2,
+		),
+		{
+			status: 200,
+			headers: {
+				'Content-Type': 'application/json; charset=utf-8',
+				'Access-Control-Allow-Origin': '*',
+			},
+		},
+	);
+};
+
 export const POST: APIRoute = async ({ request, url }) => {
 	try {
 		const runtimeEnv = (globalThis as any)?.process?.env || {};
@@ -31,7 +84,7 @@ export const POST: APIRoute = async ({ request, url }) => {
 
 		const body = await request.json();
 		const items = body.items as {
-			id: string;
+			id?: string;
 			productId?: string;
 			slug?: string;
 			variantId?: string;
@@ -43,12 +96,14 @@ export const POST: APIRoute = async ({ request, url }) => {
 			personalization?: string;
 			quantity: number;
 		}[];
-		const checkoutMeta = body.checkoutMeta as {
-			chalkType?: string;
-			cueMaker?: string;
-			giftOptIn?: boolean;
-			shippingDestination?: 'domestic' | 'international';
-		} | undefined;
+		const checkoutMeta = body.checkoutMeta as
+			| {
+					chalkType?: string;
+					cueMaker?: string;
+					giftOptIn?: boolean;
+					shippingDestination?: 'domestic' | 'international';
+			  }
+			| undefined;
 
 		if (!items || items.length === 0) {
 			return new Response(JSON.stringify({ error: 'Cart is empty' }), { status: 400 });
@@ -59,7 +114,8 @@ export const POST: APIRoute = async ({ request, url }) => {
 		}).catch(() => ({ entries: [] }));
 		const productMap = new Map<string, any>();
 		databaseProducts.forEach((product: any) => {
-			productMap.set(product.id, product);
+			if (product.id) productMap.set(product.id, product);
+			if (product.slug) productMap.set(product.slug, product);
 		});
 
 		const data = new URLSearchParams();
@@ -72,29 +128,42 @@ export const POST: APIRoute = async ({ request, url }) => {
 		});
 
 		let totalItems = 0;
-		const chalkType = (checkoutMeta?.chalkType || '').trim();
-		const cueMaker = (checkoutMeta?.cueMaker || '').trim();
-		const giftOptIn = checkoutMeta?.giftOptIn === true;
-		
-		if (!chalkType) {
-			return new Response(JSON.stringify({ error: 'Please select your chalk type' }), { status: 400 });
-		}
-		if (!cueMaker || !['Mezz', 'Predator'].includes(cueMaker)) {
-			return new Response(JSON.stringify({ error: 'Please choose either Mezz or Predator' }), { status: 400 });
+		const rawChalkType = (checkoutMeta?.chalkType || '').trim();
+		const rawCueMaker = (checkoutMeta?.cueMaker || '').trim();
+		// If giftOptIn is explicitly true without chalk/cueMaker from the cart UI, validate;
+		// if an API/shopping agent omits checkoutMeta or sets giftOptIn: false, fall back cleanly.
+		const requireGiftFields = checkoutMeta?.giftOptIn === true && (rawChalkType !== '' || rawCueMaker !== '');
+		if (requireGiftFields) {
+			if (!rawChalkType) {
+				return new Response(JSON.stringify({ error: 'Please select your chalk type' }), { status: 400 });
+			}
+			if (!rawCueMaker || !['Mezz', 'Predator'].includes(rawCueMaker)) {
+				return new Response(JSON.stringify({ error: 'Please choose either Mezz or Predator' }), {
+					status: 400,
+				});
+			}
+		} else if (rawCueMaker && !['Mezz', 'Predator', 'Not specified'].includes(rawCueMaker)) {
+			return new Response(JSON.stringify({ error: 'Please choose either Mezz or Predator' }), {
+				status: 400,
+			});
 		}
 
+		const chalkType = rawChalkType || 'Not specified';
+		const cueMaker = rawCueMaker || 'Not specified';
+		const giftOptIn = Boolean(rawChalkType && ['Mezz', 'Predator'].includes(rawCueMaker));
+
 		items.forEach((item, index) => {
-			const productId = item.productId || item.id;
-			const dbProduct: any = productMap.get(productId);
-			if (!dbProduct) throw new Error(`Product ${productId} not found.`);
+			const lookupKey = item.productId || item.slug || item.id || '';
+			const dbProduct: any = productMap.get(lookupKey);
+			if (!dbProduct) throw new Error(`Product ${lookupKey} not found.`);
 			if (!Number.isFinite(item.quantity) || item.quantity <= 0) {
-				throw new Error(`Invalid quantity for product ${productId}.`);
+				throw new Error(`Invalid quantity for product ${lookupKey}.`);
 			}
 
 			const variant = getVariantById(dbProduct.data, item.variantId);
 			const unitPriceDollars = variant?.price ?? getBasePrice(dbProduct.data);
 			if (!Number.isFinite(unitPriceDollars) || unitPriceDollars <= 0) {
-				throw new Error(`Product ${productId} has invalid price.`);
+				throw new Error(`Product ${lookupKey} has invalid price.`);
 			}
 
 			const trackStock = getTrackStock(dbProduct.data);
@@ -108,14 +177,18 @@ export const POST: APIRoute = async ({ request, url }) => {
 			// Recompute personalization / logo surcharges server-side from the shared
 			// source of truth. Never trust the client-sent price — only the chosen
 			// personalization type, which can only select among allowed surcharges.
-			const productSlug = item.slug || dbProduct.slug || dbProduct.id || productId;
+			const productSlug = item.slug || dbProduct.slug || dbProduct.id || lookupKey;
 			const personalizationType: PersonalizationType = item.personalizationType ?? 'none';
 			const personalizationSurcharge = getPersonalizationSurcharge(personalizationType, productSlug);
 			const logoSurcharge = item.logoUrl ? getLogoSurcharge(productSlug, item.variantId) : 0;
-			const unitAmountCents = Math.round((unitPriceDollars + personalizationSurcharge + logoSurcharge) * 100);
+			const unitAmountCents = Math.round(
+				(unitPriceDollars + personalizationSurcharge + logoSurcharge) * 100,
+			);
 			data.append(`line_items[${index}][price_data][currency]`, 'aud');
 			data.append(`line_items[${index}][price_data][unit_amount]`, unitAmountCents.toString());
-			const lineNameBase = variant ? `${dbProduct.data.title} - ${variant.label}` : dbProduct.data.title;
+			const lineNameBase = variant
+				? `${dbProduct.data.title} - ${variant.label}`
+				: dbProduct.data.title;
 			const colourSuffix = [item.color, item.nogennColor ? `Nogenn ${item.nogennColor}` : null]
 				.filter(Boolean)
 				.join(', ');
@@ -124,12 +197,16 @@ export const POST: APIRoute = async ({ request, url }) => {
 			data.append(`line_items[${index}][quantity]`, item.quantity.toString());
 
 			if (item.logoUrl) {
-				const absoluteLogo = item.logoUrl.startsWith('http') ? item.logoUrl : `${url.origin}${item.logoUrl}`;
+				const absoluteLogo = item.logoUrl.startsWith('http')
+					? item.logoUrl
+					: `${url.origin}${item.logoUrl}`;
 				data.append(`metadata[logo_${index}]`, absoluteLogo);
 			}
 
 			if (item.faceUrl) {
-				const absoluteFace = item.faceUrl.startsWith('http') ? item.faceUrl : `${url.origin}${item.faceUrl}`;
+				const absoluteFace = item.faceUrl.startsWith('http')
+					? item.faceUrl
+					: `${url.origin}${item.faceUrl}`;
 				data.append(`metadata[face_${index}]`, absoluteFace);
 			}
 
@@ -141,8 +218,10 @@ export const POST: APIRoute = async ({ request, url }) => {
 		});
 
 		const shippingDestination = checkoutMeta?.shippingDestination || 'domestic';
-		const domesticShippingCost = BASE_SHIPPING_CENTS + Math.max(0, totalItems - 1) * PER_EXTRA_ITEM_CENTS;
-		const intShippingCost = INT_BASE_SHIPPING_CENTS + Math.max(0, totalItems - 1) * INT_PER_EXTRA_ITEM_CENTS;
+		const domesticShippingCost =
+			BASE_SHIPPING_CENTS + Math.max(0, totalItems - 1) * PER_EXTRA_ITEM_CENTS;
+		const intShippingCost =
+			INT_BASE_SHIPPING_CENTS + Math.max(0, totalItems - 1) * INT_PER_EXTRA_ITEM_CENTS;
 
 		data.append('metadata[chalk_type]', chalkType);
 		data.append('metadata[cue_maker]', cueMaker);
@@ -164,19 +243,35 @@ export const POST: APIRoute = async ({ request, url }) => {
 		};
 
 		// If customer selected International in cart, prioritize international option first
-		const orderedShippingOptions = shippingDestination === 'international'
-			? [intOption, domesticOption]
-			: [domesticOption, intOption];
+		const orderedShippingOptions =
+			shippingDestination === 'international'
+				? [intOption, domesticOption]
+				: [domesticOption, intOption];
 
 		orderedShippingOptions.forEach((opt, idx) => {
 			data.append(`shipping_options[${idx}][shipping_rate_data][type]`, 'fixed_amount');
-			data.append(`shipping_options[${idx}][shipping_rate_data][fixed_amount][amount]`, opt.amount.toString());
+			data.append(
+				`shipping_options[${idx}][shipping_rate_data][fixed_amount][amount]`,
+				opt.amount.toString(),
+			);
 			data.append(`shipping_options[${idx}][shipping_rate_data][fixed_amount][currency]`, 'aud');
 			data.append(`shipping_options[${idx}][shipping_rate_data][display_name]`, opt.name);
-			data.append(`shipping_options[${idx}][shipping_rate_data][delivery_estimate][minimum][unit]`, 'business_day');
-			data.append(`shipping_options[${idx}][shipping_rate_data][delivery_estimate][minimum][value]`, opt.minDays);
-			data.append(`shipping_options[${idx}][shipping_rate_data][delivery_estimate][maximum][unit]`, 'business_day');
-			data.append(`shipping_options[${idx}][shipping_rate_data][delivery_estimate][maximum][value]`, opt.maxDays);
+			data.append(
+				`shipping_options[${idx}][shipping_rate_data][delivery_estimate][minimum][unit]`,
+				'business_day',
+			);
+			data.append(
+				`shipping_options[${idx}][shipping_rate_data][delivery_estimate][minimum][value]`,
+				opt.minDays,
+			);
+			data.append(
+				`shipping_options[${idx}][shipping_rate_data][delivery_estimate][maximum][unit]`,
+				'business_day',
+			);
+			data.append(
+				`shipping_options[${idx}][shipping_rate_data][delivery_estimate][maximum][value]`,
+				opt.maxDays,
+			);
 		});
 
 		const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
@@ -191,7 +286,10 @@ export const POST: APIRoute = async ({ request, url }) => {
 		const sessionData = await stripeRes.json();
 
 		if (!stripeRes.ok) {
-			return new Response(JSON.stringify({ error: sessionData.error?.message || 'Stripe error' }), { status: 500 });
+			return new Response(
+				JSON.stringify({ error: sessionData.error?.message || 'Stripe error' }),
+				{ status: 500 },
+			);
 		}
 
 		return new Response(JSON.stringify({ url: sessionData.url }), {
